@@ -1,0 +1,27 @@
+# secrets
+.env
+*.env
+fine.env
+duel.env
+
+# databases
+*.db
+*.sqlite
+*.sqlite3
+
+# logs / outputs
+*.log
+*.out
+__pycache__/
+*.pyc
+
+# backups / rollback
+*.bak*
+*.backup*
+backups/
+archive_*/
+rollback_*/
+
+# local temp
+.DS_Store
+.vscode/
