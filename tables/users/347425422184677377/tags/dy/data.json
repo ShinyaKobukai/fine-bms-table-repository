@@ -3,8 +3,8 @@
   "tag": "日課",
   "slug": "dy",
   "fixed": true,
-  "count": 19,
-  "score_count": 14,
+  "count": 20,
+  "score_count": 15,
   "songs": [
     {
       "id": 144,
@@ -19,6 +19,23 @@
       "songdata_title": "俗物フェスティバル[ANOTHER]",
       "songdata_subtitle": "",
       "url": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=4&event=137",
+      "memo": "",
+      "tag": "日課",
+      "comment": ""
+    },
+    {
+      "id": 4028,
+      "source": "sl",
+      "level": "sl9",
+      "title": "Flashdance [#]",
+      "chart_name": "",
+      "display_title": "Flashdance [#]",
+      "md5": "97bc4321bc1bc37177e40ee592637cb1",
+      "sha256": "9c1bd0f5013df83078aa5e298d1b60eb0f10a297e674427e412c6a1bb18d8ab3",
+      "artist": "music:litmus* / bms: :Poin7less",
+      "songdata_title": "Flashdance [#]",
+      "songdata_subtitle": "",
+      "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02379.zip",
       "memo": "",
       "tag": "日課",
       "comment": ""
