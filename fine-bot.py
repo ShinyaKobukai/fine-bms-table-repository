@@ -142,6 +142,7 @@ def add_custom_tag(full_name, short_name, user_id):
 
     con.commit()
     con.close()
+    schedule_auto_table_publish(user_id, reason="custom_tag_added")
 
 
 def delete_custom_tag(short_name, user_id):
@@ -155,6 +156,7 @@ def delete_custom_tag(short_name, user_id):
 
     con.commit()
     con.close()
+    schedule_auto_table_publish(user_id, reason="custom_tag_deleted")
 
 
 
@@ -504,6 +506,7 @@ def update_song(row, tags, memo, user_id=None):
 
     con.commit()
     con.close()
+    schedule_auto_table_publish(user_id, reason="song_tags_updated")
 
 
 
@@ -537,6 +540,7 @@ def reset_song(row, user_id=None):
     )
     con.commit()
     con.close()
+    schedule_auto_table_publish(user_id, reason="song_tags_reset")
 
 
 def resolve_tag_fuzzy(token, user_id=None):
@@ -572,6 +576,74 @@ intents.reactions = True
 intents.guilds = True
 
 bot = commands.Bot(command_prefix=["!", "！"], intents=intents, help_command=None)
+auto_table_publish_tasks = {}
+auto_table_publish_lock = asyncio.Lock()
+
+
+def auto_table_publish_enabled():
+    return os.getenv("AUTO_TABLE_PUBLISH_ON_TAG_CHANGE", "1").strip().lower() not in {
+        "0",
+        "false",
+        "no",
+        "off",
+    }
+
+
+def schedule_auto_table_publish(user_id, reason="tag_change"):
+    if not auto_table_publish_enabled() or user_id is None:
+        return
+
+    user_id = str(user_id)
+    old_task = auto_table_publish_tasks.get(user_id)
+    if old_task and not old_task.done():
+        old_task.cancel()
+
+    try:
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = bot.loop
+        task = loop.create_task(auto_publish_user_tables(user_id, reason))
+        auto_table_publish_tasks[user_id] = task
+        logging.info("auto_table_publish scheduled user_id=%s reason=%s", user_id, reason)
+    except Exception:
+        logging.exception("auto_table_publish schedule failed user_id=%s reason=%s", user_id, reason)
+
+
+async def auto_publish_user_tables(user_id, reason="tag_change"):
+    delay = float(os.getenv("AUTO_TABLE_PUBLISH_DELAY_SECONDS", "8"))
+    try:
+        await asyncio.sleep(max(0.0, delay))
+        table_base_url = os.getenv("TABLE_BASE_URL", "").strip()
+        loop = asyncio.get_running_loop()
+        logging.info("auto_table_publish start user_id=%s reason=%s", user_id, reason)
+
+        async with auto_table_publish_lock:
+            from table_generator import generate_user_tables
+            from pages_deploy import deploy_user_tables
+
+            result = await loop.run_in_executor(
+                None,
+                lambda: generate_user_tables(user_id, table_base_url=table_base_url),
+            )
+            deploy_result = await loop.run_in_executor(
+                None,
+                lambda: deploy_user_tables(user_id),
+            )
+
+        logging.info(
+            "auto_table_publish done user_id=%s reason=%s tags=%s deploy=%s commit=%s",
+            user_id,
+            reason,
+            len(result.get("tags", [])),
+            deploy_result.get("message", ""),
+            deploy_result.get("commit", ""),
+        )
+    except asyncio.CancelledError:
+        logging.info("auto_table_publish cancelled user_id=%s reason=%s", user_id, reason)
+        raise
+    except Exception:
+        logging.exception("auto_table_publish failed user_id=%s reason=%s", user_id, reason)
 
 
 @bot.event
@@ -2751,10 +2823,11 @@ async def maketables_cmd_progress(ctx):
                     label=f"deploy:{event}",
                 )
 
-            deploy_result = await loop.run_in_executor(
-                None,
-                lambda: deploy_user_tables(user_id, progress=deploy_progress),
-            )
+            async with auto_table_publish_lock:
+                deploy_result = await loop.run_in_executor(
+                    None,
+                    lambda: deploy_user_tables(user_id, progress=deploy_progress),
+                )
             await flush_progress("deploy")
             deploy_done_text = "push完了" if deploy_result.get("pushed") else "変更なし"
             await update_progress(
