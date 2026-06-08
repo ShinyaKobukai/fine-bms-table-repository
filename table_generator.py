@@ -449,16 +449,26 @@ def song_to_record(row):
     }
 
 
+def beatoraja_title(record):
+    title = str(record.get("songdata_title") or "").strip()
+    subtitle = str(record.get("songdata_subtitle") or "").strip()
+    if title:
+        if subtitle and subtitle not in title:
+            return f"{title} {subtitle}"
+        return title
+    return str(record.get("display_title") or record.get("title") or "").strip()
+
+
 def score_record(record):
     return {
         "md5": record["md5"],
         "sha256": record["sha256"],
         "level": str(record["level"]),
-        "title": record["display_title"],
+        "title": beatoraja_title(record),
         "artist": record["artist"],
+        "comment": record["comment"],
         "url": record["url"],
         "url_diff": record["url"],
-        "comment": record["comment"],
     }
 
 
@@ -572,12 +582,13 @@ def generate_user_tables(user_id, table_base_url=None, output_root=OUTPUT_ROOT, 
             tag_dir = user_root / "tags" / spec["slug"]
             tag_dir.mkdir(parents=True, exist_ok=True)
 
-            score = [score_record(record) for record in records]
+            beatoraja_records = [record for record in records if record["md5"]]
+            score = [score_record(record) for record in beatoraja_records]
             header = {
                 "name": f"Fine {spec['name']}",
                 "symbol": spec["slug"].replace("/", "-"),
                 "data_url": "score.json",
-                "level_order": sorted({str(record["level"]) for record in records}, key=level_sort_key),
+                "level_order": sorted({str(record["level"]) for record in beatoraja_records}, key=level_sort_key),
             }
 
             write_json(tag_dir / "header.json", header)
@@ -590,6 +601,7 @@ def generate_user_tables(user_id, table_base_url=None, output_root=OUTPUT_ROOT, 
                     "slug": spec["slug"],
                     "fixed": spec["fixed"],
                     "count": len(records),
+                    "score_count": len(score),
                     "songs": records,
                 },
             )
@@ -600,6 +612,7 @@ def generate_user_tables(user_id, table_base_url=None, output_root=OUTPUT_ROOT, 
                     "tag_name": spec["name"],
                     "slug": spec["slug"],
                     "count": len(records),
+                    "score_count": len(score),
                     "path": str(tag_dir),
                     "relative_url": f"tags/{spec['slug']}/",
                     "url": make_public_url(table_base_url, user_id, spec["slug"]),
