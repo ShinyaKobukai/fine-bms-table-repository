@@ -793,7 +793,7 @@ def make_song_list_embed(title, rows, start_index=1, footer_text=None, user_id=N
     return embed
 
 
-async def send_song_list_embeds(ctx, title, rows, per_page=10):
+async def send_song_list_embeds(ctx, title, rows, per_page=10, first_message=None):
     total = len(rows)
 
     for page_start in range(0, total, per_page):
@@ -809,7 +809,14 @@ async def send_song_list_embeds(ctx, title, rows, per_page=10):
             user_id=ctx.author.id,
         )
 
-        await ctx.send(embed=embed)
+        if page_start == 0 and first_message is not None:
+            try:
+                await first_message.edit(content=None, embed=embed)
+            except Exception:
+                logging.exception("search result message edit failed user_id=%s", ctx.author.id)
+                await ctx.send(embed=embed)
+        else:
+            await ctx.send(embed=embed)
 
 
 
@@ -981,37 +988,42 @@ def make_single_song_detail_embed(row, title="🎵 楽曲情報", color=0x8EC5FF
 
 
 
-@bot.command(name="s", aliases=["search", "検索", "さ", "す"])
+@bot.command(name="s", aliases=["search", "\u691c\u7d22", "\u3055", "\u3057"])
 async def search_cmd(ctx, *args):
     if ctx.channel.id != CHANNEL_ID:
         return
 
     if not args:
-        await ctx.send("検索語を入れてくださいませ。例: `!s sl1 ceu`")
+        await ctx.send("\u691c\u7d22\u8a9e\u3092\u5165\u308c\u3066\u306d\uff01\u4f8b: `!s sl1 ceu`")
         return
+
+    progress_message = await ctx.send("\U0001f50e \u691c\u7d22\u4e2d\u3060\u3088\u3001\u3061\u3087\u3063\u3068\u5f85\u3063\u3066\u306d\uff01")
 
     rows = search_songs(args, user_id=ctx.author.id)
     last_search[ctx.author.id] = rows
 
     if not rows:
-        await ctx.send("一致する曲が見つかりませんでしたわ。")
+        try:
+            await progress_message.edit(content="\u898b\u3064\u304b\u3089\u306a\u304b\u3063\u305f\u307f\u305f\u3044\u3060\u306d\uff01\u691c\u7d22\u8a9e\u3092\u5c11\u3057\u5909\u3048\u3066\u307f\u3066\u306d\u3002")
+        except Exception:
+            logging.exception("search no-result message edit failed user_id=%s", ctx.author.id)
+            await ctx.send("\u898b\u3064\u304b\u3089\u306a\u304b\u3063\u305f\u307f\u305f\u3044\u3060\u306d\uff01\u691c\u7d22\u8a9e\u3092\u5c11\u3057\u5909\u3048\u3066\u307f\u3066\u306d\u3002")
         return
 
     if len(rows) == 1:
-        msg = await ctx.send(
-            embed=make_single_song_detail_embed(
-                rows[0],
-                "🎵 楽曲情報",
-                user_id=ctx.author.id,
-            )
-        )
+        embed = make_single_song_detail_embed(rows[0], "\U0001f3b5 \u697d\u66f2\u60c5\u5831\u3060\u3088\uff01", user_id=ctx.author.id)
+        try:
+            await progress_message.edit(content=None, embed=embed)
+            msg = progress_message
+        except Exception:
+            logging.exception("search single-result message edit failed user_id=%s", ctx.author.id)
+            msg = await ctx.send(embed=embed)
 
         reaction_song_messages[msg.id] = rows[0][0]
         await add_all_tag_reactions(msg)
-
         return
 
-    await send_song_list_embeds(ctx, "🔎 検索結果だよ！", rows)
+    await send_song_list_embeds(ctx, "\U0001f50e \u691c\u7d22\u7d50\u679c\u3060\u3088\uff01", rows, first_message=progress_message)
 
 
 
