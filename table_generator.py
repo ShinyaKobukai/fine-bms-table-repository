@@ -15,6 +15,7 @@ if load_dotenv:
     load_dotenv("fine.env")
 
 DB = "stella_songs.db"
+SONGDATA_DB = Path(__file__).with_name("songdata.db")
 OUTPUT_ROOT = Path("public") / "tables"
 
 FIXED_TAGS = [
@@ -65,6 +66,197 @@ def slugify(text, fallback="tag"):
     text = re.sub(r"[^a-z0-9_-]+", "-", text)
     text = re.sub(r"-+", "-", text).strip("-")
     return text or fallback
+
+
+def strip_brackets(text):
+    text = str(text or "").strip()
+    if text.startswith("[") and text.endswith("]"):
+        return text[1:-1].strip()
+    return text
+
+
+def add_unique(items, value):
+    value = str(value or "").strip()
+    if value and value not in items:
+        items.append(value)
+
+
+def songdata_join_candidates(title, subtitle):
+    title = str(title or "").strip()
+    subtitle = str(subtitle or "").strip()
+    if not title:
+        return []
+
+    candidates = []
+    if not subtitle:
+        add_unique(candidates, title)
+        return candidates
+
+    subtitle_plain = strip_brackets(subtitle)
+    subtitle_bracket = f"[{subtitle_plain}]" if subtitle_plain else subtitle
+
+    add_unique(candidates, f"{title}{subtitle}")
+    add_unique(candidates, f"{title} {subtitle}")
+    if subtitle_plain:
+        add_unique(candidates, f"{title}{subtitle_bracket}")
+        add_unique(candidates, f"{title} {subtitle_bracket}")
+        add_unique(candidates, f"{title}{subtitle_plain}")
+        add_unique(candidates, f"{title} {subtitle_plain}")
+    return candidates
+
+
+def lookup_songdata(title, chart_name="", url="", level=""):
+    if not SONGDATA_DB.exists():
+        return None
+
+    fine_title = str(title or "").strip()
+    fine_chart = str(chart_name or "").strip()
+    fine_url = str(url or "").strip()
+    fine_level = str(level or "").strip()
+    if not fine_title:
+        return None
+
+    chart_plain = strip_brackets(fine_chart)
+
+    con = sqlite3.connect(SONGDATA_DB)
+    try:
+        cur = con.cursor()
+        select_sql = songdata_select_sql(cur)
+        rows = [songdata_row_to_dict(row) for row in cur.execute(select_sql).fetchall()]
+
+        if fine_url:
+            url_matches = [
+                row for row in rows
+                if fine_url in {row.get("url", ""), row.get("url_diff", "")}
+            ]
+            found = choose_songdata_match(url_matches, fine_level)
+            if found:
+                return found
+
+        if chart_plain:
+            subtitle_candidates = [fine_chart, chart_plain, f"[{chart_plain}]"]
+            exact_matches = [
+                row for row in rows
+                if row["title"] == fine_title and row["subtitle"] in subtitle_candidates
+            ]
+            found = choose_songdata_match(exact_matches, fine_level)
+            if found:
+                return found
+
+        joined_matches = []
+        for row in rows:
+            candidates = songdata_join_candidates(row["title"], row["subtitle"])
+            if fine_title in candidates:
+                joined_matches.append(row)
+        found = choose_songdata_match(joined_matches, fine_level)
+        if found:
+            return found
+
+        bracket_no_space_matches = []
+        bracket_space_matches = []
+        for row in rows:
+            subtitle_plain = strip_brackets(row["subtitle"])
+            if not subtitle_plain:
+                continue
+            if fine_title == f"{row['title']}[{subtitle_plain}]":
+                bracket_no_space_matches.append(row)
+            if fine_title == f"{row['title']} [{subtitle_plain}]":
+                bracket_space_matches.append(row)
+
+        found = choose_songdata_match(bracket_no_space_matches, fine_level)
+        if found:
+            return found
+        found = choose_songdata_match(bracket_space_matches, fine_level)
+        if found:
+            return found
+
+        normalized_matches = []
+        for row in rows:
+            candidates = songdata_join_candidates(row["title"], row["subtitle"])
+            normalized_candidates = {normalize_text(candidate) for candidate in candidates}
+            if normalize_text(fine_title) in normalized_candidates:
+                normalized_matches.append(row)
+
+        found = choose_songdata_match(normalized_matches, fine_level)
+        if found:
+            return found
+
+        return None
+    finally:
+        con.close()
+
+
+def songdata_select_sql(cur):
+    cols = {row[1] for row in cur.execute("PRAGMA table_info(song)").fetchall()}
+    sha_expr = "sha256" if "sha256" in cols else "'' AS sha256"
+    artist_expr = "artist" if "artist" in cols else "'' AS artist"
+    subtitle_expr = "subtitle" if "subtitle" in cols else "'' AS subtitle"
+    url_expr = "url" if "url" in cols else "'' AS url"
+    url_diff_expr = "url_diff" if "url_diff" in cols else "'' AS url_diff"
+    level_expr = "level" if "level" in cols else "'' AS level"
+    return (
+        "SELECT "
+        f"md5, {sha_expr}, title, {subtitle_expr}, {artist_expr}, "
+        f"{url_expr}, {url_diff_expr}, {level_expr} "
+        "FROM song"
+    )
+
+
+def unique_songdata_rows(rows):
+    seen = set()
+    unique = []
+    for row in rows:
+        key = (row.get("md5", ""), row.get("sha256", ""), row.get("title", ""), row.get("subtitle", ""))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(row)
+    return unique
+
+
+def songdata_row_to_dict(row):
+    md5, sha256, title, subtitle, artist, url, url_diff, level = row
+    return {
+        "md5": md5 or "",
+        "sha256": sha256 or "",
+        "title": title or "",
+        "subtitle": subtitle or "",
+        "artist": artist or "",
+        "url": url or "",
+        "url_diff": url_diff or "",
+        "level": level or "",
+    }
+
+
+def choose_songdata_match(rows, fine_level=""):
+    unique = unique_songdata_rows(rows)
+    if len(unique) == 1:
+        return unique[0]
+    if len(unique) <= 1:
+        return None
+
+    fine_level = normalize_text(fine_level)
+    if not fine_level:
+        return None
+
+    level_matches = [
+        row for row in unique
+        if normalize_text(row.get("level", "")) == fine_level
+    ]
+    if len(level_matches) == 1:
+        return level_matches[0]
+
+    fine_prefix = re.match(r"^[a-z]+", fine_level)
+    if fine_prefix:
+        prefix = fine_prefix.group(0)
+        prefix_matches = [
+            row for row in unique
+            if normalize_text(row.get("level", "")).startswith(prefix)
+        ]
+        if len(prefix_matches) == 1:
+            return prefix_matches[0]
+
+    return None
 
 
 def ensure_tables(con):
@@ -219,6 +411,7 @@ def song_to_record(row):
     sid, source, level, title, chart_name, url, memo, tag_name, user_tag_memo = row
     display_title = song_display_name(row)
     comment = user_tag_memo or memo or ""
+    found = lookup_songdata(title, chart_name, url=url, level=level)
     return {
         "id": sid,
         "source": source or "",
@@ -226,6 +419,11 @@ def song_to_record(row):
         "title": title or "",
         "chart_name": chart_name or "",
         "display_title": display_title,
+        "md5": found["md5"] if found else "",
+        "sha256": found["sha256"] if found else "",
+        "artist": found["artist"] if found else "",
+        "songdata_title": found["title"] if found else "",
+        "songdata_subtitle": found["subtitle"] if found else "",
         "url": url or "",
         "memo": memo or "",
         "tag": canonical_tag_name(tag_name),
@@ -235,11 +433,11 @@ def song_to_record(row):
 
 def score_record(record):
     return {
-        "md5": "",
-        "sha256": "",
+        "md5": record["md5"],
+        "sha256": record["sha256"],
         "level": str(record["level"]),
         "title": record["display_title"],
-        "artist": "",
+        "artist": record["artist"],
         "url": record["url"],
         "url_diff": record["url"],
         "comment": record["comment"],
