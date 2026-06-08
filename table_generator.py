@@ -461,14 +461,13 @@ def beatoraja_title(record):
 
 def score_record(record):
     return {
-        "md5": record["md5"],
-        "sha256": record["sha256"],
         "level": str(record["level"]),
         "title": beatoraja_title(record),
         "artist": record["artist"],
-        "comment": record["comment"],
-        "url": record["url"],
+        "comment": record["tag"],
+        "md5": record["md5"],
         "url_diff": record["url"],
+        "tag": record["tag"],
     }
 
 
