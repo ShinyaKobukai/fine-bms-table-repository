@@ -199,6 +199,41 @@ def get_user_song_tags(user_id, song_id):
     return [canonical_tag_name(row[0]) for row in rows]
 
 
+def get_user_song_tags_map(user_id, song_ids=None):
+    if user_id is None:
+        return {}
+
+    con = db()
+    ensure_user_tags_table(con)
+    params = [str(user_id)]
+    where = "WHERE user_id=?"
+
+    if song_ids is not None:
+        song_ids = [int(song_id) for song_id in song_ids]
+        if not song_ids:
+            con.close()
+            return {}
+        placeholders = ",".join("?" for _ in song_ids)
+        where += f" AND song_id IN ({placeholders})"
+        params.extend(song_ids)
+
+    rows = con.execute(
+        f"""
+        SELECT song_id, tag_name
+        FROM user_tags
+        {where}
+        ORDER BY id
+        """,
+        params,
+    ).fetchall()
+    con.close()
+
+    tags_by_song = {}
+    for song_id, tag_name in rows:
+        tags_by_song.setdefault(song_id, []).append(canonical_tag_name(tag_name))
+    return tags_by_song
+
+
 def get_song_tags_for_display(row, user_id=None):
     song_id = row[0]
     return join_tags(get_user_song_tags(user_id, song_id))
@@ -1710,6 +1745,7 @@ def insert_manual_song(table_name, data, user_id=None):
 
 
 def search_songs(words, user_id=None):
+    started = time.perf_counter()
     con = db()
 
     rows = con.execute(
@@ -1720,9 +1756,11 @@ def search_songs(words, user_id=None):
 
     norm_words = [normalize_text(w) for w in words if w.strip()]
     result = []
+    user_tags_by_song = get_user_song_tags_map(user_id)
 
     for row in rows:
         sid, source, level, title, chart_name, url, tags, memo = row
+        user_tags = join_tags(user_tags_by_song.get(sid, []))
 
         hay = normalize_text(" ".join([
             source or "",
@@ -1730,17 +1768,28 @@ def search_songs(words, user_id=None):
             title or "",
             chart_name or "",
             url or "",
-            get_song_tags_for_display(row, user_id=user_id),
+            user_tags,
             memo or "",
         ]))
 
         if all(w in hay for w in norm_words):
             result.append(row)
+            if len(result) >= 20:
+                break
 
-    return result[:20]
+    logging.info(
+        "search_songs user_id=%s words=%s rows=%s results=%s seconds=%.3f",
+        user_id,
+        list(words),
+        len(rows),
+        len(result),
+        time.perf_counter() - started,
+    )
+    return result
 
 
 def search_by_tag(args, user_id=None):
+    started = time.perf_counter()
     level_filter = None
     tag_tokens = []
 
@@ -1773,6 +1822,7 @@ def search_by_tag(args, user_id=None):
     con.close()
 
     results = []
+    user_tags_by_song = get_user_song_tags_map(user_id)
 
     for row in rows:
         sid, source, level, title, chart_name, url, tags, memo = row
@@ -1780,12 +1830,22 @@ def search_by_tag(args, user_id=None):
         if level_filter and normalize_text(level) != level_filter:
             continue
 
-        song_tags = split_tags(get_song_tags_for_display(row, user_id=user_id))
+        song_tags = user_tags_by_song.get(sid, [])
 
         if all(any(tag_matches(song_tag, tag) for song_tag in song_tags) for tag in resolved_tags):
             results.append(row)
+            if len(results) >= 20:
+                break
 
-    return resolved_tags, results[:20]
+    logging.info(
+        "search_by_tag user_id=%s args=%s rows=%s results=%s seconds=%.3f",
+        user_id,
+        list(args),
+        len(rows),
+        len(results),
+        time.perf_counter() - started,
+    )
+    return resolved_tags, results
 
 
 def format_song(row, index, user_id=None):

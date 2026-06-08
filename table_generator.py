@@ -69,7 +69,7 @@ def normalize_text(text):
 def normalize_lookup_text(text):
     text = unicodedata.normalize("NFKC", str(text or ""))
     text = text.lower()
-    text = re.sub(r"[\s\[\]\(\)（）【】]+", "", text)
+    text = re.sub(r"[\W_]+", "", text, flags=re.UNICODE)
     return text
 
 
@@ -592,7 +592,7 @@ def generate_user_tables(user_id, table_base_url=None, output_root=OUTPUT_ROOT, 
             score = [score_record(record) for record in beatoraja_records]
             header = {
                 "name": f"Fine {spec['name']}",
-                "symbol": spec["slug"].replace("/", "-"),
+                "symbol": "",
                 "data_url": "score.json",
             }
 
