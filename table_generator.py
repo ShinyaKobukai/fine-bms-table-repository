@@ -556,6 +556,13 @@ def make_score_url(table_base_url, user_id, slug):
     return str(OUTPUT_ROOT / "users" / str(user_id) / "tags" / slug / "score.json")
 
 
+def make_header_url(table_base_url, user_id, slug):
+    base = str(table_base_url or "").rstrip("/")
+    if base:
+        return f"{base}/users/{quote(str(user_id))}/tags/{quote(slug)}/header.json"
+    return str(OUTPUT_ROOT / "users" / str(user_id) / "tags" / slug / "header.json")
+
+
 def generate_user_tables(user_id, table_base_url=None, output_root=OUTPUT_ROOT, progress=None):
     started_total = time.perf_counter()
     user_id = str(user_id)
@@ -614,7 +621,8 @@ def generate_user_tables(user_id, table_base_url=None, output_root=OUTPUT_ROOT, 
                     "path": str(tag_dir),
                     "relative_url": f"tags/{spec['slug']}/",
                     "url": make_public_url(table_base_url, user_id, spec["slug"]),
-                    "table_url": make_score_url(table_base_url, user_id, spec["slug"]),
+                    "table_url": make_header_url(table_base_url, user_id, spec["slug"]),
+                    "score_url": make_score_url(table_base_url, user_id, spec["slug"]),
                 }
             )
 

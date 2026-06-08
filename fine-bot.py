@@ -2726,7 +2726,8 @@ async def maketables_cmd_progress(ctx):
     ]
 
     for tag in table_links[:12]:
-        lines.append(f"{tag['tag_name']} ({tag['count']}): {tag['table_url']}")
+        lines.append(f"{tag['tag_name']} ({tag['count']})")
+        lines.append(f"```text\n{tag['table_url']}\n```")
 
     if len(table_links) > 12:
         lines.append(f"...ほか {len(table_links) - 12} タグあるよ！")
