@@ -557,7 +557,11 @@ async def help_cmd(ctx):
 
     embed.add_field(
         name="🏷️ タグ系",
-        value="`!t`\n`!ts y`\n`!ts sl12 日課`\n`!tl dy`\n`!tagcount`",
+        value=(
+            "`!t`\n`!ts y`\n`!ts sl12 日課`\n`!tl dy`\n`!tagcount`\n"
+            "`!addtag テスト01 te01`\n"
+            "タグ一覧に新しいタグを追加するよ。例: `!addtag テスト01 te01`"
+        ),
         inline=False,
     )
 
@@ -670,21 +674,25 @@ async def send_single_song_embed(target, row, title="✅ 更新したよ！", co
 
 
 
-def make_tag_count_embed(title, counter):
+def make_tag_count_embed_legacy(title, counter):
     embed = discord.Embed(title=title, color=EMBED_BLUE)
 
     if not counter:
         embed.description = "まだタグが登録されていないよ。"
         return embed
 
-    tags = sort_tags(list(counter.keys()))
-    lines = [f"{tag}　{counter[tag]}" for tag in tags]
-
-    embed.add_field(
-        name="📊 集計",
-        value="```text\n" + "\n".join(lines)[:950] + "\n```",
-        inline=False,
+    items = sorted(
+        ((tag, count) for tag, count in counter.items() if count > 0),
+        key=lambda item: (-item[1], tag_priority(item[0]), normalize_text(item[0])),
     )
+    lines = [f"{tag} ({count})" for tag, count in items]
+
+    for i, chunk in enumerate(split_embed_lines(lines), 1):
+        embed.add_field(
+            name="📊 集計" if i == 1 else f"📊 集計 続き{i}",
+            value="```text\n" + chunk + "\n```",
+            inline=False,
+        )
     return embed
 
 
@@ -2014,6 +2022,39 @@ def get_all_tags():
             key=lambda item: (order.get(item[0], 999), normalize_text(item[1]))
         )
     )
+
+
+def make_tag_count_embed(title, counter):
+    embed = discord.Embed(title=title, color=EMBED_BLUE)
+
+    all_tags = get_all_tags()
+    fixed_tags = []
+    for short_name in DEFAULT_TAG_ORDER:
+        tag = all_tags.get(short_name)
+        if tag and tag not in fixed_tags:
+            fixed_tags.append(tag)
+
+    fixed_tag_set = set(fixed_tags)
+    custom_tags = sorted(
+        (
+            tag
+            for tag, count in counter.items()
+            if count > 0 and tag not in fixed_tag_set
+        ),
+        key=normalize_text,
+    )
+
+    lines = [f"{tag} ({counter.get(tag, 0)})" for tag in fixed_tags]
+    lines += [f"{tag} ({counter[tag]})" for tag in custom_tags]
+
+    for i, chunk in enumerate(split_embed_lines(lines, limit=900), 1):
+        embed.add_field(
+            name="集計" if i == 1 else f"集計 続き{i}",
+            value="```text\n" + chunk + "\n```",
+            inline=False,
+        )
+
+    return embed
 
 
 def set_tag_order(short_name, new_priority):
