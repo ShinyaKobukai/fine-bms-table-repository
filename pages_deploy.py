@@ -43,7 +43,7 @@ def copy_user_tables(source_tables_dir, pages_repo_dir, tables_subdir, user_id):
     return target_user_dir
 
 
-def deploy_user_tables(user_id, source_tables_dir="public/tables"):
+def deploy_user_tables(user_id, source_tables_dir="public/tables", progress=None):
     pages_repo_dir = env_value("GITHUB_PAGES_DIR")
     if not pages_repo_dir:
         raise DeployError("GITHUB_PAGES_DIR is not set")
@@ -56,9 +56,13 @@ def deploy_user_tables(user_id, source_tables_dir="public/tables"):
     remote = env_value("GITHUB_PAGES_REMOTE", "origin")
     branch = env_value("GITHUB_PAGES_BRANCH", "")
 
+    if progress:
+        progress("copy")
     target_user_dir = copy_user_tables(source_tables_dir, pages_repo_dir, tables_subdir, user_id)
     target_rel = target_user_dir.relative_to(pages_repo_dir).as_posix()
 
+    if progress:
+        progress("git_add")
     run_git(pages_repo_dir, ["add", target_rel])
     diff = subprocess.run(
         ["git", "-C", str(pages_repo_dir), "diff", "--cached", "--quiet", "--", target_rel],
@@ -81,12 +85,16 @@ def deploy_user_tables(user_id, source_tables_dir="public/tables"):
     env.setdefault("GIT_COMMITTER_NAME", env["GIT_AUTHOR_NAME"])
     env.setdefault("GIT_COMMITTER_EMAIL", env["GIT_AUTHOR_EMAIL"])
 
+    if progress:
+        progress("commit")
     run_git(
         pages_repo_dir,
         ["commit", "-m", f"Update Fine BMS tables for user {user_id}"],
         env=env,
     )
 
+    if progress:
+        progress("push")
     push_args = []
     token = env_value("GITHUB_TOKEN") or env_value("GH_TOKEN")
     if token:

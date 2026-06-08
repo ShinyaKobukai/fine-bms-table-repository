@@ -3,6 +3,7 @@ import re
 import json
 import sqlite3
 import unicodedata
+import asyncio
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -2506,6 +2507,115 @@ async def maketables_cmd_pages(ctx):
         lines.append(f"...ほか {len(non_empty) - 10} タグ")
 
     await ctx.send("\n".join(lines)[:1900])
+
+
+bot.remove_command("maketables")
+
+
+@bot.command(name="maketables", aliases=["make_tables", "tablesgen"])
+async def maketables_cmd_progress(ctx):
+    if ctx.channel.id != CHANNEL_ID:
+        return
+
+    user_id = str(ctx.author.id)
+    table_base_url = os.getenv("TABLE_BASE_URL", "").strip()
+    progress_message = await ctx.send("📋 難易度表生成を開始しましたわ")
+    loop = asyncio.get_running_loop()
+
+    async def update_progress(text):
+        try:
+            await progress_message.edit(content=text[:1900])
+        except Exception:
+            pass
+
+    def schedule_progress(text):
+        asyncio.run_coroutine_threadsafe(update_progress(text), loop)
+
+    def generation_error_message(exc):
+        text = str(exc)
+        if "stella_songs.db" in text or "no such table" in text:
+            return "曲データベースの確認中に問題が発生しましたわ。"
+        return "難易度表データの作成中に問題が発生しましたわ。"
+
+    def deploy_error_message(exc):
+        text = str(exc)
+        if "GITHUB_PAGES_DIR" in text:
+            return "GITHUB_PAGES_DIR が未設定ですわ。GitHub Pages用ディレクトリをご確認くださいませ。"
+        if "git" in text.lower() or "push" in text.lower():
+            return "GitHub Pagesへの反映中に問題が発生しましたわ。認証情報とリポジトリ状態をご確認くださいませ。"
+        return "公開処理中に問題が発生しましたわ。"
+
+    try:
+        async with ctx.typing():
+            from table_generator import generate_user_tables
+
+            def generate_progress(event, **data):
+                if event != "generate_tag":
+                    return
+                index = data.get("index")
+                total = data.get("total")
+                tag_name = data.get("tag_name", "")
+                schedule_progress(f"📋 難易度表生成中ですわ\n[{index}/{total}] {tag_name}")
+
+            result = await loop.run_in_executor(
+                None,
+                lambda: generate_user_tables(
+                    user_id,
+                    table_base_url=table_base_url,
+                    progress=generate_progress,
+                ),
+            )
+    except Exception as e:
+        await update_progress(
+            "❌ 難易度表生成に失敗しましたわ\n"
+            f"{generation_error_message(e)}"
+        )
+        return
+
+    try:
+        async with ctx.typing():
+            from pages_deploy import deploy_user_tables
+
+            def deploy_progress(event, **data):
+                messages = {
+                    "copy": "📋 GitHub Pagesへ反映中ですわ...",
+                    "git_add": "📋 GitHub Pagesの差分を準備中ですわ...",
+                    "commit": "📋 GitHub Pages用のコミット作成中ですわ...",
+                    "push": "📋 GitHubへpush中ですわ...",
+                }
+                schedule_progress(messages.get(event, "📋 公開処理中ですわ..."))
+
+            deploy_result = await loop.run_in_executor(
+                None,
+                lambda: deploy_user_tables(user_id, progress=deploy_progress),
+            )
+    except Exception as e:
+        await update_progress(
+            "❌ GitHub Pagesへの公開に失敗しましたわ\n"
+            f"{deploy_error_message(e)}"
+        )
+        return
+
+    tags = result["tags"]
+    non_empty = [tag for tag in tags if tag["count"] > 0]
+    table_links = [tag for tag in tags if tag.get("table_url")]
+    lines = [
+        "✅ 難易度表公開完了ですわ",
+        f"user_id: {user_id}",
+        f"生成タグ数: {len(tags)}",
+        f"曲ありタグ数: {len(non_empty)}",
+        f"deploy: {deploy_result.get('message', '')}",
+        "",
+        "beatoraja登録用URLですわ:",
+    ]
+
+    for tag in table_links[:12]:
+        lines.append(f"{tag['tag_name']} ({tag['count']}): {tag['table_url']}")
+
+    if len(table_links) > 12:
+        lines.append(f"...ほか {len(table_links) - 12} タグですわ")
+
+    await update_progress("\n".join(lines))
 
 
 init_db()

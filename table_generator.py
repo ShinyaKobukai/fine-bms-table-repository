@@ -490,7 +490,14 @@ def make_public_url(table_base_url, user_id, slug):
     return str(OUTPUT_ROOT / path)
 
 
-def generate_user_tables(user_id, table_base_url=None, output_root=OUTPUT_ROOT):
+def make_table_url(table_base_url, user_id, slug):
+    base = str(table_base_url or "").rstrip("/")
+    if base:
+        return f"{base}/users/{quote(str(user_id))}/tags/{quote(slug)}/header.json"
+    return str(OUTPUT_ROOT / "users" / str(user_id) / "tags" / slug / "header.json")
+
+
+def generate_user_tables(user_id, table_base_url=None, output_root=OUTPUT_ROOT, progress=None):
     user_id = str(user_id)
     output_root = Path(output_root)
     con = db()
@@ -502,7 +509,10 @@ def generate_user_tables(user_id, table_base_url=None, output_root=OUTPUT_ROOT):
         user_root = output_root / "users" / user_id
         tag_results = []
 
-        for spec in tag_specs:
+        total = len(tag_specs)
+        for index, spec in enumerate(tag_specs, 1):
+            if progress:
+                progress("generate_tag", index=index, total=total, tag_name=spec["name"])
             rows = load_tag_songs(con, user_id, spec["name"])
             records = [song_to_record(row) for row in rows]
             tag_dir = user_root / "tags" / spec["slug"]
@@ -539,6 +549,7 @@ def generate_user_tables(user_id, table_base_url=None, output_root=OUTPUT_ROOT):
                     "path": str(tag_dir),
                     "relative_url": f"tags/{spec['slug']}/",
                     "url": make_public_url(table_base_url, user_id, spec["slug"]),
+                    "table_url": make_table_url(table_base_url, user_id, spec["slug"]),
                 }
             )
 
