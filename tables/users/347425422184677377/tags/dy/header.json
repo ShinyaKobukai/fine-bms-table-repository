@@ -1,0 +1,12 @@
+{
+  "name": "Fine 日課",
+  "symbol": "dy",
+  "data_url": "score.json",
+  "level_order": [
+    "sl1",
+    "sl12",
+    "st0",
+    "st1",
+    "st2"
+  ]
+}

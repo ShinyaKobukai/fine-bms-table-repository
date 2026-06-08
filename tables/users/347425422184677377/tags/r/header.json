@@ -1,0 +1,9 @@
+{
+  "name": "Fine 乱打",
+  "symbol": "r",
+  "data_url": "score.json",
+  "level_order": [
+    "st1",
+    "st2"
+  ]
+}

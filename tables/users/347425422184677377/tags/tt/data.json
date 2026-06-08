@@ -1,0 +1,60 @@
+{
+  "user_id": "347425422184677377",
+  "tag": "縦連",
+  "slug": "tt",
+  "fixed": true,
+  "count": 3,
+  "songs": [
+    {
+      "id": 420,
+      "source": "st",
+      "level": "st0",
+      "title": "ちんこ音頭2012",
+      "chart_name": "",
+      "display_title": "ちんこ音頭2012",
+      "md5": "",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "http://sagena.harisen.jp/",
+      "memo": "",
+      "tag": "縦連",
+      "comment": ""
+    },
+    {
+      "id": 16,
+      "source": "st",
+      "level": "st0",
+      "title": "情熱の大阪",
+      "chart_name": "",
+      "display_title": "情熱の大阪",
+      "md5": "",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "http://bms.hexlataia.xyz/tables/hexajoy.html",
+      "memo": "",
+      "tag": "縦連",
+      "comment": ""
+    },
+    {
+      "id": 872,
+      "source": "st",
+      "level": "st2",
+      "title": "pp-hunk [Phxxkin]",
+      "chart_name": "",
+      "display_title": "pp-hunk [Phxxkin]",
+      "md5": "79c1ad2bd63bd1c2595e5ee3db2e25fd",
+      "sha256": "0571601565491416c579feac58142c3c648bb883219a975a7a67f2c067083465",
+      "artist": "Coco / obj:alt",
+      "songdata_title": "pp-hunk [Phxxkin]",
+      "songdata_subtitle": "",
+      "url": "https://drive.google.com/file/d/1PRtvsdVVVzuKujL1Y4zehNofQZxCdjir/view?usp=sharing",
+      "memo": "",
+      "tag": "縦連",
+      "comment": ""
+    }
+  ]
+}

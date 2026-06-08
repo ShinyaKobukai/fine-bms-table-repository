@@ -1,0 +1,12 @@
+{
+  "name": "Fine 良譜面",
+  "symbol": "ni",
+  "data_url": "score.json",
+  "level_order": [
+    "sl3",
+    "sl9",
+    "sl12",
+    "st0",
+    "st1"
+  ]
+}

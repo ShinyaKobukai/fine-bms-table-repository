@@ -1,0 +1,10 @@
+{
+  "name": "Fine 横認識(8分系)",
+  "symbol": "8",
+  "data_url": "score.json",
+  "level_order": [
+    "st0",
+    "st1",
+    "st2"
+  ]
+}

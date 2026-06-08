@@ -1,0 +1,12 @@
+{
+  "name": "Fine ガチ押し系",
+  "symbol": "go",
+  "data_url": "score.json",
+  "level_order": [
+    "sl7",
+    "sl11",
+    "st0",
+    "st1",
+    "st2"
+  ]
+}
