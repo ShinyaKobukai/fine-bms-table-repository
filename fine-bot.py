@@ -5,6 +5,7 @@ import sqlite3
 import unicodedata
 import asyncio
 import logging
+import time
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -2521,16 +2522,100 @@ async def maketables_cmd_progress(ctx):
     user_id = str(ctx.author.id)
     table_base_url = os.getenv("TABLE_BASE_URL", "").strip()
     progress_message = await ctx.send("📋 難易度表生成を開始したよ！")
+    logging.info(
+        "maketables progress sent user_id=%s message_id=%s sent_at=%s discord_error=False label=start",
+        user_id,
+        getattr(progress_message, "id", ""),
+        datetime.now(JST).isoformat(),
+    )
     loop = asyncio.get_running_loop()
+    pending_progress = []
 
-    async def update_progress(text):
+    async def update_progress(text, label="progress", queued_at=None):
+        edit_started = time.perf_counter()
+        edited_at = datetime.now(JST).isoformat()
         try:
             await progress_message.edit(content=text[:1900])
+            logging.info(
+                "maketables progress edited user_id=%s message_id=%s label=%s queued_at=%s edited_at=%s duration=%.3fs discord_error=False",
+                user_id,
+                getattr(progress_message, "id", ""),
+                label,
+                queued_at or "",
+                edited_at,
+                time.perf_counter() - edit_started,
+            )
         except Exception:
-            pass
+            logging.exception(
+                "maketables progress edit failed user_id=%s message_id=%s label=%s queued_at=%s edited_at=%s duration=%.3fs discord_error=True",
+                user_id,
+                getattr(progress_message, "id", ""),
+                label,
+                queued_at or "",
+                edited_at,
+                time.perf_counter() - edit_started,
+            )
 
-    def schedule_progress(text):
-        asyncio.run_coroutine_threadsafe(update_progress(text), loop)
+    def schedule_progress(text, label="progress"):
+        queued_at = datetime.now(JST).isoformat()
+        logging.info(
+            "maketables progress queued user_id=%s message_id=%s label=%s queued_at=%s discord_error=False",
+            user_id,
+            getattr(progress_message, "id", ""),
+            label,
+            queued_at,
+        )
+        try:
+            future = asyncio.run_coroutine_threadsafe(
+                update_progress(text, label=label, queued_at=queued_at),
+                loop,
+            )
+        except Exception:
+            logging.exception(
+                "maketables progress callback scheduling failed user_id=%s label=%s queued_at=%s",
+                user_id,
+                label,
+                queued_at,
+            )
+            return
+
+        pending_progress.append(future)
+
+        def log_progress_result(done):
+            try:
+                done.result()
+            except Exception:
+                logging.exception(
+                    "maketables progress callback failed user_id=%s label=%s queued_at=%s",
+                    user_id,
+                    label,
+                    queued_at,
+                )
+
+        future.add_done_callback(log_progress_result)
+        return future
+
+    async def flush_progress(label):
+        if not pending_progress:
+            return
+        futures = [asyncio.wrap_future(future) for future in pending_progress if not future.done()]
+        pending_progress.clear()
+        if not futures:
+            return
+        logging.info(
+            "maketables progress flush start user_id=%s label=%s pending=%s flushed_at=%s",
+            user_id,
+            label,
+            len(futures),
+            datetime.now(JST).isoformat(),
+        )
+        await asyncio.gather(*futures, return_exceptions=True)
+        logging.info(
+            "maketables progress flush done user_id=%s label=%s flushed_at=%s",
+            user_id,
+            label,
+            datetime.now(JST).isoformat(),
+        )
 
     def percent(index, total):
         if not total:
@@ -2566,7 +2651,8 @@ async def maketables_cmd_progress(ctx):
                 total = data.get("total")
                 tag_name = data.get("tag_name", "")
                 schedule_progress(
-                    progress_text("📋 難易度表生成中だよ！", index, total, tag_name)
+                    progress_text("📋 難易度表生成中だよ！", index, total, tag_name),
+                    label=f"generate:{index}/{total}",
                 )
 
             result = await loop.run_in_executor(
@@ -2577,6 +2663,7 @@ async def maketables_cmd_progress(ctx):
                     progress=generate_progress,
                 ),
             )
+            await flush_progress("generation")
     except Exception as e:
         logging.exception("maketables generation failed for user_id=%s", user_id)
         await update_progress(
@@ -2596,15 +2683,23 @@ async def maketables_cmd_progress(ctx):
                     "copy": (2, "copy"),
                     "commit": (3, "commit"),
                     "push": (4, "push"),
+                    "complete": (4, "push完了" if data.get("status") == "pushed" else "変更なし"),
                 }
                 index, current = steps.get(event, (1, "準備中"))
                 schedule_progress(
-                    progress_text("📋 GitHub Pagesへ公開中だよ！", index, 4, current)
+                    progress_text("📋 GitHub Pagesへ公開中だよ！", index, 4, current),
+                    label=f"deploy:{event}",
                 )
 
             deploy_result = await loop.run_in_executor(
                 None,
                 lambda: deploy_user_tables(user_id, progress=deploy_progress),
+            )
+            await flush_progress("deploy")
+            deploy_done_text = "push完了" if deploy_result.get("pushed") else "変更なし"
+            await update_progress(
+                progress_text("📋 GitHub Pagesへ公開中だよ！", 4, 4, deploy_done_text),
+                label="deploy:complete",
             )
     except Exception as e:
         logging.exception("maketables deploy failed for user_id=%s", user_id)
@@ -2623,9 +2718,11 @@ async def maketables_cmd_progress(ctx):
         f"user_id: {user_id}",
         f"生成タグ数: {len(tags)}",
         f"曲ありタグ数: {len(non_empty)}",
-        f"deploy: {deploy_result.get('message', '')}",
+        "deploy:",
+        f"status: {deploy_result.get('message', '')}",
+        f"commit: {deploy_result.get('commit', '')}",
         "",
-        "beatoraja登録用URLだよ！",
+        "beatoraja登録URL:",
     ]
 
     for tag in table_links[:12]:
@@ -2634,7 +2731,7 @@ async def maketables_cmd_progress(ctx):
     if len(table_links) > 12:
         lines.append(f"...ほか {len(table_links) - 12} タグあるよ！")
 
-    await update_progress("\n".join(lines))
+    await update_progress("\n".join(lines), label="complete")
 
 
 init_db()

@@ -31,6 +31,11 @@ def run_git(repo_dir, args, env=None):
         raise DeployError(message or "git command failed") from exc
 
 
+def current_commit(repo_dir):
+    result = run_git(repo_dir, ["rev-parse", "HEAD"])
+    return result.stdout.strip()
+
+
 def git_auth_args():
     token = env_value("GITHUB_TOKEN") or env_value("GH_TOKEN")
     if not token:
@@ -109,19 +114,24 @@ def deploy_user_tables(user_id, source_tables_dir="public/tables", progress=None
     )
     timings["git_diff"] = time.perf_counter() - started
     if diff.returncode == 0:
+        commit_hash = current_commit(pages_repo_dir)
+        if progress:
+            progress("complete", status="skipped", commit=commit_hash)
         logging.info(
-            "pages_deploy timings user_id=%s git_pull=%.3fs copy=%.3fs git_add=%.3fs git_diff=%.3fs total=%.3fs result=skipped",
+            "pages_deploy timings user_id=%s git_pull=%.3fs copy=%.3fs git_add=%.3fs git_diff=%.3fs total=%.3fs result=skipped commit=%s",
             user_id,
             timings["git_pull"],
             timings["copy"],
             timings["git_add"],
             timings["git_diff"],
             time.perf_counter() - total_started,
+            commit_hash,
         )
         return {
             "committed": False,
             "pushed": False,
             "message": "skipped",
+            "commit": commit_hash,
             "target": str(target_user_dir),
         }
     if diff.returncode not in (0, 1):
@@ -154,8 +164,11 @@ def deploy_user_tables(user_id, source_tables_dir="public/tables", progress=None
         run_git(pages_repo_dir, auth_args + ["pull", "--rebase", remote, branch], env=env)
         run_git(pages_repo_dir, push_args, env=env)
     timings["git_push"] = time.perf_counter() - started
+    commit_hash = current_commit(pages_repo_dir)
+    if progress:
+        progress("complete", status="pushed", commit=commit_hash)
     logging.info(
-        "pages_deploy timings user_id=%s git_pull=%.3fs copy=%.3fs git_add=%.3fs git_diff=%.3fs git_commit=%.3fs git_push=%.3fs total=%.3fs push_retried=%s result=pushed",
+        "pages_deploy timings user_id=%s git_pull=%.3fs copy=%.3fs git_add=%.3fs git_diff=%.3fs git_commit=%.3fs git_push=%.3fs total=%.3fs push_retried=%s result=pushed commit=%s",
         user_id,
         timings["git_pull"],
         timings["copy"],
@@ -165,10 +178,12 @@ def deploy_user_tables(user_id, source_tables_dir="public/tables", progress=None
         timings["git_push"],
         time.perf_counter() - total_started,
         push_retried,
+        commit_hash,
     )
     return {
         "committed": True,
         "pushed": True,
         "message": "pushed",
+        "commit": commit_hash,
         "target": str(target_user_dir),
     }
