@@ -4,6 +4,7 @@ import json
 import sqlite3
 import unicodedata
 import asyncio
+import logging
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -2519,7 +2520,7 @@ async def maketables_cmd_progress(ctx):
 
     user_id = str(ctx.author.id)
     table_base_url = os.getenv("TABLE_BASE_URL", "").strip()
-    progress_message = await ctx.send("📋 難易度表生成を開始しましたわ")
+    progress_message = await ctx.send("📋 難易度表生成を開始したよ！")
     loop = asyncio.get_running_loop()
 
     async def update_progress(text):
@@ -2531,19 +2532,28 @@ async def maketables_cmd_progress(ctx):
     def schedule_progress(text):
         asyncio.run_coroutine_threadsafe(update_progress(text), loop)
 
+    def percent(index, total):
+        if not total:
+            return 0
+        return round(index * 100 / total)
+
+    def progress_text(title, index, total, current):
+        return f"{title}\n[{index}/{total}] {percent(index, total)}%\n現在: {current}"
+
+    def concise_error(exc):
+        text = compact_text(str(exc), 500)
+        lower = text.lower()
+        if "fetch first" in lower or "rejected" in lower or "non-fast-forward" in lower:
+            return "git push rejected\nremote contains work that you do not have locally"
+        if "github_pages_dir" in lower:
+            return "GITHUB_PAGES_DIR が設定されていないみたいだね！"
+        return text or exc.__class__.__name__
+
     def generation_error_message(exc):
         text = str(exc)
         if "stella_songs.db" in text or "no such table" in text:
-            return "曲データベースの確認中に問題が発生しましたわ。"
-        return "難易度表データの作成中に問題が発生しましたわ。"
-
-    def deploy_error_message(exc):
-        text = str(exc)
-        if "GITHUB_PAGES_DIR" in text:
-            return "GITHUB_PAGES_DIR が未設定ですわ。GitHub Pages用ディレクトリをご確認くださいませ。"
-        if "git" in text.lower() or "push" in text.lower():
-            return "GitHub Pagesへの反映中に問題が発生しましたわ。認証情報とリポジトリ状態をご確認くださいませ。"
-        return "公開処理中に問題が発生しましたわ。"
+            return "曲データベースの確認中に問題が起きたみたいだね！"
+        return concise_error(exc)
 
     try:
         async with ctx.typing():
@@ -2555,7 +2565,9 @@ async def maketables_cmd_progress(ctx):
                 index = data.get("index")
                 total = data.get("total")
                 tag_name = data.get("tag_name", "")
-                schedule_progress(f"📋 難易度表生成中ですわ\n[{index}/{total}] {tag_name}")
+                schedule_progress(
+                    progress_text("📋 難易度表生成中だよ！", index, total, tag_name)
+                )
 
             result = await loop.run_in_executor(
                 None,
@@ -2566,9 +2578,11 @@ async def maketables_cmd_progress(ctx):
                 ),
             )
     except Exception as e:
+        logging.exception("maketables generation failed for user_id=%s", user_id)
         await update_progress(
-            "❌ 難易度表生成に失敗しましたわ\n"
-            f"{generation_error_message(e)}"
+            "❌ 難易度表生成失敗\n"
+            f"{generation_error_message(e)}\n\n"
+            "詳細はサーバーログを確認してね！"
         )
         return
 
@@ -2577,22 +2591,27 @@ async def maketables_cmd_progress(ctx):
             from pages_deploy import deploy_user_tables
 
             def deploy_progress(event, **data):
-                messages = {
-                    "copy": "📋 GitHub Pagesへ反映中ですわ...",
-                    "git_add": "📋 GitHub Pagesの差分を準備中ですわ...",
-                    "commit": "📋 GitHub Pages用のコミット作成中ですわ...",
-                    "push": "📋 GitHubへpush中ですわ...",
+                steps = {
+                    "pull": (1, "git pull"),
+                    "copy": (2, "copy"),
+                    "commit": (3, "commit"),
+                    "push": (4, "push"),
                 }
-                schedule_progress(messages.get(event, "📋 公開処理中ですわ..."))
+                index, current = steps.get(event, (1, "準備中"))
+                schedule_progress(
+                    progress_text("📋 GitHub Pagesへ公開中だよ！", index, 4, current)
+                )
 
             deploy_result = await loop.run_in_executor(
                 None,
                 lambda: deploy_user_tables(user_id, progress=deploy_progress),
             )
     except Exception as e:
+        logging.exception("maketables deploy failed for user_id=%s", user_id)
         await update_progress(
-            "❌ GitHub Pagesへの公開に失敗しましたわ\n"
-            f"{deploy_error_message(e)}"
+            "❌ GitHub Pages公開失敗\n"
+            f"{concise_error(e)}\n\n"
+            "詳細はサーバーログを確認してね！"
         )
         return
 
@@ -2600,20 +2619,20 @@ async def maketables_cmd_progress(ctx):
     non_empty = [tag for tag in tags if tag["count"] > 0]
     table_links = [tag for tag in tags if tag.get("table_url")]
     lines = [
-        "✅ 難易度表公開完了ですわ",
+        "✅ 難易度表を公開できたよ！",
         f"user_id: {user_id}",
         f"生成タグ数: {len(tags)}",
         f"曲ありタグ数: {len(non_empty)}",
         f"deploy: {deploy_result.get('message', '')}",
         "",
-        "beatoraja登録用URLですわ:",
+        "beatoraja登録用URLだよ！",
     ]
 
     for tag in table_links[:12]:
         lines.append(f"{tag['tag_name']} ({tag['count']}): {tag['table_url']}")
 
     if len(table_links) > 12:
-        lines.append(f"...ほか {len(table_links) - 12} タグですわ")
+        lines.append(f"...ほか {len(table_links) - 12} タグあるよ！")
 
     await update_progress("\n".join(lines))
 

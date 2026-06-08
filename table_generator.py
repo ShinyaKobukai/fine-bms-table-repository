@@ -1,8 +1,11 @@
 import html
 import json
+import logging
 import re
 import sqlite3
+import time
 import unicodedata
+from functools import lru_cache
 from pathlib import Path
 from urllib.parse import quote
 
@@ -17,6 +20,8 @@ if load_dotenv:
 DB = "stella_songs.db"
 SONGDATA_DB = Path(__file__).with_name("songdata.db")
 OUTPUT_ROOT = Path("public") / "tables"
+_SONGDATA_ROWS = None
+_SONGDATA_STATS = {"read_seconds": 0.0, "lookup_seconds": 0.0, "lookup_calls": 0}
 
 FIXED_TAGS = [
     ("y", "\u6a2a\u8a8d\u8b58"),
@@ -124,9 +129,65 @@ def songdata_display_candidates(title, subtitle):
     return candidates
 
 
-def lookup_songdata(title, chart_name="", url="", level=""):
+def load_songdata_rows(force=False):
+    global _SONGDATA_ROWS
+    if _SONGDATA_ROWS is not None and not force:
+        return _SONGDATA_ROWS
+
+    started = time.perf_counter()
     if not SONGDATA_DB.exists():
-        return None
+        _SONGDATA_ROWS = []
+        _SONGDATA_STATS["read_seconds"] = time.perf_counter() - started
+        return _SONGDATA_ROWS
+
+    con = sqlite3.connect(SONGDATA_DB)
+    try:
+        cur = con.cursor()
+        select_sql = songdata_select_sql(cur)
+        rows = []
+        for raw_row in cur.execute(select_sql).fetchall():
+            row = songdata_row_to_dict(raw_row)
+            candidates = songdata_display_candidates(row["title"], row["subtitle"])
+            row["_display_candidates"] = tuple(candidates)
+            row["_normalized_candidates"] = tuple(
+                sorted({normalize_lookup_text(candidate) for candidate in candidates})
+            )
+            rows.append(row)
+        _SONGDATA_ROWS = rows
+        _SONGDATA_STATS["read_seconds"] = time.perf_counter() - started
+        logging.info(
+            "table_generator songdata.db read rows=%s seconds=%.3f",
+            len(rows),
+            _SONGDATA_STATS["read_seconds"],
+        )
+        return _SONGDATA_ROWS
+    finally:
+        con.close()
+
+
+def reset_lookup_stats():
+    _SONGDATA_STATS["lookup_seconds"] = 0.0
+    _SONGDATA_STATS["lookup_calls"] = 0
+    _lookup_songdata_cached.cache_clear()
+
+
+def lookup_songdata(title, chart_name="", url="", level=""):
+    started = time.perf_counter()
+    try:
+        return _lookup_songdata_cached(
+            str(title or ""),
+            str(chart_name or ""),
+            str(url or ""),
+            str(level or ""),
+        )
+    finally:
+        _SONGDATA_STATS["lookup_calls"] += 1
+        _SONGDATA_STATS["lookup_seconds"] += time.perf_counter() - started
+
+
+@lru_cache(maxsize=4096)
+def _lookup_songdata_cached(title, chart_name="", url="", level=""):
+    rows = load_songdata_rows()
 
     fine_title = str(title or "").strip()
     fine_chart = str(chart_name or "").strip()
@@ -136,46 +197,35 @@ def lookup_songdata(title, chart_name="", url="", level=""):
 
     fine_candidates = fine_display_candidates(fine_title, fine_chart)
 
-    con = sqlite3.connect(SONGDATA_DB)
-    try:
-        cur = con.cursor()
-        select_sql = songdata_select_sql(cur)
-        rows = [songdata_row_to_dict(row) for row in cur.execute(select_sql).fetchall()]
+    if fine_url:
+        url_matches = [
+            row for row in rows
+            if fine_url in {row.get("url", ""), row.get("url_diff", "")}
+        ]
+        found = choose_unique_match(url_matches)
+        if found:
+            return found
 
-        if fine_url:
-            url_matches = [
-                row for row in rows
-                if fine_url in {row.get("url", ""), row.get("url_diff", "")}
-            ]
-            found = choose_unique_match(url_matches)
-            if found:
-                return found
+    for fine_candidate in fine_candidates:
+        exact_matches = [
+            row for row in rows
+            if fine_candidate in row.get("_display_candidates", ())
+        ]
+        found = choose_unique_match(exact_matches)
+        if found:
+            return found
 
-        for fine_candidate in fine_candidates:
-            exact_matches = []
-            for row in rows:
-                db_candidates = songdata_display_candidates(row["title"], row["subtitle"])
-                if fine_candidate in db_candidates:
-                    exact_matches.append(row)
-            found = choose_unique_match(exact_matches)
-            if found:
-                return found
+    for fine_candidate in fine_candidates:
+        normalized_fine = normalize_lookup_text(fine_candidate)
+        normalized_matches = [
+            row for row in rows
+            if normalized_fine in row.get("_normalized_candidates", ())
+        ]
+        found = choose_unique_match(normalized_matches)
+        if found:
+            return found
 
-        for fine_candidate in fine_candidates:
-            normalized_fine = normalize_lookup_text(fine_candidate)
-            normalized_matches = []
-            for row in rows:
-                db_candidates = songdata_display_candidates(row["title"], row["subtitle"])
-                db_normalized = {normalize_lookup_text(candidate) for candidate in db_candidates}
-                if normalized_fine in db_normalized:
-                    normalized_matches.append(row)
-            found = choose_unique_match(normalized_matches)
-            if found:
-                return found
-
-        return None
-    finally:
-        con.close()
+    return None
 
 
 def songdata_select_sql(cur):
@@ -498,6 +548,7 @@ def make_table_url(table_base_url, user_id, slug):
 
 
 def generate_user_tables(user_id, table_base_url=None, output_root=OUTPUT_ROOT, progress=None):
+    started_total = time.perf_counter()
     user_id = str(user_id)
     output_root = Path(output_root)
     con = db()
@@ -505,11 +556,14 @@ def generate_user_tables(user_id, table_base_url=None, output_root=OUTPUT_ROOT, 
     con.commit()
 
     try:
+        reset_lookup_stats()
+        load_songdata_rows()
         tag_specs = build_tag_specs(con, user_id)
         user_root = output_root / "users" / user_id
         tag_results = []
 
         total = len(tag_specs)
+        json_started = time.perf_counter()
         for index, spec in enumerate(tag_specs, 1):
             if progress:
                 progress("generate_tag", index=index, total=total, tag_name=spec["name"])
@@ -556,6 +610,16 @@ def generate_user_tables(user_id, table_base_url=None, output_root=OUTPUT_ROOT, 
         user_root.mkdir(parents=True, exist_ok=True)
         (user_root / "index.html").write_text(render_user_index(user_id, tag_results), encoding="utf-8")
         write_json(user_root / "index.json", {"user_id": user_id, "tags": tag_results})
+        json_seconds = time.perf_counter() - json_started
+        logging.info(
+            "table_generator timings user_id=%s songdata_read=%.3fs lookup_total=%.3fs lookup_calls=%s json_generation=%.3fs total=%.3fs",
+            user_id,
+            _SONGDATA_STATS["read_seconds"],
+            _SONGDATA_STATS["lookup_seconds"],
+            _SONGDATA_STATS["lookup_calls"],
+            json_seconds,
+            time.perf_counter() - started_total,
+        )
         return {
             "user_id": user_id,
             "root": str(user_root),
