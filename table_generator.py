@@ -61,6 +61,13 @@ def normalize_text(text):
     return text.strip().lower()
 
 
+def normalize_lookup_text(text):
+    text = unicodedata.normalize("NFKC", str(text or ""))
+    text = text.lower()
+    text = re.sub(r"[\s\[\]\(\)（）【】]+", "", text)
+    return text
+
+
 def slugify(text, fallback="tag"):
     text = unicodedata.normalize("NFKC", str(text or "")).strip().lower()
     text = re.sub(r"[^a-z0-9_-]+", "-", text)
@@ -81,27 +88,39 @@ def add_unique(items, value):
         items.append(value)
 
 
-def songdata_join_candidates(title, subtitle):
+def fine_display_candidates(title, chart_name):
+    title = str(title or "").strip()
+    chart_name = str(chart_name or "").strip()
+    if not title:
+        return []
+
+    candidates = []
+    if chart_name:
+        chart_plain = strip_brackets(chart_name)
+        add_unique(candidates, f"{title}{chart_name}")
+        add_unique(candidates, f"{title} {chart_name}")
+        if chart_plain:
+            add_unique(candidates, f"{title}[{chart_plain}]")
+            add_unique(candidates, f"{title} [{chart_plain}]")
+    add_unique(candidates, title)
+    return candidates
+
+
+def songdata_display_candidates(title, subtitle):
     title = str(title or "").strip()
     subtitle = str(subtitle or "").strip()
     if not title:
         return []
 
     candidates = []
-    if not subtitle:
-        add_unique(candidates, title)
-        return candidates
-
-    subtitle_plain = strip_brackets(subtitle)
-    subtitle_bracket = f"[{subtitle_plain}]" if subtitle_plain else subtitle
-
-    add_unique(candidates, f"{title}{subtitle}")
-    add_unique(candidates, f"{title} {subtitle}")
-    if subtitle_plain:
-        add_unique(candidates, f"{title}{subtitle_bracket}")
-        add_unique(candidates, f"{title} {subtitle_bracket}")
-        add_unique(candidates, f"{title}{subtitle_plain}")
-        add_unique(candidates, f"{title} {subtitle_plain}")
+    add_unique(candidates, title)
+    if subtitle:
+        subtitle_plain = strip_brackets(subtitle)
+        add_unique(candidates, f"{title}{subtitle}")
+        add_unique(candidates, f"{title} {subtitle}")
+        if subtitle_plain:
+            add_unique(candidates, f"{title}[{subtitle_plain}]")
+            add_unique(candidates, f"{title} [{subtitle_plain}]")
     return candidates
 
 
@@ -112,11 +131,10 @@ def lookup_songdata(title, chart_name="", url="", level=""):
     fine_title = str(title or "").strip()
     fine_chart = str(chart_name or "").strip()
     fine_url = str(url or "").strip()
-    fine_level = str(level or "").strip()
     if not fine_title:
         return None
 
-    chart_plain = strip_brackets(fine_chart)
+    fine_candidates = fine_display_candidates(fine_title, fine_chart)
 
     con = sqlite3.connect(SONGDATA_DB)
     try:
@@ -129,57 +147,31 @@ def lookup_songdata(title, chart_name="", url="", level=""):
                 row for row in rows
                 if fine_url in {row.get("url", ""), row.get("url_diff", "")}
             ]
-            found = choose_songdata_match(url_matches, fine_level)
+            found = choose_unique_match(url_matches)
             if found:
                 return found
 
-        if chart_plain:
-            subtitle_candidates = [fine_chart, chart_plain, f"[{chart_plain}]"]
-            exact_matches = [
-                row for row in rows
-                if row["title"] == fine_title and row["subtitle"] in subtitle_candidates
-            ]
-            found = choose_songdata_match(exact_matches, fine_level)
+        for fine_candidate in fine_candidates:
+            exact_matches = []
+            for row in rows:
+                db_candidates = songdata_display_candidates(row["title"], row["subtitle"])
+                if fine_candidate in db_candidates:
+                    exact_matches.append(row)
+            found = choose_unique_match(exact_matches)
             if found:
                 return found
 
-        joined_matches = []
-        for row in rows:
-            candidates = songdata_join_candidates(row["title"], row["subtitle"])
-            if fine_title in candidates:
-                joined_matches.append(row)
-        found = choose_songdata_match(joined_matches, fine_level)
-        if found:
-            return found
-
-        bracket_no_space_matches = []
-        bracket_space_matches = []
-        for row in rows:
-            subtitle_plain = strip_brackets(row["subtitle"])
-            if not subtitle_plain:
-                continue
-            if fine_title == f"{row['title']}[{subtitle_plain}]":
-                bracket_no_space_matches.append(row)
-            if fine_title == f"{row['title']} [{subtitle_plain}]":
-                bracket_space_matches.append(row)
-
-        found = choose_songdata_match(bracket_no_space_matches, fine_level)
-        if found:
-            return found
-        found = choose_songdata_match(bracket_space_matches, fine_level)
-        if found:
-            return found
-
-        normalized_matches = []
-        for row in rows:
-            candidates = songdata_join_candidates(row["title"], row["subtitle"])
-            normalized_candidates = {normalize_text(candidate) for candidate in candidates}
-            if normalize_text(fine_title) in normalized_candidates:
-                normalized_matches.append(row)
-
-        found = choose_songdata_match(normalized_matches, fine_level)
-        if found:
-            return found
+        for fine_candidate in fine_candidates:
+            normalized_fine = normalize_lookup_text(fine_candidate)
+            normalized_matches = []
+            for row in rows:
+                db_candidates = songdata_display_candidates(row["title"], row["subtitle"])
+                db_normalized = {normalize_lookup_text(candidate) for candidate in db_candidates}
+                if normalized_fine in db_normalized:
+                    normalized_matches.append(row)
+            found = choose_unique_match(normalized_matches)
+            if found:
+                return found
 
         return None
     finally:
@@ -228,34 +220,10 @@ def songdata_row_to_dict(row):
     }
 
 
-def choose_songdata_match(rows, fine_level=""):
+def choose_unique_match(rows):
     unique = unique_songdata_rows(rows)
     if len(unique) == 1:
         return unique[0]
-    if len(unique) <= 1:
-        return None
-
-    fine_level = normalize_text(fine_level)
-    if not fine_level:
-        return None
-
-    level_matches = [
-        row for row in unique
-        if normalize_text(row.get("level", "")) == fine_level
-    ]
-    if len(level_matches) == 1:
-        return level_matches[0]
-
-    fine_prefix = re.match(r"^[a-z]+", fine_level)
-    if fine_prefix:
-        prefix = fine_prefix.group(0)
-        prefix_matches = [
-            row for row in unique
-            if normalize_text(row.get("level", "")).startswith(prefix)
-        ]
-        if len(prefix_matches) == 1:
-            return prefix_matches[0]
-
     return None
 
 

@@ -2455,5 +2455,58 @@ async def maketables_cmd(ctx):
     await ctx.send("\n".join(lines)[:1900])
 
 
+bot.remove_command("maketables")
+
+
+@bot.command(name="maketables", aliases=["make_tables", "tablesgen"])
+async def maketables_cmd_pages(ctx):
+    if ctx.channel.id != CHANNEL_ID:
+        return
+
+    user_id = str(ctx.author.id)
+    table_base_url = os.getenv("TABLE_BASE_URL", "").strip()
+
+    try:
+        async with ctx.typing():
+            from table_generator import generate_user_tables
+
+            result = generate_user_tables(user_id, table_base_url=table_base_url)
+    except Exception:
+        await ctx.send("難易度表データの生成に失敗しました。DBと出力先を確認してください。")
+        return
+
+    try:
+        async with ctx.typing():
+            from pages_deploy import deploy_user_tables
+
+            deploy_result = deploy_user_tables(user_id)
+    except Exception:
+        await ctx.send(
+            "難易度表データは生成しましたが、GitHub Pagesへの公開に失敗しました。"
+            "GITHUB_PAGES_DIR / GITHUB_TOKEN / git push権限を確認してください。"
+        )
+        return
+
+    tags = result["tags"]
+    non_empty = [tag for tag in tags if tag["count"] > 0]
+    lines = [
+        "難易度表データを生成して公開しました。",
+        f"user_id: {user_id}",
+        f"生成タグ数: {len(tags)}",
+        f"曲ありタグ数: {len(non_empty)}",
+        f"deploy: {deploy_result.get('message', '')}",
+        "",
+        result.get("index_url") or result.get("root", ""),
+    ]
+
+    for tag in non_empty[:10]:
+        lines.append(f"{tag['tag_name']} ({tag['count']}): {tag['url']}")
+
+    if len(non_empty) > 10:
+        lines.append(f"...ほか {len(non_empty) - 10} タグ")
+
+    await ctx.send("\n".join(lines)[:1900])
+
+
 init_db()
 bot.run(TOKEN)
