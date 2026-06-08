@@ -258,7 +258,7 @@ def lookup_songdata(title, chart_name=""):
 
     return None
 
-def sync_song_to_sheet(fine_row, tag_name=None, emoji=None, enabled=True):
+def sync_song_to_sheet(fine_row, tag_name=None, emoji=None, enabled=True, user_id=None):
     if not SHEET_SYNC_URL:
         print("[sheet_sync] SHEET_SYNC_URL is empty")
         return False
@@ -286,6 +286,8 @@ def sync_song_to_sheet(fine_row, tag_name=None, emoji=None, enabled=True):
         "md5": found["md5"],
         "url_diff": song["url"],
     }
+    if user_id is not None:
+        payload["user_id"] = str(user_id)
 
     try:
         r = requests.post(SHEET_SYNC_URL, json=payload, timeout=10)

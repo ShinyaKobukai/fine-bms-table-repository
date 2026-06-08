@@ -49,17 +49,35 @@ url = env["SHEET_SYNC_URL"]
 con = sqlite3.connect(DB)
 cur = con.cursor()
 cur.execute("""
-SELECT level, title, chart_name, url, tags, memo
-FROM songs
-WHERE tags IS NOT NULL
-AND tags != ''
-ORDER BY level, title
+CREATE TABLE IF NOT EXISTS user_tags (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    song_id INTEGER NOT NULL,
+    tag_name TEXT NOT NULL,
+    memo TEXT DEFAULT '',
+    created_at TEXT DEFAULT '',
+    updated_at TEXT DEFAULT '',
+    UNIQUE(user_id, song_id, tag_name)
+)
+""")
+cur.execute("""
+SELECT
+    ut.user_id,
+    s.level,
+    s.title,
+    s.chart_name,
+    s.url,
+    ut.tag_name,
+    COALESCE(ut.memo, s.memo, '')
+FROM songs s
+JOIN user_tags ut ON ut.song_id = s.id
+ORDER BY ut.user_id, s.level, s.title, ut.id
 """)
 
 sent = 0
 skipped = 0
 
-for level, title, chart_name, song_url, tags, memo in cur.fetchall():
+for user_id, level, title, chart_name, song_url, raw_tag, memo in cur.fetchall():
     found = lookup_songdata(title, chart_name or "")
 
     if not found:
@@ -74,28 +92,28 @@ for level, title, chart_name, song_url, tags, memo in cur.fetchall():
         if subtitle and subtitle not in table_title:
             table_title = f"{table_title} {subtitle}"
 
-    for raw_tag in split_tags(tags):
-        sheet = normalize_tag(raw_tag)
+    sheet = normalize_tag(raw_tag)
 
-        payload = {
-            "action": "upsert",
-            "sheet": sheet,
-            "level": str(level or ""),
-            "title": table_title,
-            "artist": found.get("artist", ""),
-            "comment": raw_tag,
-            "md5": found["md5"],
-            "url_diff": song_url or "",
-            "tag": sheet,
-        }
+    payload = {
+        "action": "upsert",
+        "sheet": sheet,
+        "level": str(level or ""),
+        "title": table_title,
+        "artist": found.get("artist", ""),
+        "comment": raw_tag,
+        "md5": found["md5"],
+        "url_diff": song_url or "",
+        "tag": sheet,
+        "user_id": str(user_id),
+    }
 
-        try:
-            res = post_json(url, payload)
-            print("[OK]", sheet, table_title, found["md5"], res)
-            sent += 1
-        except Exception as e:
-            print("[NG]", sheet, table_title, e)
-            skipped += 1
+    try:
+        res = post_json(url, payload)
+        print("[OK]", user_id, sheet, table_title, found["md5"], res)
+        sent += 1
+    except Exception as e:
+        print("[NG]", user_id, sheet, table_title, e)
+        skipped += 1
 
 con.close()
 print(f"done sent={sent} skipped={skipped}")

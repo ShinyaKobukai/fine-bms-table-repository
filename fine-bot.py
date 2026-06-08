@@ -126,11 +126,27 @@ def tag_matches(song_tag, wanted_tag):
         return song_tag == "惜敗" or song_tag.startswith("惜敗[")
     return song_tag == wanted_tag
 
-OWNER_USER_ID = "347425422184677377"
+def ensure_user_tags_table(con):
+    con.execute("""
+    CREATE TABLE IF NOT EXISTS user_tags (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        song_id INTEGER NOT NULL,
+        tag_name TEXT NOT NULL,
+        memo TEXT DEFAULT '',
+        created_at TEXT DEFAULT '',
+        updated_at TEXT DEFAULT '',
+        UNIQUE(user_id, song_id, tag_name)
+    )
+    """)
 
 
 def get_user_song_tags(user_id, song_id):
+    if user_id is None:
+        return []
+
     con = db()
+    ensure_user_tags_table(con)
     rows = con.execute(
         """
         SELECT tag_name
@@ -144,16 +160,9 @@ def get_user_song_tags(user_id, song_id):
     return [row[0] for row in rows]
 
 
-def get_song_tags_for_display(row, user_id=OWNER_USER_ID):
+def get_song_tags_for_display(row, user_id=None):
     song_id = row[0]
-    tags = get_user_song_tags(user_id, song_id)
-    if tags:
-        return join_tags(tags)
-
-    if len(row) >= 8:
-        return row[6] or ""
-
-    return ""
+    return join_tags(get_user_song_tags(user_id, song_id))
 
 
 def split_tags(text):
@@ -262,8 +271,8 @@ def discover_and_import():
 
                 imported += upsert_songs(rows)
 
-            except Exception as e:
-                errors.append(f"{source} {label}: {e}")
+            except Exception:
+                errors.append(f"{source} {label}: 取得または更新に失敗しました")
 
     return imported, errors
 
@@ -320,7 +329,7 @@ def song_display_name(row):
     return name
 
 
-def add_tags_to_song(row, add_tags, memo=None, user_id=OWNER_USER_ID):
+def add_tags_to_song(row, add_tags, memo=None, user_id=None):
     current_tags = split_tags(get_song_tags_for_display(row, user_id=user_id))
     merged_tags = current_tags + split_tags(add_tags)
 
@@ -332,7 +341,7 @@ def add_tags_to_song(row, add_tags, memo=None, user_id=OWNER_USER_ID):
     update_song(row, join_tags(merged_tags), memo, user_id=user_id)
 
 
-def append_tags_to_song(row, tags_to_add):
+def append_tags_to_song(row, tags_to_add, user_id=None):
     sid = row[0]
 
     con = db()
@@ -346,19 +355,19 @@ def append_tags_to_song(row, tags_to_add):
     if not fresh:
         return
 
-    current_tags = fresh[6] or ""
+    current_tags = get_song_tags_for_display(fresh, user_id=user_id)
     current_memo = fresh[7] or ""
 
     merged = split_tags(current_tags) + split_tags(tags_to_add)
-    update_song(fresh, join_tags(merged), current_memo)
+    update_song(fresh, join_tags(merged), current_memo, user_id=user_id)
 
 
-def remove_tags_from_song(row, remove_tokens):
+def remove_tags_from_song(row, remove_tokens, user_id=None):
     fresh = get_song_by_id(row[0])
     if not fresh:
         return
 
-    current_tags = split_tags(fresh[6] or "")
+    current_tags = split_tags(get_song_tags_for_display(fresh, user_id=user_id))
     current_memo = fresh[7] or ""
 
     remove_tags = []
@@ -378,40 +387,30 @@ def remove_tags_from_song(row, remove_tokens):
         if not remove:
             kept.append(song_tag)
 
-    update_song(fresh, join_tags(kept), current_memo)
+    update_song(fresh, join_tags(kept), current_memo, user_id=user_id)
 
 
-def update_song(row, tags, memo, user_id=OWNER_USER_ID):
+def update_song(row, tags, memo, user_id=None):
+    if user_id is None:
+        raise ValueError("user_id is required when updating song tags")
+
     sid = row[0]
     con = db()
     now = now_text()
 
     con.execute(
-        "UPDATE songs SET tags=?, memo=?, updated_at=? WHERE id=?",
-        (tags, memo, now, sid)
+        "UPDATE songs SET memo=?, updated_at=? WHERE id=?",
+        (memo, now, sid)
     )
 
-    # Phase1: existing songs.tags remains the source of truth.
-    # Also mirror tags into user_tags for owner user.
     try:
-        con.execute("""
-        CREATE TABLE IF NOT EXISTS user_tags (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT NOT NULL,
-            song_id INTEGER NOT NULL,
-            tag_name TEXT NOT NULL,
-            memo TEXT DEFAULT '',
-            created_at TEXT DEFAULT '',
-            updated_at TEXT DEFAULT '',
-            UNIQUE(user_id, song_id, tag_name)
-        )
-        """)
+        ensure_user_tags_table(con)
 
-        owner_user_id = str(user_id)
+        user_id = str(user_id)
 
         con.execute(
             "DELETE FROM user_tags WHERE user_id=? AND song_id=?",
-            (owner_user_id, sid)
+            (user_id, sid)
         )
 
         for tag in split_tags(tags):
@@ -419,7 +418,7 @@ def update_song(row, tags, memo, user_id=OWNER_USER_ID):
             INSERT OR IGNORE INTO user_tags
                 (user_id, song_id, tag_name, memo, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?)
-            """, (owner_user_id, sid, tag, memo or "", now, now))
+            """, (user_id, sid, tag, memo or "", now, now))
 
     except Exception as e:
         with open("/tmp/fine_user_tags.log", "a", encoding="utf-8") as f:
@@ -430,24 +429,32 @@ def update_song(row, tags, memo, user_id=OWNER_USER_ID):
 
 
 
-def sync_removed_tags_to_sheet(row, tags):
+def sync_removed_tags_to_sheet(row, tags, user_id=None):
     with open("/tmp/fine_sheet_sync.log", "a", encoding="utf-8") as f:
         f.write(f"[sheet_sync] reset/delete called row_id={row[0]} tags={tags}\n")
     try:
         from sheet_sync import sync_song_to_sheet
         for tag in tags:
-            ok = sync_song_to_sheet(row, tag_name=tag, enabled=False)
+            ok = sync_song_to_sheet(row, tag_name=tag, enabled=False, user_id=user_id)
             with open("/tmp/fine_sheet_sync.log", "a", encoding="utf-8") as f:
                 f.write(f"[sheet_sync] reset/delete tag={tag} ok={ok}\n")
     except Exception as e:
         with open("/tmp/fine_sheet_sync.log", "a", encoding="utf-8") as f:
             f.write(f"[sheet_sync] reset/delete skipped: {e}\n")
 
-def reset_song(row):
+def reset_song(row, user_id=None):
+    if user_id is None:
+        raise ValueError("user_id is required when resetting song tags")
+
     sid = row[0]
     con = db()
+    ensure_user_tags_table(con)
     con.execute(
-        "UPDATE songs SET tags='', memo='', updated_at=? WHERE id=?",
+        "DELETE FROM user_tags WHERE user_id=? AND song_id=?",
+        (str(user_id), sid)
+    )
+    con.execute(
+        "UPDATE songs SET memo='', updated_at=? WHERE id=?",
         (now_text(), sid)
     )
     con.commit()
@@ -595,7 +602,7 @@ def normalize_tag_for_count(tag):
     return tag
 
 
-def make_song_field(row, index=None):
+def make_song_field(row, index=None, user_id=None):
     if len(row) >= 8:
         sid, source, level, title, chart_name, url, tags, memo = row
     else:
@@ -610,17 +617,17 @@ def make_song_field(row, index=None):
     value = []
     if chart_name:
         value.append(f"差分: {compact_text(chart_name, 36)}")
-    value.append(f"🏷️ {display_tags(get_song_tags_for_display(row))}")
+    value.append(f"🏷️ {display_tags(get_song_tags_for_display(row, user_id=user_id))}")
     value.append(f"💬 {memo if memo else '備考なし'}")
 
     return field_name, "\n".join(value)
 
 
-def make_song_list_embed(title, rows, start_index=1, footer_text=None):
+def make_song_list_embed(title, rows, start_index=1, footer_text=None, user_id=None):
     embed = discord.Embed(title=title, color=EMBED_BLUE)
 
     for i, row in enumerate(rows, start_index):
-        field_name, value = make_song_field(row, i)
+        field_name, value = make_song_field(row, i, user_id=user_id)
         embed.add_field(name=field_name, value=value, inline=False)
 
     if footer_text:
@@ -641,20 +648,23 @@ async def send_song_list_embeds(ctx, title, rows, per_page=10):
             title if page_start == 0 else f"{title} 続き",
             page_rows,
             start_index=start_index,
-            footer_text=f"{total}件中 {start_index}-{end_index}件"
+            footer_text=f"{total}件中 {start_index}-{end_index}件",
+            user_id=ctx.author.id,
         )
 
         await ctx.send(embed=embed)
 
 
 
-def make_single_song_embed(row, title="✅ 更新したよ！", color=EMBED_GREEN):
-    embed = make_single_song_detail_embed(row, title, color)
+def make_single_song_embed(row, title="✅ 更新したよ！", color=EMBED_GREEN, user_id=None):
+    embed = make_single_song_detail_embed(row, title, color, user_id=user_id)
     return embed
 
 
-async def send_single_song_embed(target, row, title="✅ 更新したよ！", color=EMBED_GREEN):
-    msg = await target.send(embed=make_single_song_embed(row, title, color))
+async def send_single_song_embed(target, row, title="✅ 更新したよ！", color=EMBED_GREEN, user_id=None):
+    if user_id is None:
+        user_id = getattr(getattr(target, "author", None), "id", None)
+    msg = await target.send(embed=make_single_song_embed(row, title, color, user_id=user_id))
     reaction_song_messages[msg.id] = row[0]
     await add_all_tag_reactions(msg)
 
@@ -752,7 +762,7 @@ def reaction_guide_text():
     ])
 
 
-def make_single_song_detail_embed(row, title="🎵 楽曲情報", color=0x8EC5FF):
+def make_single_song_detail_embed(row, title="🎵 楽曲情報", color=0x8EC5FF, user_id=None):
     embed = discord.Embed(
         title=title,
         color=color,
@@ -772,7 +782,7 @@ def make_single_song_detail_embed(row, title="🎵 楽曲情報", color=0x8EC5FF
         name=f"{level} {name}",
         value="\n".join([
             "🏷️ 現在のタグ",
-            emoji_tag_lines_from_tags(tags),
+            emoji_tag_lines_from_tags(get_song_tags_for_display(row, user_id=user_id)),
             "",
             f"💬 {memo if memo else '備考なし'}",
             "",
@@ -814,7 +824,7 @@ async def search_cmd(ctx, *args):
         await ctx.send("検索語を入れてくださいませ。例: `!s sl1 ceu`")
         return
 
-    rows = search_songs(args)
+    rows = search_songs(args, user_id=ctx.author.id)
     last_search[ctx.author.id] = rows
 
     if not rows:
@@ -825,7 +835,8 @@ async def search_cmd(ctx, *args):
         msg = await ctx.send(
             embed=make_single_song_detail_embed(
                 rows[0],
-                "🎵 楽曲情報"
+                "🎵 楽曲情報",
+                user_id=ctx.author.id,
             )
         )
 
@@ -847,7 +858,7 @@ async def tag_search_cmd(ctx, *args):
         await ctx.send("使い方ですわ: `!ts sl12 go` または `!ts ガチ`")
         return
 
-    tags, rows = search_by_tag(args)
+    tags, rows = search_by_tag(args, user_id=ctx.author.id)
 
     if not tags:
         await ctx.send("タグが見つかりませんでしたわ。`!t` で一覧を確認してくださいませ。")
@@ -915,8 +926,8 @@ async def import_cmd(ctx):
     if ctx.channel.id != CHANNEL_ID:
         return
 
-    await ctx.send("取り込みを開始しますわ。少し待ってくださいませ。")
-    added, errors = discover_and_import()
+    async with ctx.typing():
+        added, errors = discover_and_import()
 
     msg = [f"取り込み完了ですわ。追加 {len(added)} 件ですわ。"]
     if errors:
@@ -995,7 +1006,7 @@ def normalize_tag_for_count(tag):
     return tag
 
 
-def tag_count_lines(rows, user_id=OWNER_USER_ID):
+def tag_count_lines(rows, user_id=None):
     from collections import Counter
 
     counter = Counter()
@@ -1060,7 +1071,7 @@ async def tag_level_cmd(ctx, *args):
 
     matched = []
     for row in rows:
-        song_tags = split_tags(get_song_tags_for_display(row))
+        song_tags = split_tags(get_song_tags_for_display(row, user_id=ctx.author.id))
         if all(any(tag_matches(song_tag, tag) for song_tag in song_tags) for tag in wanted_tags):
             matched.append(row)
 
@@ -1096,7 +1107,7 @@ async def tag_level_cmd(ctx, *args):
         song_lines = []
         for row in level_rows:
             song_lines.append(f"・**{compact_text(song_display_name(row), 42)}**")
-            song_lines.append(f"　🏷️ {display_tags(get_song_tags_for_display(row))}")
+            song_lines.append(f"　🏷️ {display_tags(get_song_tags_for_display(row, user_id=ctx.author.id))}")
             if row[7]:
                 song_lines.append(f"　💬 {compact_text(row[7], 80)}")
             song_lines.append("")
@@ -1110,7 +1121,7 @@ async def tag_level_cmd(ctx, *args):
 
         counter = Counter()
         for row in level_rows:
-            for tag in split_tags(get_song_tags_for_display(row)):
+            for tag in split_tags(get_song_tags_for_display(row, user_id=ctx.author.id)):
                 counter[normalize_tag_for_count(tag)] += 1
 
         count_lines = [f"{tag}　{counter[tag]}" for tag in sort_tags(list(counter.keys()))]
@@ -1133,6 +1144,7 @@ async def tagcount_cmd(ctx):
     from collections import Counter
 
     con = db()
+    ensure_user_tags_table(con)
     rows = con.execute(
         """
         SELECT tag_name
@@ -1185,10 +1197,14 @@ async def edit_cmd(ctx, index: int = None, *args):
 
     if normalize_text(body) == "reset":
         fresh_before = get_song_by_id(row[0]) or row
-        sync_removed_tags_to_sheet(fresh_before, split_tags(fresh_before[6] or ""))
-        reset_song(row)
+        sync_removed_tags_to_sheet(
+            fresh_before,
+            split_tags(get_song_tags_for_display(fresh_before, user_id=ctx.author.id)),
+            user_id=ctx.author.id,
+        )
+        reset_song(row, user_id=ctx.author.id)
         fresh_row = get_song_by_id(row[0]) or row
-        await send_single_song_embed(ctx, fresh_row, "🗑️ 初期化したよ！")
+        await send_single_song_embed(ctx, fresh_row, "🗑️ 初期化したよ！", user_id=ctx.author.id)
         return
 
     if not body:
@@ -1205,21 +1221,21 @@ async def edit_cmd(ctx, index: int = None, *args):
     remove_mode = any(part.startswith("-") for part in parts)
 
     if remove_mode:
-        remove_tags_from_song(row, [part for part in parts if part.startswith("-")])
+        remove_tags_from_song(row, [part for part in parts if part.startswith("-")], user_id=ctx.author.id)
     else:
         tags, memo = parse_edit_args(parts)
 
         if add_mode:
-            append_tags_to_song(row, tags)
+            append_tags_to_song(row, tags, user_id=ctx.author.id)
         else:
-            update_song(row, tags, memo)
+            update_song(row, tags, memo, user_id=ctx.author.id)
 
     fresh_row = get_song_by_id(row[0])
     if fresh_row:
         row = fresh_row
         last_search[ctx.author.id] = [fresh_row]
 
-    await send_single_song_embed(ctx, row, "✅ 更新したよ！")
+    await send_single_song_embed(ctx, row, "✅ 更新したよ！", user_id=ctx.author.id)
 
 
 @bot.event
@@ -1252,10 +1268,14 @@ async def edit_after_search(message):
 
     if normalize_text(body) == "reset":
         fresh_before = get_song_by_id(row[0]) or row
-        sync_removed_tags_to_sheet(fresh_before, split_tags(fresh_before[6] or ""))
-        reset_song(row)
+        sync_removed_tags_to_sheet(
+            fresh_before,
+            split_tags(get_song_tags_for_display(fresh_before, user_id=message.author.id)),
+            user_id=message.author.id,
+        )
+        reset_song(row, user_id=message.author.id)
         fresh_row = get_song_by_id(row[0]) or row
-        await send_single_song_embed(message.channel, fresh_row, "🗑️ 初期化したよ！")
+        await send_single_song_embed(message.channel, fresh_row, "🗑️ 初期化したよ！", user_id=message.author.id)
         return
 
     if not body:
@@ -1265,13 +1285,13 @@ async def edit_after_search(message):
     parts = body.split()
 
     if any(part.startswith("-") for part in parts):
-        remove_tags_from_song(row, [part for part in parts if part.startswith("-")])
+        remove_tags_from_song(row, [part for part in parts if part.startswith("-")], user_id=message.author.id)
         fresh_row = get_song_by_id(row[0])
         if fresh_row:
             row = fresh_row
             last_search[message.author.id] = [fresh_row]
 
-        await send_single_song_embed(message.channel, row, "✅ 更新したよ！")
+        await send_single_song_embed(message.channel, row, "✅ 更新したよ！", user_id=message.author.id)
         return
 
     add_mode = False
@@ -1282,16 +1302,16 @@ async def edit_after_search(message):
     tags, memo = parse_edit_args(parts)
 
     if add_mode:
-        append_tags_to_song(row, tags)
+        append_tags_to_song(row, tags, user_id=message.author.id)
     else:
-        update_song(row, tags, memo)
+        update_song(row, tags, memo, user_id=message.author.id)
 
     fresh_row = get_song_by_id(row[0])
     if fresh_row:
         row = fresh_row
         last_search[message.author.id] = [fresh_row]
 
-    await send_single_song_embed(message.channel, row, "✅ 更新したよ！")
+    await send_single_song_embed(message.channel, row, "✅ 更新したよ！", user_id=message.author.id)
 
 
 @bot.listen("on_message")
@@ -1322,17 +1342,21 @@ async def quick_edit_single_search(message):
 
     if normalize_text(text) == "reset":
         fresh_before = get_song_by_id(row[0]) or row
-        sync_removed_tags_to_sheet(fresh_before, split_tags(fresh_before[6] or ""))
-        reset_song(row)
+        sync_removed_tags_to_sheet(
+            fresh_before,
+            split_tags(get_song_tags_for_display(fresh_before, user_id=message.author.id)),
+            user_id=message.author.id,
+        )
+        reset_song(row, user_id=message.author.id)
         fresh = get_song_by_id(row[0]) or row
         last_search[message.author.id] = [fresh]
-        await send_single_song_embed(message.channel, fresh, "🗑️ 初期化したよ！")
+        await send_single_song_embed(message.channel, fresh, "🗑️ 初期化したよ！", user_id=message.author.id)
         return
 
     # 削除モード: -sh / -惜敗 / -ni / -良譜面
     if any(part.startswith("-") for part in parts):
         fresh = get_song_by_id(row[0]) or row
-        current_tags = split_tags(fresh[6] or "")
+        current_tags = split_tags(get_song_tags_for_display(fresh, user_id=message.author.id))
         current_memo = fresh[7] or ""
 
         remove_tags = []
@@ -1354,11 +1378,11 @@ async def quick_edit_single_search(message):
             if not should_remove:
                 kept.append(song_tag)
 
-        update_song(fresh, join_tags(kept), current_memo)
+        update_song(fresh, join_tags(kept), current_memo, user_id=message.author.id)
         fresh = get_song_by_id(row[0]) or fresh
         last_search[message.author.id] = [fresh]
 
-        await send_single_song_embed(message.channel, fresh, "✅ 更新したよ！")
+        await send_single_song_embed(message.channel, fresh, "✅ 更新したよ！", user_id=message.author.id)
         return
 
     # 通常編集として扱うか判定
@@ -1384,15 +1408,15 @@ async def quick_edit_single_search(message):
 
     if add_mode:
         fresh = get_song_by_id(row[0]) or row
-        merged = split_tags(fresh[6] or "") + split_tags(tags)
-        update_song(fresh, join_tags(merged), fresh[7] or "")
+        merged = split_tags(get_song_tags_for_display(fresh, user_id=message.author.id)) + split_tags(tags)
+        update_song(fresh, join_tags(merged), fresh[7] or "", user_id=message.author.id)
     else:
-        update_song(row, tags, memo)
+        update_song(row, tags, memo, user_id=message.author.id)
 
     fresh = get_song_by_id(row[0]) or row
     last_search[message.author.id] = [fresh]
 
-    await send_single_song_embed(message.channel, fresh, "✅ 更新したよ！")
+    await send_single_song_embed(message.channel, fresh, "✅ 更新したよ！", user_id=message.author.id)
 
 
 @tasks.loop(hours=24)
@@ -1455,6 +1479,8 @@ def init_db():
         full_name TEXT NOT NULL
     )
     """)
+
+    ensure_user_tags_table(con)
 
     con.commit()
     con.close()
@@ -1584,10 +1610,14 @@ def parse_song_line(line):
     }, None
 
 
-def insert_manual_song(table_name, data):
-    con = db()
+def insert_manual_song(table_name, data, user_id=None):
+    if user_id is None:
+        raise ValueError("user_id is required when inserting manual song tags")
 
-    con.execute(
+    con = db()
+    now = now_text()
+
+    cur = con.execute(
         """
         INSERT INTO songs(source, level, title, chart_name, url, tags, memo, created_at, updated_at)
         VALUES(?,?,?,?,?,?,?,?,?)
@@ -1598,18 +1628,27 @@ def insert_manual_song(table_name, data):
             data["title"],
             data["chart_name"],
             "",
-            data["tags"],
+            "",
             data["memo"],
-            now_text(),
-            now_text(),
+            now,
+            now,
         )
     )
+    song_id = cur.lastrowid
+
+    ensure_user_tags_table(con)
+    for tag in split_tags(data["tags"]):
+        con.execute("""
+        INSERT OR IGNORE INTO user_tags
+            (user_id, song_id, tag_name, memo, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, (str(user_id), song_id, tag, data["memo"] or "", now, now))
 
     con.commit()
     con.close()
 
 
-def search_songs(words):
+def search_songs(words, user_id=None):
     con = db()
 
     rows = con.execute(
@@ -1630,7 +1669,7 @@ def search_songs(words):
             title or "",
             chart_name or "",
             url or "",
-            tags or "",
+            get_song_tags_for_display(row, user_id=user_id),
             memo or "",
         ]))
 
@@ -1640,7 +1679,7 @@ def search_songs(words):
     return result[:20]
 
 
-def search_by_tag(args):
+def search_by_tag(args, user_id=None):
     level_filter = None
     tag_tokens = []
 
@@ -1680,7 +1719,7 @@ def search_by_tag(args):
         if level_filter and normalize_text(level) != level_filter:
             continue
 
-        song_tags = split_tags(get_song_tags_for_display(row))
+        song_tags = split_tags(get_song_tags_for_display(row, user_id=user_id))
 
         if all(any(tag_matches(song_tag, tag) for song_tag in song_tags) for tag in resolved_tags):
             results.append(row)
@@ -1688,7 +1727,7 @@ def search_by_tag(args):
     return resolved_tags, results[:20]
 
 
-def format_song(row, index):
+def format_song(row, index, user_id=None):
     if len(row) >= 8:
         sid, source, level, title, chart_name, url, tags, memo = row
     else:
@@ -1699,7 +1738,7 @@ def format_song(row, index):
     if chart_name:
         name += f" [{chart_name}]"
 
-    tag_text = display_tags(get_song_tags_for_display(row))
+    tag_text = display_tags(get_song_tags_for_display(row, user_id=user_id))
     memo_text = memo if memo else "備考なし"
 
     return chr(10).join([
@@ -1795,7 +1834,7 @@ async def addsong_cmd(ctx, *, body=None):
             await ctx.send(error)
             return
 
-        insert_manual_song(table_name, data)
+        insert_manual_song(table_name, data, user_id=ctx.author.id)
 
         await ctx.send(
             f"✅ 曲を追加しましたわ\n"
@@ -1843,7 +1882,7 @@ async def addsong_cmd(ctx, *, body=None):
         await ctx.send(error)
         return
 
-    insert_manual_song(table_name, data)
+    insert_manual_song(table_name, data, user_id=ctx.author.id)
 
     await ctx.send(
         f"✅ 曲を追加しましたわ\n"
@@ -2060,6 +2099,13 @@ def delete_table(name):
         return False, "st / sl は基本テーブルなので削除できませんわ。"
 
     con = db()
+    ensure_user_tags_table(con)
+    song_ids = [
+        row[0]
+        for row in con.execute("SELECT id FROM songs WHERE source=?", (real_name,)).fetchall()
+    ]
+    for song_id in song_ids:
+        con.execute("DELETE FROM user_tags WHERE song_id=?", (song_id,))
     con.execute("DELETE FROM songs WHERE source=?", (real_name,))
     con.execute("DELETE FROM custom_tables WHERE name=?", (real_name,))
     con.commit()
@@ -2080,6 +2126,8 @@ def get_song_by_id(song_id):
 
 def delete_song_by_id(song_id):
     con = db()
+    ensure_user_tags_table(con)
+    con.execute("DELETE FROM user_tags WHERE song_id=?", (song_id,))
     cur = con.execute("DELETE FROM songs WHERE id=?", (song_id,))
     con.commit()
     ok = cur.rowcount > 0
@@ -2152,7 +2200,7 @@ def make_reaction_tag(tag):
     return tag
 
 
-def set_song_tag_by_reaction(song_id, emoji, enabled, user_id=OWNER_USER_ID):
+def set_song_tag_by_reaction(song_id, emoji, enabled, user_id=None):
     tag = reaction_emoji_to_tag(emoji)
     if not tag:
         return None
@@ -2219,7 +2267,8 @@ async def refresh_reaction_song_message(payload, enabled):
         await message.edit(
             embed=make_single_song_detail_embed(
                 fresh,
-                "🎵 楽曲情報"
+                "🎵 楽曲情報",
+                user_id=payload.user_id,
             )
         )
     except Exception:
@@ -2241,6 +2290,7 @@ async def refresh_reaction_song_message(payload, enabled):
             tag_name=tag_name,
             emoji=str(payload.emoji),
             enabled=enabled,
+            user_id=payload.user_id,
         )
 
         with open("/tmp/fine_sheet_sync.log", "a", encoding="utf-8") as f:
