@@ -1,6 +1,5 @@
 {
   "name": "Fine ラス殺し",
   "symbol": "sr",
-  "data_url": "score.json",
-  "level_order": []
+  "data_url": "score.json"
 }

@@ -1,8 +1,5 @@
 {
   "name": "Fine 惜敗",
   "symbol": "sh",
-  "data_url": "score.json",
-  "level_order": [
-    "st2"
-  ]
+  "data_url": "score.json"
 }

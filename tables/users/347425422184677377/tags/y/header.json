@@ -1,10 +1,5 @@
 {
   "name": "Fine 横認識",
   "symbol": "y",
-  "data_url": "score.json",
-  "level_order": [
-    "sl12",
-    "st0",
-    "st2"
-  ]
+  "data_url": "score.json"
 }

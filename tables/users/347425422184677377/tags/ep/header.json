@@ -1,12 +1,5 @@
 {
   "name": "Fine 地力上げ",
   "symbol": "ep",
-  "data_url": "score.json",
-  "level_order": [
-    "sl9",
-    "sl12",
-    "st0",
-    "st1",
-    "st2"
-  ]
+  "data_url": "score.json"
 }
