@@ -3,8 +3,8 @@
   "tag": "日課",
   "slug": "dy",
   "fixed": true,
-  "count": 20,
-  "score_count": 15,
+  "count": 21,
+  "score_count": 16,
   "songs": [
     {
       "id": 144,
@@ -36,6 +36,23 @@
       "songdata_title": "Flashdance [#]",
       "songdata_subtitle": "",
       "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02379.zip",
+      "memo": "",
+      "tag": "日課",
+      "comment": ""
+    },
+    {
+      "id": 256,
+      "source": "sl",
+      "level": "sl11",
+      "title": "BAMBOO TWIST [my treat]",
+      "chart_name": "",
+      "display_title": "BAMBOO TWIST [my treat]",
+      "md5": "1fda5d1c3600b1278688ba1f73286cf6",
+      "sha256": "7d72f70a744ca0b47fcb3f566dede6d166c50dfd8aad4e90f5049317ef869351",
+      "artist": "Ras vs Nankumo BGA：plano",
+      "songdata_title": "BAMBOO TWIST",
+      "songdata_subtitle": "[my treat]",
+      "url": "https://stellabms.xyz/upload/4636",
       "memo": "",
       "tag": "日課",
       "comment": ""
