@@ -1,33 +1,13 @@
 [
   {
-    "md5": "",
-    "sha256": "",
-    "level": "sl3",
-    "title": "Neo Side",
-    "artist": "",
-    "url": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=332&event=140",
-    "url_diff": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=332&event=140",
-    "comment": ""
-  },
-  {
     "md5": "0bbcf824051b19c6da354c615692d740",
     "sha256": "de0c4e95ff3645fc94bebbca8039ecb53851d2f9a3716b89cc88bb2f4dc74891",
     "level": "sl12",
     "title": "レシュノルティア [あなたの横に]",
     "artist": "あとぅす feat.はらもりよしな",
+    "comment": "",
     "url": "https://stellabms.xyz/upload/4286",
-    "url_diff": "https://stellabms.xyz/upload/4286",
-    "comment": ""
-  },
-  {
-    "md5": "",
-    "sha256": "",
-    "level": "sl12",
-    "title": "図書室のエルザ [FOX]",
-    "artist": "",
-    "url": "http://kirakitsune.web.fc2.com/sabun.html",
-    "url_diff": "http://kirakitsune.web.fc2.com/sabun.html",
-    "comment": ""
+    "url_diff": "https://stellabms.xyz/upload/4286"
   },
   {
     "md5": "48d24d3128468c5c49fa7471babcd9a0",
@@ -35,9 +15,9 @@
     "level": "st0",
     "title": "EOS -PING-",
     "artist": "ginkiha / PING",
+    "comment": "",
     "url": "http://www.mediafire.com/?9n94dyt0za3qm5e",
-    "url_diff": "http://www.mediafire.com/?9n94dyt0za3qm5e",
-    "comment": ""
+    "url_diff": "http://www.mediafire.com/?9n94dyt0za3qm5e"
   },
   {
     "md5": "2d488edb0fad6b0bce38f0440eb6e755",
@@ -45,9 +25,9 @@
     "level": "st0",
     "title": "EUROBEATアイドル橘花音のテーマ [Muel]",
     "artist": "nmk feat.EUROBEATアイドル橘花音",
+    "comment": "",
     "url": "https://stellabms.xyz/upload/4251",
-    "url_diff": "https://stellabms.xyz/upload/4251",
-    "comment": ""
+    "url_diff": "https://stellabms.xyz/upload/4251"
   },
   {
     "md5": "b2e0a5d984b39b9a17451000ead86071",
@@ -55,9 +35,9 @@
     "level": "st0",
     "title": "バーチャルセラピー [超物量セラピー]",
     "artist": "ふぃるまーち！（CV：ちょこ＆藍月なくる＆山田じぇみ子）",
+    "comment": "",
     "url": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0",
-    "url_diff": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0",
-    "comment": ""
+    "url_diff": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0"
   },
   {
     "md5": "c3c99394db35ed28295a589bafebbf5e",
@@ -65,28 +45,8 @@
     "level": "st2",
     "title": "adabana [HEARTFUL]",
     "artist": "Kyuzo Sameura",
+    "comment": "",
     "url": "https://stellabms.xyz/upload/3827",
-    "url_diff": "https://stellabms.xyz/upload/3827",
-    "comment": ""
-  },
-  {
-    "md5": "",
-    "sha256": "",
-    "level": "st2",
-    "title": "JKillMe [Muyather]",
-    "artist": "",
-    "url": "https://muy4.github.io/muyacharts/index.html",
-    "url_diff": "https://muy4.github.io/muyacharts/index.html",
-    "comment": ""
-  },
-  {
-    "md5": "",
-    "sha256": "",
-    "level": "st2",
-    "title": "薄雲 [六角形的]",
-    "artist": "",
-    "url": "http://bms.hexlataia.xyz/tables/hexajoy.html",
-    "url_diff": "http://bms.hexlataia.xyz/tables/hexajoy.html",
-    "comment": ""
+    "url_diff": "https://stellabms.xyz/upload/3827"
   }
 ]

@@ -1,23 +1,13 @@
 [
   {
-    "md5": "",
-    "sha256": "",
-    "level": "sl3",
-    "title": "Neo Side",
-    "artist": "",
-    "url": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=332&event=140",
-    "url_diff": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=332&event=140",
-    "comment": ""
-  },
-  {
     "md5": "97bc4321bc1bc37177e40ee592637cb1",
     "sha256": "9c1bd0f5013df83078aa5e298d1b60eb0f10a297e674427e412c6a1bb18d8ab3",
     "level": "sl9",
     "title": "Flashdance [#]",
     "artist": "music:litmus* / bms: :Poin7less",
+    "comment": "",
     "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02379.zip",
-    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02379.zip",
-    "comment": ""
+    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02379.zip"
   },
   {
     "md5": "0bbcf824051b19c6da354c615692d740",
@@ -25,19 +15,9 @@
     "level": "sl12",
     "title": "レシュノルティア [あなたの横に]",
     "artist": "あとぅす feat.はらもりよしな",
+    "comment": "",
     "url": "https://stellabms.xyz/upload/4286",
-    "url_diff": "https://stellabms.xyz/upload/4286",
-    "comment": ""
-  },
-  {
-    "md5": "",
-    "sha256": "",
-    "level": "sl12",
-    "title": "図書室のエルザ [FOX]",
-    "artist": "",
-    "url": "http://kirakitsune.web.fc2.com/sabun.html",
-    "url_diff": "http://kirakitsune.web.fc2.com/sabun.html",
-    "comment": ""
+    "url_diff": "https://stellabms.xyz/upload/4286"
   },
   {
     "md5": "04bd8f404bc86c7254f44a2e4d6a0814",
@@ -45,9 +25,9 @@
     "level": "sl12",
     "title": "溶けたアイス、キミの声 [MELTY]",
     "artist": "kei_iwata feat.Noa",
+    "comment": "",
     "url": "http://manbow.nothing.sh/event/event.cgi?action=More_def&num=403&event=133",
-    "url_diff": "http://manbow.nothing.sh/event/event.cgi?action=More_def&num=403&event=133",
-    "comment": ""
+    "url_diff": "http://manbow.nothing.sh/event/event.cgi?action=More_def&num=403&event=133"
   },
   {
     "md5": "48d24d3128468c5c49fa7471babcd9a0",
@@ -55,9 +35,9 @@
     "level": "st0",
     "title": "EOS -PING-",
     "artist": "ginkiha / PING",
+    "comment": "",
     "url": "http://www.mediafire.com/?9n94dyt0za3qm5e",
-    "url_diff": "http://www.mediafire.com/?9n94dyt0za3qm5e",
-    "comment": ""
+    "url_diff": "http://www.mediafire.com/?9n94dyt0za3qm5e"
   },
   {
     "md5": "2d488edb0fad6b0bce38f0440eb6e755",
@@ -65,9 +45,9 @@
     "level": "st0",
     "title": "EUROBEATアイドル橘花音のテーマ [Muel]",
     "artist": "nmk feat.EUROBEATアイドル橘花音",
+    "comment": "",
     "url": "https://stellabms.xyz/upload/4251",
-    "url_diff": "https://stellabms.xyz/upload/4251",
-    "comment": ""
+    "url_diff": "https://stellabms.xyz/upload/4251"
   },
   {
     "md5": "b19a06311e46c9409238e502f3985c59",
@@ -75,19 +55,9 @@
     "level": "st0",
     "title": "soyosoyo zawazawa",
     "artist": "K4Y5",
+    "comment": "",
     "url": "https://stellabms.xyz/upload/4525",
-    "url_diff": "https://stellabms.xyz/upload/4525",
-    "comment": ""
-  },
-  {
-    "md5": "",
-    "sha256": "",
-    "level": "st0",
-    "title": "ちんこ音頭2012",
-    "artist": "",
-    "url": "http://sagena.harisen.jp/",
-    "url_diff": "http://sagena.harisen.jp/",
-    "comment": ""
+    "url_diff": "https://stellabms.xyz/upload/4525"
   },
   {
     "md5": "b2e0a5d984b39b9a17451000ead86071",
@@ -95,19 +65,9 @@
     "level": "st0",
     "title": "バーチャルセラピー [超物量セラピー]",
     "artist": "ふぃるまーち！（CV：ちょこ＆藍月なくる＆山田じぇみ子）",
+    "comment": "",
     "url": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0",
-    "url_diff": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0",
-    "comment": ""
-  },
-  {
-    "md5": "",
-    "sha256": "",
-    "level": "st0",
-    "title": "情熱の大阪",
-    "artist": "",
-    "url": "http://bms.hexlataia.xyz/tables/hexajoy.html",
-    "url_diff": "http://bms.hexlataia.xyz/tables/hexajoy.html",
-    "comment": ""
+    "url_diff": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0"
   },
   {
     "md5": "fc269db1ba717f4f49398edad3f941c4",
@@ -115,9 +75,9 @@
     "level": "st1",
     "title": "永劫綺譚の純潔葬花 -Yellow Lily-",
     "artist": "nmk feat.橘花音",
+    "comment": "",
     "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02264.zip",
-    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02264.zip",
-    "comment": ""
+    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02264.zip"
   },
   {
     "md5": "4101dd74b1eb5fcb04dd892a1eff3e76",
@@ -125,9 +85,9 @@
     "level": "st1",
     "title": "追憶の森 -Voices of the Earth- [wide]",
     "artist": "AKITO / obj. laner",
+    "comment": "",
     "url": "https://web.archive.org/web/20190322230138/http://www.hyper-laner.com/sabun/all201807_laner.rar",
-    "url_diff": "https://web.archive.org/web/20190322230138/http://www.hyper-laner.com/sabun/all201807_laner.rar",
-    "comment": ""
+    "url_diff": "https://web.archive.org/web/20190322230138/http://www.hyper-laner.com/sabun/all201807_laner.rar"
   },
   {
     "md5": "c3c99394db35ed28295a589bafebbf5e",
@@ -135,9 +95,9 @@
     "level": "st2",
     "title": "adabana [HEARTFUL]",
     "artist": "Kyuzo Sameura",
+    "comment": "",
     "url": "https://stellabms.xyz/upload/3827",
-    "url_diff": "https://stellabms.xyz/upload/3827",
-    "comment": ""
+    "url_diff": "https://stellabms.xyz/upload/3827"
   },
   {
     "md5": "ebf75354a4bd0f8bfb8d1702a4a67bb6",
@@ -145,9 +105,9 @@
     "level": "st2",
     "title": "Neo Side [Run Away]",
     "artist": "Harunao, Kanna obj:E",
+    "comment": "",
     "url": "https://stellabms.xyz/upload/4435",
-    "url_diff": "https://stellabms.xyz/upload/4435",
-    "comment": ""
+    "url_diff": "https://stellabms.xyz/upload/4435"
   },
   {
     "md5": "79c1ad2bd63bd1c2595e5ee3db2e25fd",
@@ -155,9 +115,9 @@
     "level": "st2",
     "title": "pp-hunk [Phxxkin]",
     "artist": "Coco / obj:alt",
+    "comment": "",
     "url": "https://drive.google.com/file/d/1PRtvsdVVVzuKujL1Y4zehNofQZxCdjir/view?usp=sharing",
-    "url_diff": "https://drive.google.com/file/d/1PRtvsdVVVzuKujL1Y4zehNofQZxCdjir/view?usp=sharing",
-    "comment": ""
+    "url_diff": "https://drive.google.com/file/d/1PRtvsdVVVzuKujL1Y4zehNofQZxCdjir/view?usp=sharing"
   },
   {
     "md5": "e3840c4a4eb84f84e663409bb857a09c",
@@ -165,18 +125,8 @@
     "level": "st2",
     "title": "東風谷早苗が悲しい顔をする理由。 [Hexagon]",
     "artist": "nmk feat.かなえゆめ",
+    "comment": "",
     "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01457.zip",
-    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01457.zip",
-    "comment": ""
-  },
-  {
-    "md5": "",
-    "sha256": "",
-    "level": "st2",
-    "title": "薄雲 [六角形的]",
-    "artist": "",
-    "url": "http://bms.hexlataia.xyz/tables/hexajoy.html",
-    "url_diff": "http://bms.hexlataia.xyz/tables/hexajoy.html",
-    "comment": ""
+    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01457.zip"
   }
 ]
