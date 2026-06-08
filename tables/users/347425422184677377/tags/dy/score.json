@@ -1,142 +1,128 @@
 [
   {
-    "md5": "b2dc9be72c4c4b00a5c253d2022e88ce",
-    "sha256": "21a4cfce8d6b82ad9a0561323f2fc72430ca4ced62e18e7775d77c8dcf2b7232",
     "level": "sl1",
     "title": "俗物フェスティバル[ANOTHER]",
     "artist": "Micelle feat.Yshida",
-    "comment": "",
-    "url": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=4&event=137",
-    "url_diff": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=4&event=137"
+    "comment": "日課",
+    "md5": "b2dc9be72c4c4b00a5c253d2022e88ce",
+    "url_diff": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=4&event=137",
+    "tag": "日課"
   },
   {
-    "md5": "0bbcf824051b19c6da354c615692d740",
-    "sha256": "de0c4e95ff3645fc94bebbca8039ecb53851d2f9a3716b89cc88bb2f4dc74891",
     "level": "sl12",
     "title": "レシュノルティア [あなたの横に]",
     "artist": "あとぅす feat.はらもりよしな",
-    "comment": "",
-    "url": "https://stellabms.xyz/upload/4286",
-    "url_diff": "https://stellabms.xyz/upload/4286"
+    "comment": "日課",
+    "md5": "0bbcf824051b19c6da354c615692d740",
+    "url_diff": "https://stellabms.xyz/upload/4286",
+    "tag": "日課"
   },
   {
-    "md5": "04bd8f404bc86c7254f44a2e4d6a0814",
-    "sha256": "1d62ac02a51a2546f00f9707f75a2cc387b9b137a1df7c70a77a39af3d47bbaa",
     "level": "sl12",
     "title": "溶けたアイス、キミの声 [MELTY]",
     "artist": "kei_iwata feat.Noa",
-    "comment": "",
-    "url": "http://manbow.nothing.sh/event/event.cgi?action=More_def&num=403&event=133",
-    "url_diff": "http://manbow.nothing.sh/event/event.cgi?action=More_def&num=403&event=133"
+    "comment": "日課",
+    "md5": "04bd8f404bc86c7254f44a2e4d6a0814",
+    "url_diff": "http://manbow.nothing.sh/event/event.cgi?action=More_def&num=403&event=133",
+    "tag": "日課"
   },
   {
-    "md5": "48d24d3128468c5c49fa7471babcd9a0",
-    "sha256": "d3e88aa5f951a1d76edb1109fc330f3ae960d9cfd2ffb6ddc786c41487fd2cdd",
     "level": "st0",
     "title": "EOS -PING-",
     "artist": "ginkiha / PING",
-    "comment": "",
-    "url": "http://www.mediafire.com/?9n94dyt0za3qm5e",
-    "url_diff": "http://www.mediafire.com/?9n94dyt0za3qm5e"
+    "comment": "日課",
+    "md5": "48d24d3128468c5c49fa7471babcd9a0",
+    "url_diff": "http://www.mediafire.com/?9n94dyt0za3qm5e",
+    "tag": "日課"
   },
   {
-    "md5": "2d488edb0fad6b0bce38f0440eb6e755",
-    "sha256": "cf0bc82ec8606dc718712c208f8bb410c0792cf2c1feb481caf4cf5584a24843",
     "level": "st0",
     "title": "EUROBEATアイドル橘花音のテーマ [Muel]",
     "artist": "nmk feat.EUROBEATアイドル橘花音",
-    "comment": "",
-    "url": "https://stellabms.xyz/upload/4251",
-    "url_diff": "https://stellabms.xyz/upload/4251"
+    "comment": "日課",
+    "md5": "2d488edb0fad6b0bce38f0440eb6e755",
+    "url_diff": "https://stellabms.xyz/upload/4251",
+    "tag": "日課"
   },
   {
-    "md5": "b19a06311e46c9409238e502f3985c59",
-    "sha256": "2d5b84e2040424c5ca43a4e75d03e0a79a828e7490e1b592806514bd5d0871dc",
     "level": "st0",
     "title": "soyosoyo zawazawa",
     "artist": "K4Y5",
-    "comment": "",
-    "url": "https://stellabms.xyz/upload/4525",
-    "url_diff": "https://stellabms.xyz/upload/4525"
+    "comment": "日課",
+    "md5": "b19a06311e46c9409238e502f3985c59",
+    "url_diff": "https://stellabms.xyz/upload/4525",
+    "tag": "日課"
   },
   {
-    "md5": "b2e0a5d984b39b9a17451000ead86071",
-    "sha256": "a4a7f14a2ead6861abd72b664dc9da0371ea2cd6ef902d104819dea3ec0054dc",
     "level": "st0",
     "title": "バーチャルセラピー [超物量セラピー]",
     "artist": "ふぃるまーち！（CV：ちょこ＆藍月なくる＆山田じぇみ子）",
-    "comment": "",
-    "url": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0",
-    "url_diff": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0"
+    "comment": "日課",
+    "md5": "b2e0a5d984b39b9a17451000ead86071",
+    "url_diff": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0",
+    "tag": "日課"
   },
   {
-    "md5": "496cbb0d0f6b3b7287fb360944124e85",
-    "sha256": "9ab50bfe2a5bf1c8e586c5605cdf0f4e0618cf0896059e88232dc7563b364c07",
     "level": "st1",
     "title": "Hazy moon[雷雨]",
     "artist": "Chitose / obj:Rian",
-    "comment": "",
-    "url": "https://drive.google.com/open?id=1u1NTkaIfkAalc4F3a-0xiw9bCj1muBg_",
-    "url_diff": "https://drive.google.com/open?id=1u1NTkaIfkAalc4F3a-0xiw9bCj1muBg_"
+    "comment": "日課",
+    "md5": "496cbb0d0f6b3b7287fb360944124e85",
+    "url_diff": "https://drive.google.com/open?id=1u1NTkaIfkAalc4F3a-0xiw9bCj1muBg_",
+    "tag": "日課"
   },
   {
-    "md5": "fc269db1ba717f4f49398edad3f941c4",
-    "sha256": "761b23c2d7a3310d647b66395c9cf4e3a350d8b60256675d6df69659378fe44e",
     "level": "st1",
     "title": "永劫綺譚の純潔葬花 -Yellow Lily-",
     "artist": "nmk feat.橘花音",
-    "comment": "",
-    "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02264.zip",
-    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02264.zip"
+    "comment": "日課",
+    "md5": "fc269db1ba717f4f49398edad3f941c4",
+    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02264.zip",
+    "tag": "日課"
   },
   {
-    "md5": "4101dd74b1eb5fcb04dd892a1eff3e76",
-    "sha256": "0a87afa045e7366d94a8cc84d88dcea24409527f00d8f7b4482de3a9604cf6bd",
     "level": "st1",
     "title": "追憶の森 -Voices of the Earth- [wide]",
     "artist": "AKITO / obj. laner",
-    "comment": "",
-    "url": "https://web.archive.org/web/20190322230138/http://www.hyper-laner.com/sabun/all201807_laner.rar",
-    "url_diff": "https://web.archive.org/web/20190322230138/http://www.hyper-laner.com/sabun/all201807_laner.rar"
+    "comment": "日課",
+    "md5": "4101dd74b1eb5fcb04dd892a1eff3e76",
+    "url_diff": "https://web.archive.org/web/20190322230138/http://www.hyper-laner.com/sabun/all201807_laner.rar",
+    "tag": "日課"
   },
   {
-    "md5": "c3c99394db35ed28295a589bafebbf5e",
-    "sha256": "a1b440fc381438d3df018e4195920c2053f7c52855830ad1648ea55940920d91",
     "level": "st2",
     "title": "adabana [HEARTFUL]",
     "artist": "Kyuzo Sameura",
-    "comment": "",
-    "url": "https://stellabms.xyz/upload/3827",
-    "url_diff": "https://stellabms.xyz/upload/3827"
+    "comment": "日課",
+    "md5": "c3c99394db35ed28295a589bafebbf5e",
+    "url_diff": "https://stellabms.xyz/upload/3827",
+    "tag": "日課"
   },
   {
-    "md5": "ebf75354a4bd0f8bfb8d1702a4a67bb6",
-    "sha256": "ebbc80f7feda47aad921b32c034d38131648f416dc2b7b801554d664e4dd126c",
     "level": "st2",
     "title": "Neo Side [Run Away]",
     "artist": "Harunao, Kanna obj:E",
-    "comment": "",
-    "url": "https://stellabms.xyz/upload/4435",
-    "url_diff": "https://stellabms.xyz/upload/4435"
+    "comment": "日課",
+    "md5": "ebf75354a4bd0f8bfb8d1702a4a67bb6",
+    "url_diff": "https://stellabms.xyz/upload/4435",
+    "tag": "日課"
   },
   {
-    "md5": "79c1ad2bd63bd1c2595e5ee3db2e25fd",
-    "sha256": "0571601565491416c579feac58142c3c648bb883219a975a7a67f2c067083465",
     "level": "st2",
     "title": "pp-hunk [Phxxkin]",
     "artist": "Coco / obj:alt",
-    "comment": "",
-    "url": "https://drive.google.com/file/d/1PRtvsdVVVzuKujL1Y4zehNofQZxCdjir/view?usp=sharing",
-    "url_diff": "https://drive.google.com/file/d/1PRtvsdVVVzuKujL1Y4zehNofQZxCdjir/view?usp=sharing"
+    "comment": "日課",
+    "md5": "79c1ad2bd63bd1c2595e5ee3db2e25fd",
+    "url_diff": "https://drive.google.com/file/d/1PRtvsdVVVzuKujL1Y4zehNofQZxCdjir/view?usp=sharing",
+    "tag": "日課"
   },
   {
-    "md5": "e3840c4a4eb84f84e663409bb857a09c",
-    "sha256": "d356e99a7f01d9dbb44445120eaa077e022cc524b4ae8f05fc33691b7e8dc008",
     "level": "st2",
     "title": "東風谷早苗が悲しい顔をする理由。 [Hexagon]",
     "artist": "nmk feat.かなえゆめ",
-    "comment": "",
-    "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01457.zip",
-    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01457.zip"
+    "comment": "日課",
+    "md5": "e3840c4a4eb84f84e663409bb857a09c",
+    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01457.zip",
+    "tag": "日課"
   }
 ]

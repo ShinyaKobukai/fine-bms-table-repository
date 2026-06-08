@@ -1,42 +1,38 @@
 [
   {
-    "md5": "97bc4321bc1bc37177e40ee592637cb1",
-    "sha256": "9c1bd0f5013df83078aa5e298d1b60eb0f10a297e674427e412c6a1bb18d8ab3",
     "level": "sl9",
     "title": "Flashdance [#]",
     "artist": "music:litmus* / bms: :Poin7less",
-    "comment": "",
-    "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02379.zip",
-    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02379.zip"
+    "comment": "横認識(縦系)",
+    "md5": "97bc4321bc1bc37177e40ee592637cb1",
+    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02379.zip",
+    "tag": "横認識(縦系)"
   },
   {
-    "md5": "04bd8f404bc86c7254f44a2e4d6a0814",
-    "sha256": "1d62ac02a51a2546f00f9707f75a2cc387b9b137a1df7c70a77a39af3d47bbaa",
     "level": "sl12",
     "title": "溶けたアイス、キミの声 [MELTY]",
     "artist": "kei_iwata feat.Noa",
-    "comment": "",
-    "url": "http://manbow.nothing.sh/event/event.cgi?action=More_def&num=403&event=133",
-    "url_diff": "http://manbow.nothing.sh/event/event.cgi?action=More_def&num=403&event=133"
+    "comment": "横認識(縦系)",
+    "md5": "04bd8f404bc86c7254f44a2e4d6a0814",
+    "url_diff": "http://manbow.nothing.sh/event/event.cgi?action=More_def&num=403&event=133",
+    "tag": "横認識(縦系)"
   },
   {
-    "md5": "79c1ad2bd63bd1c2595e5ee3db2e25fd",
-    "sha256": "0571601565491416c579feac58142c3c648bb883219a975a7a67f2c067083465",
     "level": "st2",
     "title": "pp-hunk [Phxxkin]",
     "artist": "Coco / obj:alt",
-    "comment": "",
-    "url": "https://drive.google.com/file/d/1PRtvsdVVVzuKujL1Y4zehNofQZxCdjir/view?usp=sharing",
-    "url_diff": "https://drive.google.com/file/d/1PRtvsdVVVzuKujL1Y4zehNofQZxCdjir/view?usp=sharing"
+    "comment": "横認識(縦系)",
+    "md5": "79c1ad2bd63bd1c2595e5ee3db2e25fd",
+    "url_diff": "https://drive.google.com/file/d/1PRtvsdVVVzuKujL1Y4zehNofQZxCdjir/view?usp=sharing",
+    "tag": "横認識(縦系)"
   },
   {
-    "md5": "e3840c4a4eb84f84e663409bb857a09c",
-    "sha256": "d356e99a7f01d9dbb44445120eaa077e022cc524b4ae8f05fc33691b7e8dc008",
     "level": "st2",
     "title": "東風谷早苗が悲しい顔をする理由。 [Hexagon]",
     "artist": "nmk feat.かなえゆめ",
-    "comment": "",
-    "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01457.zip",
-    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01457.zip"
+    "comment": "横認識(縦系)",
+    "md5": "e3840c4a4eb84f84e663409bb857a09c",
+    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01457.zip",
+    "tag": "横認識(縦系)"
   }
 ]

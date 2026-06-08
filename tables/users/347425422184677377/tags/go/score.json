@@ -1,62 +1,56 @@
 [
   {
-    "md5": "16b56701b2f846875a26dda621a132dd",
-    "sha256": "7c55b1bdd37c70d62660396a69faa0d840a2423c9b597e9f6726b1178eb017d8",
     "level": "sl7",
     "title": "the lost dedicated [nostalgia]",
     "artist": "哀愁マニア / obj.siokaze",
-    "comment": "",
-    "url": "http://siokazebms.web.fc2.com/",
-    "url_diff": "http://siokazebms.web.fc2.com/"
+    "comment": "ガチ押し系",
+    "md5": "16b56701b2f846875a26dda621a132dd",
+    "url_diff": "http://siokazebms.web.fc2.com/",
+    "tag": "ガチ押し系"
   },
   {
-    "md5": "22a8d3bd25179ffd2450ac877a6bb82a",
-    "sha256": "af44e355705d13764e02a662161e48935fa0c272e639dbd71dd3cde9e5bad795",
     "level": "sl11",
     "title": "The sinking world [sagINSANE]",
     "artist": "Syatten / obj:sagoo",
-    "comment": "",
-    "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/00379.zip",
-    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/00379.zip"
+    "comment": "ガチ押し系",
+    "md5": "22a8d3bd25179ffd2450ac877a6bb82a",
+    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/00379.zip",
+    "tag": "ガチ押し系"
   },
   {
-    "md5": "b19a06311e46c9409238e502f3985c59",
-    "sha256": "2d5b84e2040424c5ca43a4e75d03e0a79a828e7490e1b592806514bd5d0871dc",
     "level": "st0",
     "title": "soyosoyo zawazawa",
     "artist": "K4Y5",
-    "comment": "",
-    "url": "https://stellabms.xyz/upload/4525",
-    "url_diff": "https://stellabms.xyz/upload/4525"
+    "comment": "ガチ押し系",
+    "md5": "b19a06311e46c9409238e502f3985c59",
+    "url_diff": "https://stellabms.xyz/upload/4525",
+    "tag": "ガチ押し系"
   },
   {
-    "md5": "496cbb0d0f6b3b7287fb360944124e85",
-    "sha256": "9ab50bfe2a5bf1c8e586c5605cdf0f4e0618cf0896059e88232dc7563b364c07",
     "level": "st1",
     "title": "Hazy moon[雷雨]",
     "artist": "Chitose / obj:Rian",
-    "comment": "",
-    "url": "https://drive.google.com/open?id=1u1NTkaIfkAalc4F3a-0xiw9bCj1muBg_",
-    "url_diff": "https://drive.google.com/open?id=1u1NTkaIfkAalc4F3a-0xiw9bCj1muBg_"
+    "comment": "ガチ押し系",
+    "md5": "496cbb0d0f6b3b7287fb360944124e85",
+    "url_diff": "https://drive.google.com/open?id=1u1NTkaIfkAalc4F3a-0xiw9bCj1muBg_",
+    "tag": "ガチ押し系"
   },
   {
-    "md5": "ebf75354a4bd0f8bfb8d1702a4a67bb6",
-    "sha256": "ebbc80f7feda47aad921b32c034d38131648f416dc2b7b801554d664e4dd126c",
     "level": "st2",
     "title": "Neo Side [Run Away]",
     "artist": "Harunao, Kanna obj:E",
-    "comment": "",
-    "url": "https://stellabms.xyz/upload/4435",
-    "url_diff": "https://stellabms.xyz/upload/4435"
+    "comment": "ガチ押し系",
+    "md5": "ebf75354a4bd0f8bfb8d1702a4a67bb6",
+    "url_diff": "https://stellabms.xyz/upload/4435",
+    "tag": "ガチ押し系"
   },
   {
-    "md5": "e3840c4a4eb84f84e663409bb857a09c",
-    "sha256": "d356e99a7f01d9dbb44445120eaa077e022cc524b4ae8f05fc33691b7e8dc008",
     "level": "st2",
     "title": "東風谷早苗が悲しい顔をする理由。 [Hexagon]",
     "artist": "nmk feat.かなえゆめ",
-    "comment": "",
-    "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01457.zip",
-    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01457.zip"
+    "comment": "ガチ押し系",
+    "md5": "e3840c4a4eb84f84e663409bb857a09c",
+    "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01457.zip",
+    "tag": "ガチ押し系"
   }
 ]

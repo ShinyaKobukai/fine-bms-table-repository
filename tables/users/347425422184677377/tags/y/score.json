@@ -1,52 +1,47 @@
 [
   {
-    "md5": "0bbcf824051b19c6da354c615692d740",
-    "sha256": "de0c4e95ff3645fc94bebbca8039ecb53851d2f9a3716b89cc88bb2f4dc74891",
     "level": "sl12",
     "title": "レシュノルティア [あなたの横に]",
     "artist": "あとぅす feat.はらもりよしな",
-    "comment": "",
-    "url": "https://stellabms.xyz/upload/4286",
-    "url_diff": "https://stellabms.xyz/upload/4286"
+    "comment": "横認識",
+    "md5": "0bbcf824051b19c6da354c615692d740",
+    "url_diff": "https://stellabms.xyz/upload/4286",
+    "tag": "横認識"
   },
   {
-    "md5": "48d24d3128468c5c49fa7471babcd9a0",
-    "sha256": "d3e88aa5f951a1d76edb1109fc330f3ae960d9cfd2ffb6ddc786c41487fd2cdd",
     "level": "st0",
     "title": "EOS -PING-",
     "artist": "ginkiha / PING",
-    "comment": "",
-    "url": "http://www.mediafire.com/?9n94dyt0za3qm5e",
-    "url_diff": "http://www.mediafire.com/?9n94dyt0za3qm5e"
+    "comment": "横認識",
+    "md5": "48d24d3128468c5c49fa7471babcd9a0",
+    "url_diff": "http://www.mediafire.com/?9n94dyt0za3qm5e",
+    "tag": "横認識"
   },
   {
-    "md5": "2d488edb0fad6b0bce38f0440eb6e755",
-    "sha256": "cf0bc82ec8606dc718712c208f8bb410c0792cf2c1feb481caf4cf5584a24843",
     "level": "st0",
     "title": "EUROBEATアイドル橘花音のテーマ [Muel]",
     "artist": "nmk feat.EUROBEATアイドル橘花音",
-    "comment": "",
-    "url": "https://stellabms.xyz/upload/4251",
-    "url_diff": "https://stellabms.xyz/upload/4251"
+    "comment": "横認識",
+    "md5": "2d488edb0fad6b0bce38f0440eb6e755",
+    "url_diff": "https://stellabms.xyz/upload/4251",
+    "tag": "横認識"
   },
   {
-    "md5": "b2e0a5d984b39b9a17451000ead86071",
-    "sha256": "a4a7f14a2ead6861abd72b664dc9da0371ea2cd6ef902d104819dea3ec0054dc",
     "level": "st0",
     "title": "バーチャルセラピー [超物量セラピー]",
     "artist": "ふぃるまーち！（CV：ちょこ＆藍月なくる＆山田じぇみ子）",
-    "comment": "",
-    "url": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0",
-    "url_diff": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0"
+    "comment": "横認識",
+    "md5": "b2e0a5d984b39b9a17451000ead86071",
+    "url_diff": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0",
+    "tag": "横認識"
   },
   {
-    "md5": "c3c99394db35ed28295a589bafebbf5e",
-    "sha256": "a1b440fc381438d3df018e4195920c2053f7c52855830ad1648ea55940920d91",
     "level": "st2",
     "title": "adabana [HEARTFUL]",
     "artist": "Kyuzo Sameura",
-    "comment": "",
-    "url": "https://stellabms.xyz/upload/3827",
-    "url_diff": "https://stellabms.xyz/upload/3827"
+    "comment": "横認識",
+    "md5": "c3c99394db35ed28295a589bafebbf5e",
+    "url_diff": "https://stellabms.xyz/upload/3827",
+    "tag": "横認識"
   }
 ]
