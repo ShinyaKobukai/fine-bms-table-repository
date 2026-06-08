@@ -19,6 +19,8 @@ def load_env(path="fine.env"):
 
 def normalize_tag(tag):
     tag = tag.strip()
+    if tag == "\u30e9\u30b9\u6bba\u3057":
+        return "\u30e9\u30b9\u6bba\u3057"
     if tag.startswith("惜敗["):
         return "惜敗"
     if tag == "しょうもないラス殺し":

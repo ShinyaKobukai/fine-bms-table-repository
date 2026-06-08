@@ -25,6 +25,7 @@ TAG_TO_SHEET = {
     "日課": "日課",
     "惜敗": "惜敗",
 }
+TAG_TO_SHEET["\u30e9\u30b9\u6bba\u3057"] = "\u30e9\u30b9\u6bba\u3057"
 
 
 def split_title_chart(title, chart_name=""):

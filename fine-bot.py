@@ -38,6 +38,10 @@ TAG_ALIASES = {
     "sh": "惜敗",
 }
 
+OLD_LAST_KILL_TAG = TAG_ALIASES["sr"]
+NEW_LAST_KILL_TAG = "\u30e9\u30b9\u6bba\u3057"
+TAG_ALIASES["sr"] = NEW_LAST_KILL_TAG
+
 
 TAG_INPUT_ALIASES = {
     "ん": "y",
@@ -92,28 +96,58 @@ def db():
 
 
 
-def add_custom_tag(full_name, short_name):
+def canonical_tag_name(tag):
+    if tag == OLD_LAST_KILL_TAG:
+        return NEW_LAST_KILL_TAG
+    return tag
+
+
+def ensure_user_custom_tags_table(con):
+    con.execute("""
+    CREATE TABLE IF NOT EXISTS user_custom_tags (
+        user_id TEXT NOT NULL,
+        short_name TEXT NOT NULL,
+        full_name TEXT NOT NULL,
+        created_at TEXT DEFAULT '',
+        updated_at TEXT DEFAULT '',
+        PRIMARY KEY(user_id, short_name)
+    )
+    """)
+    con.execute(
+        "UPDATE user_tags SET tag_name=? WHERE tag_name=?",
+        (NEW_LAST_KILL_TAG, OLD_LAST_KILL_TAG),
+    )
+    con.execute(
+        "UPDATE user_custom_tags SET full_name=? WHERE full_name=?",
+        (NEW_LAST_KILL_TAG, OLD_LAST_KILL_TAG),
+    )
+
+
+def add_custom_tag(full_name, short_name, user_id):
     con = db()
+    ensure_user_custom_tags_table(con)
+    now = now_text()
 
     con.execute(
         """
-        INSERT OR REPLACE INTO custom_tags
-        (short_name, full_name)
-        VALUES (?,?)
+        INSERT OR REPLACE INTO user_custom_tags
+        (user_id, short_name, full_name, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?)
         """,
-        (short_name, full_name)
+        (str(user_id), short_name, canonical_tag_name(full_name), now, now)
     )
 
     con.commit()
     con.close()
 
 
-def delete_custom_tag(short_name):
+def delete_custom_tag(short_name, user_id):
     con = db()
+    ensure_user_custom_tags_table(con)
 
     con.execute(
-        "DELETE FROM custom_tags WHERE short_name=?",
-        (short_name,)
+        "DELETE FROM user_custom_tags WHERE user_id=? AND short_name=?",
+        (str(user_id), short_name)
     )
 
     con.commit()
@@ -122,6 +156,8 @@ def delete_custom_tag(short_name):
 
 
 def tag_matches(song_tag, wanted_tag):
+    song_tag = canonical_tag_name(song_tag)
+    wanted_tag = canonical_tag_name(wanted_tag)
     if wanted_tag == "惜敗":
         return song_tag == "惜敗" or song_tag.startswith("惜敗[")
     return song_tag == wanted_tag
@@ -157,7 +193,7 @@ def get_user_song_tags(user_id, song_id):
         (str(user_id), song_id),
     ).fetchall()
     con.close()
-    return [row[0] for row in rows]
+    return [canonical_tag_name(row[0]) for row in rows]
 
 
 def get_song_tags_for_display(row, user_id=None):
@@ -173,22 +209,25 @@ def split_tags(text):
 
 
 
-def resolve_tag(token):
+def resolve_tag(token, user_id=None):
     token = normalize_tag_input(token)
 
-    tags = get_all_tags()
+    tags = get_all_tags(user_id=user_id)
 
     if token in tags:
-        return tags[token]
+        return canonical_tag_name(tags[token])
 
     for formal in tags.values():
         if normalize_text(formal) == token:
-            return formal
+            return canonical_tag_name(formal)
+
+    if normalize_text(OLD_LAST_KILL_TAG) == token:
+        return NEW_LAST_KILL_TAG
 
     return None
 
 
-def parse_edit_args(args):
+def parse_edit_args(args, user_id=None):
     tags = []
     memo_parts = []
     memo_is_null = False
@@ -204,7 +243,7 @@ def parse_edit_args(args):
             tags.append(f"惜敗[{datetime.now(JST).strftime('%Y-%m-%d')}]")
             continue
 
-        tag = resolve_tag(token)
+        tag = resolve_tag(token, user_id=user_id)
         if tag:
             tags.append(tag)
         else:
@@ -373,7 +412,7 @@ def remove_tags_from_song(row, remove_tokens, user_id=None):
     remove_tags = []
     for token in remove_tokens:
         token = token[1:] if token.startswith("-") else token
-        tag = resolve_tag_fuzzy(token) or resolve_tag(token)
+        tag = resolve_tag_fuzzy(token, user_id=user_id) or resolve_tag(token, user_id=user_id)
         if tag:
             remove_tags.append(tag)
 
@@ -414,6 +453,7 @@ def update_song(row, tags, memo, user_id=None):
         )
 
         for tag in split_tags(tags):
+            tag = canonical_tag_name(tag)
             con.execute("""
             INSERT OR IGNORE INTO user_tags
                 (user_id, song_id, tag_name, memo, created_at, updated_at)
@@ -461,24 +501,27 @@ def reset_song(row, user_id=None):
     con.close()
 
 
-def resolve_tag_fuzzy(token):
+def resolve_tag_fuzzy(token, user_id=None):
     token = normalize_tag_input(token)
 
-    tags = get_all_tags()
+    tags = get_all_tags(user_id=user_id)
 
     if token in tags:
-        return tags[token]
+        return canonical_tag_name(tags[token])
 
     matches = []
 
     for short, formal in tags.items():
         if token in normalize_text(short) or token in normalize_text(formal):
-            matches.append(formal)
+            matches.append(canonical_tag_name(formal))
+
+    if token in normalize_text(OLD_LAST_KILL_TAG):
+        matches.append(NEW_LAST_KILL_TAG)
 
     matches = list(dict.fromkeys(matches))
 
     if len(matches) == 1:
-        return matches[0]
+        return canonical_tag_name(matches[0])
 
     return None
 
@@ -733,9 +776,14 @@ TAG_REACTION_EMOJIS = [
     ("📅", "日課"),
     ("😭", "惜敗"),
 ]
+TAG_REACTION_EMOJIS = [
+    (emoji, canonical_tag_name(tag))
+    for emoji, tag in TAG_REACTION_EMOJIS
+]
 
 
 def tag_base_name(tag):
+    tag = canonical_tag_name(tag)
     if tag.startswith("惜敗["):
         return "惜敗"
     return tag
@@ -898,7 +946,7 @@ async def tag_cmd(ctx):
         color=0x8EC5FF,
     )
 
-    tags = get_all_tags()
+    tags = get_all_tags(user_id=ctx.author.id)
 
     lines = []
     for short, formal in tags.items():
@@ -960,7 +1008,7 @@ async def addtag(ctx, full_name=None, short_name=None):
         )
         return
 
-    add_custom_tag(full_name, short_name)
+    add_custom_tag(full_name, short_name, user_id=ctx.author.id)
 
     await ctx.send(
         f"✅ タグ追加ですわ\n・{full_name}\n{short_name}"
@@ -979,7 +1027,7 @@ async def deltag(ctx, short_name=None):
         )
         return
 
-    delete_custom_tag(short_name)
+    delete_custom_tag(short_name, user_id=ctx.author.id)
 
     await ctx.send(
         f"🗑️ タグ削除ですわ\n{short_name}"
@@ -1061,7 +1109,7 @@ async def tag_level_cmd(ctx, *args):
 
     wanted_tags = []
     for token in args:
-        tag = resolve_tag_fuzzy(token) or resolve_tag(token)
+        tag = resolve_tag_fuzzy(token, user_id=ctx.author.id) or resolve_tag(token, user_id=ctx.author.id)
         if tag:
             wanted_tags.append(tag)
 
@@ -1231,7 +1279,7 @@ async def edit_cmd(ctx, index: int = None, *args):
     if remove_mode:
         remove_tags_from_song(row, [part for part in parts if part.startswith("-")], user_id=ctx.author.id)
     else:
-        tags, memo = parse_edit_args(parts)
+        tags, memo = parse_edit_args(parts, user_id=ctx.author.id)
 
         if add_mode:
             append_tags_to_song(row, tags, user_id=ctx.author.id)
@@ -1307,7 +1355,7 @@ async def edit_after_search(message):
         add_mode = True
         parts = parts[1:]
 
-    tags, memo = parse_edit_args(parts)
+    tags, memo = parse_edit_args(parts, user_id=message.author.id)
 
     if add_mode:
         append_tags_to_song(row, tags, user_id=message.author.id)
@@ -1372,7 +1420,7 @@ async def quick_edit_single_search(message):
             if not part.startswith("-"):
                 continue
             token = part[1:]
-            tag = resolve_tag_fuzzy(token) or resolve_tag(token)
+            tag = resolve_tag_fuzzy(token, user_id=message.author.id) or resolve_tag(token, user_id=message.author.id)
             if tag:
                 remove_tags.append(tag)
 
@@ -1400,7 +1448,7 @@ async def quick_edit_single_search(message):
 
     has_tag_or_null = False
     for part in check_parts:
-        if normalize_text(part) == "/null" or resolve_tag(part):
+        if normalize_text(part) == "/null" or resolve_tag(part, user_id=message.author.id):
             has_tag_or_null = True
             break
 
@@ -1412,7 +1460,7 @@ async def quick_edit_single_search(message):
         add_mode = True
         parts = parts[1:]
 
-    tags, memo = parse_edit_args(parts)
+    tags, memo = parse_edit_args(parts, user_id=message.author.id)
 
     if add_mode:
         fresh = get_song_by_id(row[0]) or row
@@ -1489,6 +1537,7 @@ def init_db():
     """)
 
     ensure_user_tags_table(con)
+    ensure_user_custom_tags_table(con)
 
     con.commit()
     con.close()
@@ -1567,20 +1616,20 @@ def resolve_table_name(name):
     return None
 
 
-def parse_tag_list(text):
+def parse_tag_list(text, user_id=None):
     if not text or normalize_text(text) == "/null":
         return ""
 
     parts = []
     for x in text.replace("、", " ").replace(",", " ").replace("|", " ").split():
-        tag = resolve_tag(x)
+        tag = resolve_tag(x, user_id=user_id)
         if tag:
             parts.append(tag)
 
     return join_tags(parts)
 
 
-def parse_song_line(line):
+def parse_song_line(line, user_id=None):
     parts = shlex.split(line)
 
     if len(parts) < 5:
@@ -1601,7 +1650,7 @@ def parse_song_line(line):
     if normalize_text(memo) == "/null":
         memo = ""
 
-    tags = parse_tag_list(tag_text)
+    tags = parse_tag_list(tag_text, user_id=user_id)
 
     if len(memo) > 150:
         memo = memo[:150]
@@ -1646,6 +1695,7 @@ def insert_manual_song(table_name, data, user_id=None):
 
     ensure_user_tags_table(con)
     for tag in split_tags(data["tags"]):
+        tag = canonical_tag_name(tag)
         con.execute("""
         INSERT OR IGNORE INTO user_tags
             (user_id, song_id, tag_name, memo, created_at, updated_at)
@@ -1702,7 +1752,7 @@ def search_by_tag(args, user_id=None):
     resolved_tags = []
 
     for token in tag_tokens:
-        tag = resolve_tag_fuzzy(token)
+        tag = resolve_tag_fuzzy(token, user_id=user_id)
         if tag:
             resolved_tags.append(tag)
 
@@ -1836,7 +1886,7 @@ async def addsong_cmd(ctx, *, body=None):
             await ctx.send("そのテーブルはありませんわ。先に `!tableadd テーブル名` してくださいませ。")
             return
 
-        data, error = parse_song_line(" ".join(shlex.quote(x) for x in parts[1:]))
+        data, error = parse_song_line(" ".join(shlex.quote(x) for x in parts[1:]), user_id=ctx.author.id)
 
         if error:
             await ctx.send(error)
@@ -1884,7 +1934,7 @@ async def addsong_cmd(ctx, *, body=None):
         await ctx.send("時間切れですわ。")
         return
 
-    data, error = parse_song_line(data_message.content.strip())
+    data, error = parse_song_line(data_message.content.strip(), user_id=ctx.author.id)
 
     if error:
         await ctx.send(error)
@@ -1998,19 +2048,26 @@ def display_tags(tags):
     return " | ".join(tag_list) if tag_list else "タグなし"
 
 
-def get_all_tags():
+def get_all_tags(user_id=None):
     tags = {}
 
     for k, v in TAG_ALIASES.items():
-        tags[k] = v
+        tags[k] = canonical_tag_name(v)
 
     con = db()
 
     try:
-        for short_name, full_name in con.execute(
-            "SELECT short_name, full_name FROM custom_tags"
-        ):
-            tags[short_name] = full_name
+        ensure_user_custom_tags_table(con)
+        if user_id is not None:
+            for short_name, full_name in con.execute(
+                """
+                SELECT short_name, full_name
+                FROM user_custom_tags
+                WHERE user_id=?
+                """,
+                (str(user_id),),
+            ):
+                tags[short_name] = canonical_tag_name(full_name)
     finally:
         con.close()
 
@@ -2022,6 +2079,13 @@ def get_all_tags():
             key=lambda item: (order.get(item[0], 999), normalize_text(item[1]))
         )
     )
+
+
+def normalize_tag_for_count(tag):
+    tag = canonical_tag_name(tag)
+    if tag.startswith("諠懈風["):
+        return "諠懈風"
+    return tag
 
 
 def make_tag_count_embed(title, counter):
