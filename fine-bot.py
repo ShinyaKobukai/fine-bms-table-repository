@@ -470,6 +470,7 @@ def remove_tags_from_song(row, remove_tokens, user_id=None):
 
 
 def update_song(row, tags, memo, user_id=None):
+    started = time.perf_counter()
     if user_id is None:
         raise ValueError("user_id is required when updating song tags")
 
@@ -507,6 +508,13 @@ def update_song(row, tags, memo, user_id=None):
     con.commit()
     con.close()
     schedule_auto_table_publish(user_id, reason="song_tags_updated")
+    logging.info(
+        "timing update_song=%.3fs user_id=%s song_id=%s tag_count=%s",
+        time.perf_counter() - started,
+        user_id,
+        sid,
+        len(split_tags(tags)),
+    )
 
 
 
@@ -524,6 +532,7 @@ def sync_removed_tags_to_sheet(row, tags, user_id=None):
             f.write(f"[sheet_sync] reset/delete skipped: {e}\n")
 
 def reset_song(row, user_id=None):
+    started = time.perf_counter()
     if user_id is None:
         raise ValueError("user_id is required when resetting song tags")
 
@@ -541,6 +550,12 @@ def reset_song(row, user_id=None):
     con.commit()
     con.close()
     schedule_auto_table_publish(user_id, reason="song_tags_reset")
+    logging.info(
+        "timing reset_song=%.3fs user_id=%s song_id=%s",
+        time.perf_counter() - started,
+        user_id,
+        sid,
+    )
 
 
 def resolve_tag_fuzzy(token, user_id=None):
@@ -611,6 +626,7 @@ def schedule_auto_table_publish(user_id, reason="tag_change"):
 
 
 async def auto_publish_user_tables(user_id, reason="tag_change"):
+    total_started = time.perf_counter()
     delay = float(os.getenv("AUTO_TABLE_PUBLISH_DELAY_SECONDS", "8"))
     try:
         await asyncio.sleep(max(0.0, delay))
@@ -618,7 +634,15 @@ async def auto_publish_user_tables(user_id, reason="tag_change"):
         loop = asyncio.get_running_loop()
         logging.info("auto_table_publish start user_id=%s reason=%s", user_id, reason)
 
+        lock_wait_started = time.perf_counter()
         async with auto_table_publish_lock:
+            lock_wait_seconds = time.perf_counter() - lock_wait_started
+            logging.info(
+                "timing auto_publish_lock_wait=%.3fs user_id=%s reason=%s",
+                lock_wait_seconds,
+                user_id,
+                reason,
+            )
             from table_generator import generate_user_tables
             from pages_deploy import deploy_user_tables
 
@@ -632,12 +656,19 @@ async def auto_publish_user_tables(user_id, reason="tag_change"):
             )
 
         logging.info(
-            "auto_table_publish done user_id=%s reason=%s tags=%s deploy=%s commit=%s",
+            "auto_table_publish done user_id=%s reason=%s tags=%s deploy=%s commit=%s total_seconds=%.3f",
             user_id,
             reason,
             len(result.get("tags", [])),
             deploy_result.get("message", ""),
             deploy_result.get("commit", ""),
+            time.perf_counter() - total_started,
+        )
+        logging.info(
+            "timing auto_publish_total=%.3fs user_id=%s reason=%s",
+            time.perf_counter() - total_started,
+            user_id,
+            reason,
         )
     except asyncio.CancelledError:
         logging.info("auto_table_publish cancelled user_id=%s reason=%s", user_id, reason)
@@ -1097,6 +1128,56 @@ async def tag_cmd(ctx):
 
     embed.set_footer(text=f"{len(tags)}件")
     await ctx.send(embed=embed)
+
+
+@bot.command(name="missingmd5", aliases=["md5missing", "md5\u672a\u53d6\u5f97"])
+async def missing_md5_cmd(ctx, *args):
+    if ctx.channel.id != CHANNEL_ID:
+        return
+
+    tag_name = None
+    if args:
+        token = " ".join(args)
+        tag_name = resolve_tag_fuzzy(token, user_id=ctx.author.id) or resolve_tag(token, user_id=ctx.author.id)
+        if not tag_name:
+            await ctx.send("\u30bf\u30b0\u304c\u898b\u3064\u304b\u3089\u306a\u304b\u3063\u305f\u307f\u305f\u3044\u3060\u306d\uff01 `!t` \u3067\u4e00\u89a7\u3092\u78ba\u8a8d\u3057\u3066\u307f\u3066\u306d\u3002")
+            return
+
+    try:
+        async with ctx.typing():
+            from table_generator import missing_md5_records
+
+            rows = missing_md5_records(str(ctx.author.id), tag_name=tag_name)
+    except Exception:
+        logging.exception("missingmd5 failed user_id=%s tag=%s", ctx.author.id, tag_name or "")
+        await ctx.send("md5\u672a\u53d6\u5f97\u66f2\u306e\u78ba\u8a8d\u306b\u5931\u6557\u3057\u305f\u307f\u305f\u3044\u3060\u306d\u3002\u30b5\u30fc\u30d0\u30fc\u30ed\u30b0\u3092\u78ba\u8a8d\u3057\u3066\u306d\uff01")
+        return
+
+    title = f"md5\u672a\u53d6\u5f97\u66f2: {tag_name}" if tag_name else "md5\u672a\u53d6\u5f97\u66f2"
+    if not rows:
+        await ctx.send(f"\u2705 {title}\u306f\u898b\u3064\u304b\u3089\u306a\u304b\u3063\u305f\u3088\uff01")
+        return
+
+    lines = [
+        f"\U0001f50d {title}",
+        f"\u4ef6\u6570: {len(rows)}",
+        "",
+    ]
+
+    for item in rows[:15]:
+        name = item["title"]
+        if item["chart_name"]:
+            name = f"{name} [{item['chart_name']}]"
+        lines.append(f"{item['song_id']}: {item['level']} {compact_text(name, 70)}")
+        lines.append(f"tag: {item['tag']}")
+        if item["url"]:
+            lines.append(f"url: {compact_text(item['url'], 120)}")
+        lines.append("")
+
+    if len(rows) > 15:
+        lines.append(f"...\u307b\u304b {len(rows) - 15} \u4ef6\u3042\u308b\u3088\uff01")
+
+    await ctx.send("\n".join(lines)[:1900])
 
 
 @bot.command(name="import", aliases=["取り込み", "更新"])
@@ -2453,34 +2534,52 @@ def make_reaction_tag(tag):
 
 
 def set_song_tag_by_reaction(song_id, emoji, enabled, user_id=None):
-    tag = reaction_emoji_to_tag(emoji)
-    if not tag:
-        return None
+    started = time.perf_counter()
+    result = None
+    tag = None
+    try:
+        tag = reaction_emoji_to_tag(emoji)
+        if not tag:
+            return None
 
-    row = get_song_by_id(song_id)
-    if not row:
-        return None
+        row = get_song_by_id(song_id)
+        if not row:
+            return None
 
-    current_tags = split_tags(get_song_tags_for_display(row, user_id=user_id))
-    current_memo = row[7] or ""
+        current_tags = split_tags(get_song_tags_for_display(row, user_id=user_id))
+        current_memo = row[7] or ""
 
-    exists = any(tag_matches(song_tag, tag) for song_tag in current_tags)
+        exists = any(tag_matches(song_tag, tag) for song_tag in current_tags)
 
-    if enabled:
-        if exists:
-            return row
-        new_tags = current_tags + [make_reaction_tag(tag)]
-    else:
-        if not exists:
-            return row
-        new_tags = [
-            song_tag
-            for song_tag in current_tags
-            if not tag_matches(song_tag, tag)
-        ]
+        if enabled:
+            if exists:
+                result = row
+                return result
+            new_tags = current_tags + [make_reaction_tag(tag)]
+        else:
+            if not exists:
+                result = row
+                return result
+            new_tags = [
+                song_tag
+                for song_tag in current_tags
+                if not tag_matches(song_tag, tag)
+            ]
 
-    update_song(row, join_tags(new_tags), current_memo, user_id=user_id)
-    return get_song_by_id(song_id)
+        update_song(row, join_tags(new_tags), current_memo, user_id=user_id)
+        result = get_song_by_id(song_id)
+        return result
+    finally:
+        logging.info(
+            "timing set_song_tag_by_reaction=%.3fs user_id=%s song_id=%s emoji=%s tag=%s enabled=%s changed=%s",
+            time.perf_counter() - started,
+            user_id,
+            song_id,
+            emoji,
+            tag or "",
+            enabled,
+            result is not None,
+        )
 
 
 async def add_all_tag_reactions(message):
@@ -2555,14 +2654,34 @@ async def refresh_reaction_song_message(payload, enabled):
 
 @bot.event
 async def on_raw_reaction_add(payload):
-    with open("/tmp/fine_reaction.log", "a", encoding="utf-8") as f:
-        f.write(f"[REACTION ADD] message={payload.message_id} emoji={payload.emoji} user={payload.user_id}\n")
-    await refresh_reaction_song_message(payload, True)
+    started = time.perf_counter()
+    try:
+        with open("/tmp/fine_reaction.log", "a", encoding="utf-8") as f:
+            f.write(f"[REACTION ADD] message={payload.message_id} emoji={payload.emoji} user={payload.user_id}\n")
+        await refresh_reaction_song_message(payload, True)
+    finally:
+        logging.info(
+            "timing reaction_add=%.3fs user_id=%s message_id=%s emoji=%s",
+            time.perf_counter() - started,
+            payload.user_id,
+            payload.message_id,
+            payload.emoji,
+        )
 
 
 @bot.event
 async def on_raw_reaction_remove(payload):
-    await refresh_reaction_song_message(payload, False)
+    started = time.perf_counter()
+    try:
+        await refresh_reaction_song_message(payload, False)
+    finally:
+        logging.info(
+            "timing reaction_remove=%.3fs user_id=%s message_id=%s emoji=%s",
+            time.perf_counter() - started,
+            payload.user_id,
+            payload.message_id,
+            payload.emoji,
+        )
 
 
 @bot.command(name="maketables", aliases=["make_tables", "tablesgen"])

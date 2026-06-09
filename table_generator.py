@@ -314,6 +314,7 @@ def ensure_tables(con):
         PRIMARY KEY(user_id, short_name)
     )
     """)
+    ensure_md5_overrides_table(con)
     con.execute(
         "UPDATE user_tags SET tag_name=? WHERE tag_name=?",
         (NEW_LAST_KILL_TAG, OLD_LAST_KILL_TAG),
@@ -322,6 +323,57 @@ def ensure_tables(con):
         "UPDATE user_custom_tags SET full_name=? WHERE full_name=?",
         (NEW_LAST_KILL_TAG, OLD_LAST_KILL_TAG),
     )
+
+
+def ensure_md5_overrides_table(con):
+    con.execute("""
+    CREATE TABLE IF NOT EXISTS md5_overrides (
+        song_id INTEGER PRIMARY KEY,
+        url_diff TEXT,
+        title TEXT,
+        chart_name TEXT,
+        level TEXT,
+        md5 TEXT NOT NULL,
+        source TEXT DEFAULT 'manual',
+        created_by_user_id TEXT,
+        created_at TEXT,
+        updated_at TEXT
+    )
+    """)
+
+
+def load_md5_overrides(con, song_ids=None):
+    ensure_md5_overrides_table(con)
+    params = []
+    where = ""
+    if song_ids is not None:
+        song_ids = [int(song_id) for song_id in song_ids]
+        if not song_ids:
+            return {}
+        placeholders = ",".join("?" for _ in song_ids)
+        where = f"WHERE song_id IN ({placeholders})"
+        params.extend(song_ids)
+
+    rows = con.execute(
+        f"""
+        SELECT song_id, md5, title, chart_name, level, url_diff, source
+        FROM md5_overrides
+        {where}
+        """,
+        params,
+    ).fetchall()
+
+    return {
+        row[0]: {
+            "md5": row[1] or "",
+            "title": row[2] or "",
+            "chart_name": row[3] or "",
+            "level": row[4] or "",
+            "url_diff": row[5] or "",
+            "source": row[6] or "",
+        }
+        for row in rows
+    }
 
 
 def level_sort_key(level):
@@ -419,17 +471,77 @@ def load_tag_songs(con, user_id, tag_name):
     return matched
 
 
+def load_user_tagged_songs(con, user_id):
+    return con.execute(
+        """
+        SELECT
+            s.id,
+            s.source,
+            s.level,
+            s.title,
+            s.chart_name,
+            s.url,
+            s.memo,
+            ut.tag_name,
+            COALESCE(ut.memo, '')
+        FROM user_tags ut
+        JOIN songs s ON s.id = ut.song_id
+        WHERE ut.user_id=?
+        ORDER BY s.level, s.title, s.chart_name, ut.id
+        """,
+        (str(user_id),),
+    ).fetchall()
+
+
+def missing_md5_records(user_id, tag_name=None):
+    user_id = str(user_id)
+    con = db()
+    ensure_tables(con)
+    con.commit()
+    try:
+        load_songdata_rows()
+        rows = load_user_tagged_songs(con, user_id)
+        overrides = load_md5_overrides(con, [row[0] for row in rows])
+        missing = []
+
+        for row in rows:
+            if tag_name and not tag_matches(row[7], tag_name):
+                continue
+
+            record = song_to_record(row, md5_overrides=overrides)
+            if record["md5"]:
+                continue
+
+            missing.append(
+                {
+                    "song_id": row[0],
+                    "level": row[2] or "",
+                    "title": row[3] or "",
+                    "chart_name": row[4] or "",
+                    "tag": canonical_tag_name(row[7]),
+                    "url": row[5] or "",
+                }
+            )
+
+        missing.sort(key=lambda item: (level_sort_key(item["level"]), normalize_text(item["title"]), normalize_text(item["chart_name"])))
+        return missing
+    finally:
+        con.close()
+
+
 def song_display_name(row):
     title = row[3] or ""
     chart_name = row[4] or ""
     return f"{title} [{chart_name}]" if chart_name else title
 
 
-def song_to_record(row):
+def song_to_record(row, md5_overrides=None):
     sid, source, level, title, chart_name, url, memo, tag_name, user_tag_memo = row
     display_title = song_display_name(row)
     comment = user_tag_memo or memo or ""
-    found = lookup_songdata(title, chart_name, url=url, level=level)
+    override = (md5_overrides or {}).get(sid)
+    found = None if override else lookup_songdata(title, chart_name, url=url, level=level)
+    md5 = override["md5"] if override else (found["md5"] if found else "")
     return {
         "id": sid,
         "source": source or "",
@@ -437,8 +549,8 @@ def song_to_record(row):
         "title": title or "",
         "chart_name": chart_name or "",
         "display_title": display_title,
-        "md5": found["md5"] if found else "",
-        "sha256": found["sha256"] if found else "",
+        "md5": md5,
+        "sha256": "" if override else (found["sha256"] if found else ""),
         "artist": found["artist"] if found else "",
         "songdata_title": found["title"] if found else "",
         "songdata_subtitle": found["subtitle"] if found else "",
@@ -577,6 +689,7 @@ def generate_user_tables(user_id, table_base_url=None, output_root=OUTPUT_ROOT, 
         tag_specs = build_tag_specs(con, user_id)
         user_root = output_root / "users" / user_id
         tag_results = []
+        md5_overrides = load_md5_overrides(con)
 
         total = len(tag_specs)
         json_started = time.perf_counter()
@@ -584,7 +697,7 @@ def generate_user_tables(user_id, table_base_url=None, output_root=OUTPUT_ROOT, 
             if progress:
                 progress("generate_tag", index=index, total=total, tag_name=spec["name"])
             rows = load_tag_songs(con, user_id, spec["name"])
-            records = [song_to_record(row) for row in rows]
+            records = [song_to_record(row, md5_overrides=md5_overrides) for row in rows]
             tag_dir = user_root / "tags" / spec["slug"]
             tag_dir.mkdir(parents=True, exist_ok=True)
 
