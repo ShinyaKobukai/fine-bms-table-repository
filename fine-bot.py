@@ -1135,12 +1135,22 @@ async def missing_md5_cmd(ctx, *args):
     if ctx.channel.id != CHANNEL_ID:
         return
 
+    started = time.perf_counter()
+    progress_message = await ctx.send("\U0001f50d md5\u672a\u53d6\u5f97\u66f2\u3092\u691c\u7d22\u4e2d\u3060\u3088\uff01")
+
+    async def edit_missing_md5_message(content):
+        try:
+            await progress_message.edit(content=content[:1900])
+        except Exception:
+            logging.exception("missingmd5 progress edit failed user_id=%s", ctx.author.id)
+            await ctx.send(content[:1900])
+
     tag_name = None
     if args:
         token = " ".join(args)
         tag_name = resolve_tag_fuzzy(token, user_id=ctx.author.id) or resolve_tag(token, user_id=ctx.author.id)
         if not tag_name:
-            await ctx.send("\u30bf\u30b0\u304c\u898b\u3064\u304b\u3089\u306a\u304b\u3063\u305f\u307f\u305f\u3044\u3060\u306d\uff01 `!t` \u3067\u4e00\u89a7\u3092\u78ba\u8a8d\u3057\u3066\u307f\u3066\u306d\u3002")
+            await edit_missing_md5_message("\u30bf\u30b0\u304c\u898b\u3064\u304b\u3089\u306a\u304b\u3063\u305f\u307f\u305f\u3044\u3060\u306d\uff01 `!t` \u3067\u4e00\u89a7\u3092\u78ba\u8a8d\u3057\u3066\u307f\u3066\u306d\u3002")
             return
 
     try:
@@ -1150,34 +1160,54 @@ async def missing_md5_cmd(ctx, *args):
             rows = missing_md5_records(str(ctx.author.id), tag_name=tag_name)
     except Exception:
         logging.exception("missingmd5 failed user_id=%s tag=%s", ctx.author.id, tag_name or "")
-        await ctx.send("md5\u672a\u53d6\u5f97\u66f2\u306e\u78ba\u8a8d\u306b\u5931\u6557\u3057\u305f\u307f\u305f\u3044\u3060\u306d\u3002\u30b5\u30fc\u30d0\u30fc\u30ed\u30b0\u3092\u78ba\u8a8d\u3057\u3066\u306d\uff01")
+        await edit_missing_md5_message("md5\u672a\u53d6\u5f97\u66f2\u306e\u78ba\u8a8d\u306b\u5931\u6557\u3057\u305f\u307f\u305f\u3044\u3060\u306d\u3002\u30b5\u30fc\u30d0\u30fc\u30ed\u30b0\u3092\u78ba\u8a8d\u3057\u3066\u306d\uff01")
         return
 
     title = f"md5\u672a\u53d6\u5f97\u66f2: {tag_name}" if tag_name else "md5\u672a\u53d6\u5f97\u66f2"
-    if not rows:
-        await ctx.send(f"\u2705 {title}\u306f\u898b\u3064\u304b\u3089\u306a\u304b\u3063\u305f\u3088\uff01")
+    elapsed = time.perf_counter() - started
+
+    grouped = {}
+    for item in rows:
+        song_id = item["song_id"]
+        if song_id not in grouped:
+            grouped[song_id] = {
+                "song_id": song_id,
+                "level": item["level"],
+                "title": item["title"],
+                "chart_name": item["chart_name"],
+                "url": item["url"],
+                "tags": [],
+            }
+        tag = item["tag"]
+        if tag and tag not in grouped[song_id]["tags"]:
+            grouped[song_id]["tags"].append(tag)
+
+    songs = list(grouped.values())
+    if not songs:
+        await edit_missing_md5_message(f"\u2705 {title}\u306f\u898b\u3064\u304b\u3089\u306a\u304b\u3063\u305f\u3088\uff01\n\u691c\u7d22\u6642\u9593: {elapsed:.1f}\u79d2")
         return
 
     lines = [
         f"\U0001f50d {title}",
-        f"\u4ef6\u6570: {len(rows)}",
+        f"\u4ef6\u6570: {len(songs)}\u66f2",
+        f"\u691c\u7d22\u6642\u9593: {elapsed:.1f}\u79d2",
         "",
     ]
 
-    for item in rows[:15]:
+    for item in songs[:15]:
         name = item["title"]
         if item["chart_name"]:
             name = f"{name} [{item['chart_name']}]"
         lines.append(f"{item['song_id']}: {item['level']} {compact_text(name, 70)}")
-        lines.append(f"tag: {item['tag']}")
+        lines.append(f"tags: {', '.join(item['tags'])}")
         if item["url"]:
             lines.append(f"url: {compact_text(item['url'], 120)}")
         lines.append("")
 
-    if len(rows) > 15:
-        lines.append(f"...\u307b\u304b {len(rows) - 15} \u4ef6\u3042\u308b\u3088\uff01")
+    if len(songs) > 15:
+        lines.append(f"...\u307b\u304b {len(songs) - 15} \u66f2\u3042\u308b\u3088\uff01")
 
-    await ctx.send("\n".join(lines)[:1900])
+    await edit_missing_md5_message("\n".join(lines))
 
 
 @bot.command(name="import", aliases=["取り込み", "更新"])
