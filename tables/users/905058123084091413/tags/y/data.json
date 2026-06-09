@@ -3,7 +3,7 @@
   "tag": "横認識",
   "slug": "y",
   "fixed": true,
-  "count": 2,
+  "count": 3,
   "score_count": 2,
   "songs": [
     {
@@ -36,6 +36,23 @@
       "songdata_title": "Ray of Chain (ShiningStar)",
       "songdata_subtitle": "",
       "url": "https://stellabms.xyz/upload/1489",
+      "memo": "",
+      "tag": "横認識",
+      "comment": ""
+    },
+    {
+      "id": 3176,
+      "source": "sl",
+      "level": "sl3",
+      "title": "Neo Side",
+      "chart_name": "",
+      "display_title": "Neo Side",
+      "md5": "",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=332&event=140",
       "memo": "",
       "tag": "横認識",
       "comment": ""
