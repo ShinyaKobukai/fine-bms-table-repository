@@ -3,7 +3,25 @@
   "tag": "良譜面",
   "slug": "ni",
   "fixed": true,
-  "count": 0,
-  "score_count": 0,
-  "songs": []
+  "count": 1,
+  "score_count": 1,
+  "songs": [
+    {
+      "id": 2978,
+      "source": "sl",
+      "level": "sl2",
+      "title": "Ray of Chain (ShiningStar)",
+      "chart_name": "",
+      "display_title": "Ray of Chain (ShiningStar)",
+      "md5": "f3d5848ec5b4d49feaa5f9b0440987ba",
+      "sha256": "3c47b588eef24d652b090c4a2a5f72b4996fc06cb50911df22ff8f4aaca1a572",
+      "artist": "SUPER MOTEX (O-SE+CSP)/mov:murotani / obj.mqppppp + NebulaBunny",
+      "songdata_title": "Ray of Chain (ShiningStar)",
+      "songdata_subtitle": "",
+      "url": "https://stellabms.xyz/upload/1489",
+      "memo": "",
+      "tag": "良譜面",
+      "comment": ""
+    }
+  ]
 }
