@@ -3,8 +3,8 @@
   "tag": "日課",
   "slug": "dy",
   "fixed": true,
-  "count": 3,
-  "score_count": 2,
+  "count": 4,
+  "score_count": 3,
   "songs": [
     {
       "id": 320,
@@ -36,6 +36,23 @@
       "songdata_title": "EUROBEATアイドル橘花音のテーマ",
       "songdata_subtitle": "[Muel]",
       "url": "https://stellabms.xyz/upload/4251",
+      "memo": "",
+      "tag": "日課",
+      "comment": ""
+    },
+    {
+      "id": 391,
+      "source": "st",
+      "level": "st0",
+      "title": "soyosoyo zawazawa",
+      "chart_name": "",
+      "display_title": "soyosoyo zawazawa",
+      "md5": "b19a06311e46c9409238e502f3985c59",
+      "sha256": "2d5b84e2040424c5ca43a4e75d03e0a79a828e7490e1b592806514bd5d0871dc",
+      "artist": "K4Y5",
+      "songdata_title": "soyosoyo",
+      "songdata_subtitle": "zawazawa",
+      "url": "https://stellabms.xyz/upload/4525",
       "memo": "",
       "tag": "日課",
       "comment": ""

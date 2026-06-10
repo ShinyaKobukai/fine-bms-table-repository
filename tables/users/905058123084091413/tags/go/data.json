@@ -3,7 +3,25 @@
   "tag": "ガチ押し系",
   "slug": "go",
   "fixed": true,
-  "count": 0,
-  "score_count": 0,
-  "songs": []
+  "count": 1,
+  "score_count": 1,
+  "songs": [
+    {
+      "id": 391,
+      "source": "st",
+      "level": "st0",
+      "title": "soyosoyo zawazawa",
+      "chart_name": "",
+      "display_title": "soyosoyo zawazawa",
+      "md5": "b19a06311e46c9409238e502f3985c59",
+      "sha256": "2d5b84e2040424c5ca43a4e75d03e0a79a828e7490e1b592806514bd5d0871dc",
+      "artist": "K4Y5",
+      "songdata_title": "soyosoyo",
+      "songdata_subtitle": "zawazawa",
+      "url": "https://stellabms.xyz/upload/4525",
+      "memo": "",
+      "tag": "ガチ押し系",
+      "comment": ""
+    }
+  ]
 }
