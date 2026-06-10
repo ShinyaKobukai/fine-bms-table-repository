@@ -3,8 +3,8 @@
   "tag": "地力上げ",
   "slug": "ep",
   "fixed": true,
-  "count": 5,
-  "score_count": 3,
+  "count": 6,
+  "score_count": 4,
   "songs": [
     {
       "id": 320,
@@ -87,6 +87,23 @@
       "songdata_title": "",
       "songdata_subtitle": "",
       "url": "http://bms.hexlataia.xyz/tables/hexajoy.html",
+      "memo": "",
+      "tag": "地力上げ",
+      "comment": ""
+    },
+    {
+      "id": 742,
+      "source": "st",
+      "level": "st1",
+      "title": "追憶の森 -Voices of the Earth- [wide]",
+      "chart_name": "",
+      "display_title": "追憶の森 -Voices of the Earth- [wide]",
+      "md5": "4101dd74b1eb5fcb04dd892a1eff3e76",
+      "sha256": "0a87afa045e7366d94a8cc84d88dcea24409527f00d8f7b4482de3a9604cf6bd",
+      "artist": "AKITO / obj. laner",
+      "songdata_title": "追憶の森 -Voices of the Earth- [wide]",
+      "songdata_subtitle": "",
+      "url": "https://web.archive.org/web/20190322230138/http://www.hyper-laner.com/sabun/all201807_laner.rar",
       "memo": "",
       "tag": "地力上げ",
       "comment": ""

@@ -3,8 +3,8 @@
   "tag": "横認識",
   "slug": "y",
   "fixed": true,
-  "count": 9,
-  "score_count": 7,
+  "count": 10,
+  "score_count": 8,
   "songs": [
     {
       "id": 2468,
@@ -155,6 +155,23 @@
       "songdata_title": "Hazy moon[雷雨]",
       "songdata_subtitle": "",
       "url": "https://drive.google.com/open?id=1u1NTkaIfkAalc4F3a-0xiw9bCj1muBg_",
+      "memo": "",
+      "tag": "横認識",
+      "comment": ""
+    },
+    {
+      "id": 742,
+      "source": "st",
+      "level": "st1",
+      "title": "追憶の森 -Voices of the Earth- [wide]",
+      "chart_name": "",
+      "display_title": "追憶の森 -Voices of the Earth- [wide]",
+      "md5": "4101dd74b1eb5fcb04dd892a1eff3e76",
+      "sha256": "0a87afa045e7366d94a8cc84d88dcea24409527f00d8f7b4482de3a9604cf6bd",
+      "artist": "AKITO / obj. laner",
+      "songdata_title": "追憶の森 -Voices of the Earth- [wide]",
+      "songdata_subtitle": "",
+      "url": "https://web.archive.org/web/20190322230138/http://www.hyper-laner.com/sabun/all201807_laner.rar",
       "memo": "",
       "tag": "横認識",
       "comment": ""
