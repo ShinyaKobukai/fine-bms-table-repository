@@ -789,55 +789,68 @@ async def help_cmd(ctx):
     if ctx.channel.id != CHANNEL_ID:
         return
 
+    def command_block(command, description):
+        return f"```text\n{command}\n```\n{description}"
+
+    fields = [
+        ("検索", "!s レシュ", "曲名・差分名・レベル・タグ・備考から検索するよ。1件だけならリアクション編集もできるよ。"),
+        ("タグ検索", "!ts 日課", "指定タグが付いた曲を検索するよ。例: `!ts sl12 日課`"),
+        ("タグ一覧", "!t", "自分が使える固定タグ・追加タグを表示するよ。"),
+        ("タグ数", "!tagcount", "自分のタグ件数を表示するよ。固定タグは0件でも出るよ。"),
+        ("タグ別レベル", "!tl 日課", "指定タグの曲をレベル別に見るよ。"),
+        ("タグ追加", "!addtag ハネリズム hn 🪽", "自分用のタグを追加するよ。3つ目はリアクション絵文字だよ。"),
+        ("タグ削除", "!deltag hn", "自分用の追加タグを削除するよ。"),
+        ("編集", "!e 1 y ep", "`!s` の検索結果番号を指定してタグや備考を編集するよ。"),
+        ("件数", "!count レシュ", "検索条件に合う曲数を数えるよ。"),
+        ("md5未取得", "!missingmd5", "自分のタグ付き曲のうち、難易度表に出ないmd5未取得曲を確認するよ。"),
+        ("md5未取得 タグ指定", "!missingmd5 日課", "指定タグだけのmd5未取得曲を確認するよ。"),
+        ("難易度表生成", "!maketables", "自分専用のタグ別難易度表を生成して、登録URLを返すよ。"),
+        ("テーブル一覧", "!tables", "登録済みの取得元テーブルを見るよ。"),
+        ("テーブル追加", "!addtable テーブル名", "手動曲追加用のテーブルを作るよ。"),
+        ("曲追加", '!addsong テーブル名 lv12 "曲名" "差分名" y 備考', "手動で曲を追加するよ。"),
+        ("タグ順", "!tagorder dy 1", "固定タグや短縮名の表示順を変更するよ。"),
+        ("テーブル削除", "!deltable テーブル名", "手動追加用テーブルを削除するよ。"),
+        ("曲削除", "!delsong 1", "`!s` の検索結果番号を指定して曲を削除するよ。"),
+        ("取り込み", "!import", "登録テーブルから曲を取り込むよ。"),
+    ]
+
     embed = discord.Embed(
         title="📖 Fine Bot ヘルプだよ！",
-        description=(
-            "BMS楽曲のタグ付け・検索・復習をするためのBotだよ。\n"
-            "まず検索して、出てきた番号を使って編集してね。"
-        ),
+        description="コピペしやすいように、1コマンドずつ分けてあるよ。",
         color=EMBED_BLUE,
     )
 
-    embed.add_field(
-        name="🔎 検索",
-        value="`!s ceu`\n`!s sl12 ceu`\n曲名・差分名・タグ・備考をまとめて検索するよ。",
-        inline=False,
-    )
+    for name, command, description in fields:
+        embed.add_field(name=name, value=command_block(command, description), inline=False)
 
     embed.add_field(
-        name="✏️ 編集",
-        value="`!e 1 y ep`\n`1e y ep`\n`reset`\n検索結果の番号を指定して更新するよ。",
-        inline=False,
-    )
-
-    embed.add_field(
-        name="⚡ 1件検索後の簡易編集",
-        value="`y ep dy`\n`add ni`\n`-dy`\n`/null`\n検索結果が1件だけなら、そのまま編集できるよ。",
-        inline=False,
-    )
-
-    embed.add_field(
-        name="🏷️ タグ系",
+        name="1件検索後の直接入力",
         value=(
-            "`!t`\n`!ts y`\n`!ts sl12 日課`\n`!tl dy`\n`!tagcount`\n"
-            "`!addtag ハネリズム hn 🪽`\n"
-            "タグ一覧に新しいタグとリアクション絵文字を追加するよ。"
+            "```text\ny ep dy\n```\n"
+            "```text\nadd ni\n```\n"
+            "```text\n-dy\n```\n"
+            "```text\nreset\n```\n"
+            "```text\n/null\n```\n"
+            "`!s` の結果が1件だけなら、そのままタグ編集できるよ。"
         ),
         inline=False,
     )
 
     embed.add_field(
-        name="📚 テーブル・曲追加",
-        value="`!tables`\n`!addtable テーブル名`\n`!addsong テーブル lv12 \"曲名\" \"差分名\" y 備考`",
-        inline=False,
-    )
-
-    embed.add_field(
-        name="🏷️ 主なタグ",
+        name="主な短縮タグ",
         value=(
-            "`y` 横認識 / `8` 横認識(8分系) / `yt` 横認識(縦系)\n"
-            "`tt` 縦連 / `go` ガチ押し系 / `r` 乱打\n"
-            "`ep` 地力上げ / `ni` 良譜面 / `dy` 日課 / `sh` 惜敗"
+            "```text\ny 横認識\n```\n"
+            "```text\n8 横認識(8分系)\n```\n"
+            "```text\nyt 横認識(縦系)\n```\n"
+            "```text\ntt 縦連\n```\n"
+            "```text\ngo ガチ押し系\n```\n"
+            "```text\nr 乱打\n```\n"
+            "```text\nep 地力上げ\n```\n"
+            "```text\nsr ラス殺し\n```\n"
+            "```text\ng ゴミ\n```\n"
+            "```text\nni 良譜面\n```\n"
+            "```text\ndy 日課\n```\n"
+            "```text\nsh 惜敗\n```"
         ),
         inline=False,
     )
