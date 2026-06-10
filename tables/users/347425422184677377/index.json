@@ -132,6 +132,17 @@
       "url": "https://shinyakobukai.github.io/fine-bms-table-repository/tables/users/347425422184677377/tags/dy/",
       "table_url": "https://shinyakobukai.github.io/fine-bms-table-repository/tables/users/347425422184677377/tags/dy/header.json",
       "score_url": "https://shinyakobukai.github.io/fine-bms-table-repository/tables/users/347425422184677377/tags/dy/score.json"
+    },
+    {
+      "tag_name": "ハネリズム",
+      "slug": "custom/hn",
+      "count": 1,
+      "score_count": 1,
+      "path": "public/tables/users/347425422184677377/tags/custom/hn",
+      "relative_url": "tags/custom/hn/",
+      "url": "https://shinyakobukai.github.io/fine-bms-table-repository/tables/users/347425422184677377/tags/custom/hn/",
+      "table_url": "https://shinyakobukai.github.io/fine-bms-table-repository/tables/users/347425422184677377/tags/custom/hn/header.json",
+      "score_url": "https://shinyakobukai.github.io/fine-bms-table-repository/tables/users/347425422184677377/tags/custom/hn/score.json"
     }
   ]
 }

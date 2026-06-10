@@ -1,0 +1,27 @@
+{
+  "user_id": "347425422184677377",
+  "tag": "ハネリズム",
+  "slug": "custom/hn",
+  "fixed": false,
+  "count": 1,
+  "score_count": 1,
+  "songs": [
+    {
+      "id": 4511,
+      "source": "sl",
+      "level": "sl12",
+      "title": "レシュノルティア [あなたの横に]",
+      "chart_name": "",
+      "display_title": "レシュノルティア [あなたの横に]",
+      "md5": "0bbcf824051b19c6da354c615692d740",
+      "sha256": "de0c4e95ff3645fc94bebbca8039ecb53851d2f9a3716b89cc88bb2f4dc74891",
+      "artist": "あとぅす feat.はらもりよしな",
+      "songdata_title": "レシュノルティア",
+      "songdata_subtitle": "[あなたの横に]",
+      "url": "https://stellabms.xyz/upload/4286",
+      "memo": "",
+      "tag": "ハネリズム",
+      "comment": ""
+    }
+  ]
+}
