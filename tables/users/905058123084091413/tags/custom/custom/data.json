@@ -1,0 +1,27 @@
+{
+  "user_id": "905058123084091413",
+  "tag": "ハネリズム",
+  "slug": "custom/custom",
+  "fixed": false,
+  "count": 1,
+  "score_count": 1,
+  "songs": [
+    {
+      "id": 2749,
+      "source": "sl",
+      "level": "sl1",
+      "title": "Ring Ring Ring ☆ Let's H! [M@STER]",
+      "chart_name": "",
+      "display_title": "Ring Ring Ring ☆ Let's H! [M@STER]",
+      "md5": "175243192b0e570c0694a16186e5dc3e",
+      "sha256": "3c7c5f4665fe3aec40263f6be140fc2131825cd6eb378109608d9e9d82037ace",
+      "artist": "wigen_ / Note:薄杏",
+      "songdata_title": "Ring Ring Ring ☆ Let's H! [M@STER]",
+      "songdata_subtitle": "",
+      "url": "http://lalha.web.fc2.com/",
+      "memo": "",
+      "tag": "ハネリズム",
+      "comment": ""
+    }
+  ]
+}
