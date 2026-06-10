@@ -134,6 +134,17 @@
       "score_url": "https://shinyakobukai.github.io/fine-bms-table-repository/tables/users/905058123084091413/tags/dy/score.json"
     },
     {
+      "tag_name": "ディレイ",
+      "slug": "custom/dh",
+      "count": 1,
+      "score_count": 1,
+      "path": "public/tables/users/905058123084091413/tags/custom/dh",
+      "relative_url": "tags/custom/dh/",
+      "url": "https://shinyakobukai.github.io/fine-bms-table-repository/tables/users/905058123084091413/tags/custom/dh/",
+      "table_url": "https://shinyakobukai.github.io/fine-bms-table-repository/tables/users/905058123084091413/tags/custom/dh/header.json",
+      "score_url": "https://shinyakobukai.github.io/fine-bms-table-repository/tables/users/905058123084091413/tags/custom/dh/score.json"
+    },
+    {
       "tag_name": "ハネリズム",
       "slug": "custom/hn",
       "count": 1,

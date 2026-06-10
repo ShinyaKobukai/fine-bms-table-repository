@@ -1,0 +1,27 @@
+{
+  "user_id": "905058123084091413",
+  "tag": "ディレイ",
+  "slug": "custom/dh",
+  "fixed": false,
+  "count": 1,
+  "score_count": 1,
+  "songs": [
+    {
+      "id": 3515,
+      "source": "sl",
+      "level": "sl5",
+      "title": "Lonely Cat [雨模様]",
+      "chart_name": "",
+      "display_title": "Lonely Cat [雨模様]",
+      "md5": "a025de6f81e79a6d965e9a590ecd9e1c",
+      "sha256": "8d0b8e193c9ca4151cf7c9732059fcde0595737da8fefe9ed6ba6592eba18bb1",
+      "artist": "* (Asterisk)",
+      "songdata_title": "Lonely Cat[雨模様]",
+      "songdata_subtitle": "",
+      "url": "http://ux.getuploader.com/monaka_sabun_2/download/96/Lonely+Cat.zip",
+      "memo": "",
+      "tag": "ディレイ",
+      "comment": ""
+    }
+  ]
+}
