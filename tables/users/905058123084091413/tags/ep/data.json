@@ -3,7 +3,7 @@
   "tag": "地力上げ",
   "slug": "ep",
   "fixed": true,
-  "count": 4,
+  "count": 5,
   "score_count": 3,
   "songs": [
     {
@@ -70,6 +70,23 @@
       "songdata_title": "バーチャルセラピー",
       "songdata_subtitle": "[超物量セラピー]",
       "url": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0",
+      "memo": "",
+      "tag": "地力上げ",
+      "comment": ""
+    },
+    {
+      "id": 16,
+      "source": "st",
+      "level": "st0",
+      "title": "情熱の大阪",
+      "chart_name": "",
+      "display_title": "情熱の大阪",
+      "md5": "",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "http://bms.hexlataia.xyz/tables/hexajoy.html",
       "memo": "",
       "tag": "地力上げ",
       "comment": ""

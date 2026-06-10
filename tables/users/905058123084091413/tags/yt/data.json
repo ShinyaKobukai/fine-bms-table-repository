@@ -3,7 +3,7 @@
   "tag": "横認識(縦系)",
   "slug": "yt",
   "fixed": true,
-  "count": 3,
+  "count": 4,
   "score_count": 1,
   "songs": [
     {
@@ -53,6 +53,23 @@
       "songdata_title": "",
       "songdata_subtitle": "",
       "url": "http://sagena.harisen.jp/",
+      "memo": "",
+      "tag": "横認識(縦系)",
+      "comment": ""
+    },
+    {
+      "id": 16,
+      "source": "st",
+      "level": "st0",
+      "title": "情熱の大阪",
+      "chart_name": "",
+      "display_title": "情熱の大阪",
+      "md5": "",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "http://bms.hexlataia.xyz/tables/hexajoy.html",
       "memo": "",
       "tag": "横認識(縦系)",
       "comment": ""

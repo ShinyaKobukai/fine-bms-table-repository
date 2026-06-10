@@ -3,7 +3,7 @@
   "tag": "日課",
   "slug": "dy",
   "fixed": true,
-  "count": 5,
+  "count": 6,
   "score_count": 4,
   "songs": [
     {
@@ -87,6 +87,23 @@
       "songdata_title": "バーチャルセラピー",
       "songdata_subtitle": "[超物量セラピー]",
       "url": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0",
+      "memo": "",
+      "tag": "日課",
+      "comment": ""
+    },
+    {
+      "id": 16,
+      "source": "st",
+      "level": "st0",
+      "title": "情熱の大阪",
+      "chart_name": "",
+      "display_title": "情熱の大阪",
+      "md5": "",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "http://bms.hexlataia.xyz/tables/hexajoy.html",
       "memo": "",
       "tag": "日課",
       "comment": ""
