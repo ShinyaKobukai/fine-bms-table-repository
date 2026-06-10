@@ -3,8 +3,8 @@
   "tag": "日課",
   "slug": "dy",
   "fixed": true,
-  "count": 11,
-  "score_count": 9,
+  "count": 12,
+  "score_count": 10,
   "songs": [
     {
       "id": 320,
@@ -189,6 +189,23 @@
       "songdata_title": "Primo Magic",
       "songdata_subtitle": "[Sparkle]",
       "url": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=61&event=146",
+      "memo": "",
+      "tag": "日課",
+      "comment": ""
+    },
+    {
+      "id": 970,
+      "source": "st",
+      "level": "st2",
+      "title": "東風谷早苗が悲しい顔をする理由。 [Hexagon]",
+      "chart_name": "",
+      "display_title": "東風谷早苗が悲しい顔をする理由。 [Hexagon]",
+      "md5": "e3840c4a4eb84f84e663409bb857a09c",
+      "sha256": "d356e99a7f01d9dbb44445120eaa077e022cc524b4ae8f05fc33691b7e8dc008",
+      "artist": "nmk feat.かなえゆめ",
+      "songdata_title": "東風谷早苗が悲しい顔をする理由。 [Hexagon]",
+      "songdata_subtitle": "",
+      "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01457.zip",
       "memo": "",
       "tag": "日課",
       "comment": ""

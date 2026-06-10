@@ -3,8 +3,8 @@
   "tag": "地力上げ",
   "slug": "ep",
   "fixed": true,
-  "count": 6,
-  "score_count": 4,
+  "count": 7,
+  "score_count": 5,
   "songs": [
     {
       "id": 320,
@@ -104,6 +104,23 @@
       "songdata_title": "追憶の森 -Voices of the Earth- [wide]",
       "songdata_subtitle": "",
       "url": "https://web.archive.org/web/20190322230138/http://www.hyper-laner.com/sabun/all201807_laner.rar",
+      "memo": "",
+      "tag": "地力上げ",
+      "comment": ""
+    },
+    {
+      "id": 970,
+      "source": "st",
+      "level": "st2",
+      "title": "東風谷早苗が悲しい顔をする理由。 [Hexagon]",
+      "chart_name": "",
+      "display_title": "東風谷早苗が悲しい顔をする理由。 [Hexagon]",
+      "md5": "e3840c4a4eb84f84e663409bb857a09c",
+      "sha256": "d356e99a7f01d9dbb44445120eaa077e022cc524b4ae8f05fc33691b7e8dc008",
+      "artist": "nmk feat.かなえゆめ",
+      "songdata_title": "東風谷早苗が悲しい顔をする理由。 [Hexagon]",
+      "songdata_subtitle": "",
+      "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01457.zip",
       "memo": "",
       "tag": "地力上げ",
       "comment": ""
