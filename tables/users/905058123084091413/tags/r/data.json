@@ -3,8 +3,8 @@
   "tag": "乱打",
   "slug": "r",
   "fixed": true,
-  "count": 3,
-  "score_count": 3,
+  "count": 4,
+  "score_count": 4,
   "songs": [
     {
       "id": 14,
@@ -53,6 +53,23 @@
       "songdata_title": "Mugikamagika",
       "songdata_subtitle": "[Toybox]",
       "url": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=19&event=146",
+      "memo": "",
+      "tag": "乱打",
+      "comment": ""
+    },
+    {
+      "id": 43,
+      "source": "st",
+      "level": "st2",
+      "title": "Primo Magic [Sparkle]",
+      "chart_name": "",
+      "display_title": "Primo Magic [Sparkle]",
+      "md5": "fd315ea0be65ac4731ca2f8805b155ae",
+      "sha256": "aa10ca99f20f6cba6ce86e4abe930b577532de934c252682c39a392a065b4d31",
+      "artist": "kooridori Feat.猫柳なぎ",
+      "songdata_title": "Primo Magic",
+      "songdata_subtitle": "[Sparkle]",
+      "url": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=61&event=146",
       "memo": "",
       "tag": "乱打",
       "comment": ""
