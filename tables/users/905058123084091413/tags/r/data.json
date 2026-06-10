@@ -3,8 +3,8 @@
   "tag": "乱打",
   "slug": "r",
   "fixed": true,
-  "count": 1,
-  "score_count": 1,
+  "count": 2,
+  "score_count": 2,
   "songs": [
     {
       "id": 14,
@@ -19,6 +19,23 @@
       "songdata_title": "バーチャルセラピー",
       "songdata_subtitle": "[超物量セラピー]",
       "url": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0",
+      "memo": "",
+      "tag": "乱打",
+      "comment": ""
+    },
+    {
+      "id": 732,
+      "source": "st",
+      "level": "st1",
+      "title": "永劫綺譚の純潔葬花 -Yellow Lily-",
+      "chart_name": "",
+      "display_title": "永劫綺譚の純潔葬花 -Yellow Lily-",
+      "md5": "fc269db1ba717f4f49398edad3f941c4",
+      "sha256": "761b23c2d7a3310d647b66395c9cf4e3a350d8b60256675d6df69659378fe44e",
+      "artist": "nmk feat.橘花音",
+      "songdata_title": "永劫綺譚の純潔葬花 -Yellow Lily-",
+      "songdata_subtitle": "",
+      "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02264.zip",
       "memo": "",
       "tag": "乱打",
       "comment": ""

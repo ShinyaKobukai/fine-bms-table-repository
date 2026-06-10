@@ -3,8 +3,8 @@
   "tag": "横認識",
   "slug": "y",
   "fixed": true,
-  "count": 10,
-  "score_count": 8,
+  "count": 11,
+  "score_count": 9,
   "songs": [
     {
       "id": 2468,
@@ -155,6 +155,23 @@
       "songdata_title": "Hazy moon[雷雨]",
       "songdata_subtitle": "",
       "url": "https://drive.google.com/open?id=1u1NTkaIfkAalc4F3a-0xiw9bCj1muBg_",
+      "memo": "",
+      "tag": "横認識",
+      "comment": ""
+    },
+    {
+      "id": 732,
+      "source": "st",
+      "level": "st1",
+      "title": "永劫綺譚の純潔葬花 -Yellow Lily-",
+      "chart_name": "",
+      "display_title": "永劫綺譚の純潔葬花 -Yellow Lily-",
+      "md5": "fc269db1ba717f4f49398edad3f941c4",
+      "sha256": "761b23c2d7a3310d647b66395c9cf4e3a350d8b60256675d6df69659378fe44e",
+      "artist": "nmk feat.橘花音",
+      "songdata_title": "永劫綺譚の純潔葬花 -Yellow Lily-",
+      "songdata_subtitle": "",
+      "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02264.zip",
       "memo": "",
       "tag": "横認識",
       "comment": ""
