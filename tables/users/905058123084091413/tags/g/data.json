@@ -3,7 +3,25 @@
   "tag": "ゴミ",
   "slug": "g",
   "fixed": true,
-  "count": 0,
-  "score_count": 0,
-  "songs": []
+  "count": 1,
+  "score_count": 1,
+  "songs": [
+    {
+      "id": 4126,
+      "source": "sl",
+      "level": "sl10",
+      "title": "Central GRAY [Crazy]",
+      "chart_name": "",
+      "display_title": "Central GRAY [Crazy]",
+      "md5": "c16ad6046d2f0d5f65a66bbbba6aaaa8",
+      "sha256": "756c5bf430dc5284695b3deaf9d9e821e3a832025f2b5f79bdad4c816f1d3795",
+      "artist": "P.E. / D",
+      "songdata_title": "Central GRAY [Crazy]",
+      "songdata_subtitle": "",
+      "url": "http://absolute.pv.land.to/uploader/src/up4378.rar",
+      "memo": "",
+      "tag": "ゴミ",
+      "comment": ""
+    }
+  ]
 }
