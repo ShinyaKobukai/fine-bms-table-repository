@@ -3,7 +3,25 @@
   "tag": "ラス殺し",
   "slug": "sr",
   "fixed": true,
-  "count": 0,
-  "score_count": 0,
-  "songs": []
+  "count": 1,
+  "score_count": 1,
+  "songs": [
+    {
+      "id": 873,
+      "source": "st",
+      "level": "st2",
+      "title": "Psalms ～魂の還るばしょ～ [ANGELUS]",
+      "chart_name": "",
+      "display_title": "Psalms ～魂の還るばしょ～ [ANGELUS]",
+      "md5": "4709c903d17c408695c131d230c20dc5",
+      "sha256": "7e64759de3fc14b78fda60b264a325a3b8c5391ba8b2ed8a06faad6f044b80b2",
+      "artist": "qfeileadh＆レゾナンスもえこ",
+      "songdata_title": "Psalms ～魂の還るばしょ～ [ANGELUS]",
+      "songdata_subtitle": "",
+      "url": "http://manbow.nothing.sh/event/event.cgi?action=More_def&num=128&event=133",
+      "memo": "",
+      "tag": "ラス殺し",
+      "comment": ""
+    }
+  ]
 }
