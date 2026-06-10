@@ -3,8 +3,8 @@
   "tag": "惜敗",
   "slug": "sh",
   "fixed": true,
-  "count": 1,
-  "score_count": 1,
+  "count": 2,
+  "score_count": 2,
   "songs": [
     {
       "id": 873,
@@ -19,6 +19,23 @@
       "songdata_title": "Psalms ～魂の還るばしょ～ [ANGELUS]",
       "songdata_subtitle": "",
       "url": "http://manbow.nothing.sh/event/event.cgi?action=More_def&num=128&event=133",
+      "memo": "",
+      "tag": "惜敗[2026-06-10]",
+      "comment": ""
+    },
+    {
+      "id": 882,
+      "source": "st",
+      "level": "st2",
+      "title": "Revolution [Finitura Fettuccia]",
+      "chart_name": "",
+      "display_title": "Revolution [Finitura Fettuccia]",
+      "md5": "aa9ad141eb3fc64e8f09e2a312767be1",
+      "sha256": "fc30e328972c7d3e323a1511bd61da46539b9eb44755c6c3db7be89e6cb9fa17",
+      "artist": "BilliumMoto",
+      "songdata_title": "Revolution",
+      "songdata_subtitle": "[Finitura Fettuccia]",
+      "url": "https://stellabms.xyz/upload/3286",
       "memo": "",
       "tag": "惜敗[2026-06-10]",
       "comment": ""
