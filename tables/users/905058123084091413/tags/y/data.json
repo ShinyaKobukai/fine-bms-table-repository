@@ -3,8 +3,8 @@
   "tag": "横認識",
   "slug": "y",
   "fixed": true,
-  "count": 3,
-  "score_count": 2,
+  "count": 4,
+  "score_count": 3,
   "songs": [
     {
       "id": 2468,
@@ -53,6 +53,23 @@
       "songdata_title": "",
       "songdata_subtitle": "",
       "url": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=332&event=140",
+      "memo": "",
+      "tag": "横認識",
+      "comment": ""
+    },
+    {
+      "id": 320,
+      "source": "st",
+      "level": "st0",
+      "title": "EOS -PING-",
+      "chart_name": "",
+      "display_title": "EOS -PING-",
+      "md5": "48d24d3128468c5c49fa7471babcd9a0",
+      "sha256": "d3e88aa5f951a1d76edb1109fc330f3ae960d9cfd2ffb6ddc786c41487fd2cdd",
+      "artist": "ginkiha / PING",
+      "songdata_title": "EOS -PING-",
+      "songdata_subtitle": "",
+      "url": "http://www.mediafire.com/?9n94dyt0za3qm5e",
       "memo": "",
       "tag": "横認識",
       "comment": ""

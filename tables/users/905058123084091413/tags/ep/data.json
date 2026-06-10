@@ -3,7 +3,25 @@
   "tag": "地力上げ",
   "slug": "ep",
   "fixed": true,
-  "count": 0,
-  "score_count": 0,
-  "songs": []
+  "count": 1,
+  "score_count": 1,
+  "songs": [
+    {
+      "id": 320,
+      "source": "st",
+      "level": "st0",
+      "title": "EOS -PING-",
+      "chart_name": "",
+      "display_title": "EOS -PING-",
+      "md5": "48d24d3128468c5c49fa7471babcd9a0",
+      "sha256": "d3e88aa5f951a1d76edb1109fc330f3ae960d9cfd2ffb6ddc786c41487fd2cdd",
+      "artist": "ginkiha / PING",
+      "songdata_title": "EOS -PING-",
+      "songdata_subtitle": "",
+      "url": "http://www.mediafire.com/?9n94dyt0za3qm5e",
+      "memo": "",
+      "tag": "地力上げ",
+      "comment": ""
+    }
+  ]
 }
