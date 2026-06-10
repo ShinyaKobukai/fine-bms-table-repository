@@ -309,11 +309,17 @@ def ensure_tables(con):
         user_id TEXT NOT NULL,
         short_name TEXT NOT NULL,
         full_name TEXT NOT NULL,
+        emoji TEXT DEFAULT '',
         created_at TEXT DEFAULT '',
         updated_at TEXT DEFAULT '',
         PRIMARY KEY(user_id, short_name)
     )
     """)
+    try:
+        con.execute("ALTER TABLE user_custom_tags ADD COLUMN emoji TEXT DEFAULT ''")
+    except sqlite3.OperationalError as e:
+        if "duplicate column name" not in str(e).lower():
+            raise
     ensure_md5_overrides_table(con)
     con.execute(
         "UPDATE user_tags SET tag_name=? WHERE tag_name=?",

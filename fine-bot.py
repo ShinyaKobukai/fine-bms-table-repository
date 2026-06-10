@@ -34,14 +34,14 @@ TAG_ALIASES = {
     "8": "横認識(8分系)",
     "yt": "横認識(縦系)",
     "tt": "縦連",
-    "sr": "しょうもないラス殺し",
+    "sr": "ラス殺し",
     "ep": "地力上げ",
     "ni": "良譜面",
     "g": "ゴミ",
     "sh": "惜敗",
 }
 
-OLD_LAST_KILL_TAG = TAG_ALIASES["sr"]
+OLD_LAST_KILL_TAG = "しょうもないラス殺し"
 NEW_LAST_KILL_TAG = "\u30e9\u30b9\u6bba\u3057"
 TAG_ALIASES["sr"] = NEW_LAST_KILL_TAG
 
@@ -72,6 +72,18 @@ TAG_INPUT_ALIASES = {
 def normalize_tag_input(token):
     token = normalize_text(token)
     return TAG_INPUT_ALIASES.get(token, token)
+
+
+CUSTOM_EMOJI_PATTERN = re.compile(r"^<a?:([A-Za-z0-9_]+):([0-9]+)>$")
+
+
+def normalize_reaction_emoji(emoji):
+    emoji = str(emoji or "").strip()
+    match = CUSTOM_EMOJI_PATTERN.match(emoji)
+    if match:
+        return f"{match.group(1)}:{match.group(2)}"
+    return emoji
+
 
 last_search = {}
 reaction_song_messages = {}
@@ -119,11 +131,17 @@ def ensure_user_custom_tags_table(con):
         user_id TEXT NOT NULL,
         short_name TEXT NOT NULL,
         full_name TEXT NOT NULL,
+        emoji TEXT DEFAULT '',
         created_at TEXT DEFAULT '',
         updated_at TEXT DEFAULT '',
         PRIMARY KEY(user_id, short_name)
     )
     """)
+    try:
+        con.execute("ALTER TABLE user_custom_tags ADD COLUMN emoji TEXT DEFAULT ''")
+    except sqlite3.OperationalError as e:
+        if "duplicate column name" not in str(e).lower():
+            raise
     con.execute(
         "UPDATE user_tags SET tag_name=? WHERE tag_name=?",
         (NEW_LAST_KILL_TAG, OLD_LAST_KILL_TAG),
@@ -134,23 +152,45 @@ def ensure_user_custom_tags_table(con):
     )
 
 
-def add_custom_tag(full_name, short_name, user_id):
+def add_custom_tag(full_name, short_name, user_id, emoji=""):
     con = db()
     ensure_user_custom_tags_table(con)
     now = now_text()
+    user_id = str(user_id)
+    emoji = (emoji or "").strip()
+    normalized_emoji = normalize_reaction_emoji(emoji)
+
+    if normalized_emoji:
+        for fixed_emoji, fixed_tag in TAG_REACTION_EMOJIS:
+            if normalized_emoji == normalize_reaction_emoji(fixed_emoji):
+                con.close()
+                return False, f"`{emoji}` は固定タグ「{fixed_tag}」で使っている絵文字だよ！"
+
+        for existing_short, existing_name, existing_emoji in con.execute(
+            """
+            SELECT short_name, full_name, emoji
+            FROM user_custom_tags
+            WHERE user_id=? AND short_name<>? AND COALESCE(emoji, '')<>''
+            """,
+            (user_id, short_name),
+        ):
+            if normalized_emoji == normalize_reaction_emoji(existing_emoji):
+                con.close()
+                return False, f"`{emoji}` は既に「{existing_name}」で使っている絵文字だよ！"
 
     con.execute(
         """
         INSERT OR REPLACE INTO user_custom_tags
-        (user_id, short_name, full_name, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?)
+        (user_id, short_name, full_name, emoji, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?)
         """,
-        (str(user_id), short_name, canonical_tag_name(full_name), now, now)
+        (user_id, short_name, canonical_tag_name(full_name), emoji, now, now)
     )
 
     con.commit()
     con.close()
     schedule_auto_table_publish(user_id, reason="custom_tag_added")
+    return True, ""
 
 
 def delete_custom_tag(short_name, user_id):
@@ -165,6 +205,35 @@ def delete_custom_tag(short_name, user_id):
     con.commit()
     con.close()
     schedule_auto_table_publish(user_id, reason="custom_tag_deleted")
+
+
+def get_user_custom_tag_rows(user_id):
+    if user_id is None:
+        return []
+
+    con = db()
+    try:
+        ensure_user_custom_tags_table(con)
+        rows = con.execute(
+            """
+            SELECT short_name, full_name, COALESCE(emoji, '')
+            FROM user_custom_tags
+            WHERE user_id=?
+            ORDER BY short_name
+            """,
+            (str(user_id),),
+        ).fetchall()
+    finally:
+        con.close()
+
+    return [
+        {
+            "short_name": short_name,
+            "full_name": canonical_tag_name(full_name),
+            "emoji": emoji or "",
+        }
+        for short_name, full_name, emoji in rows
+    ]
 
 
 
@@ -751,8 +820,8 @@ async def help_cmd(ctx):
         name="🏷️ タグ系",
         value=(
             "`!t`\n`!ts y`\n`!ts sl12 日課`\n`!tl dy`\n`!tagcount`\n"
-            "`!addtag テスト01 te01`\n"
-            "タグ一覧に新しいタグを追加するよ。例: `!addtag テスト01 te01`"
+            "`!addtag ハネリズム hn 🪽`\n"
+            "タグ一覧に新しいタグとリアクション絵文字を追加するよ。"
         ),
         inline=False,
     )
@@ -926,7 +995,7 @@ TAG_REACTION_EMOJIS = [
     ("👊", "ガチ押し系"),
     ("🔥", "乱打"),
     ("💪", "地力上げ"),
-    ("💀", "しょうもないラス殺し"),
+    ("💀", "ラス殺し"),
     ("🗑️", "ゴミ"),
     ("⭐", "良譜面"),
     ("📅", "日課"),
@@ -958,27 +1027,53 @@ def reaction_tag_options(user_id=None):
         return options
 
     custom_index = 0
-    for short_name, tag in get_all_tags(user_id=user_id).items():
+    used_emojis = {normalize_reaction_emoji(emoji) for emoji, _tag in options}
+    for row in get_user_custom_tag_rows(user_id):
+        short_name = row["short_name"]
+        tag = row["full_name"]
         tag = canonical_tag_name(tag)
         if tag in seen_tags:
             continue
-        if custom_index >= len(CUSTOM_TAG_REACTION_EMOJIS):
+        emoji = row["emoji"].strip()
+        normalized_emoji = normalize_reaction_emoji(emoji)
+        if not normalized_emoji or normalized_emoji in used_emojis:
+            while custom_index < len(CUSTOM_TAG_REACTION_EMOJIS):
+                candidate = CUSTOM_TAG_REACTION_EMOJIS[custom_index]
+                custom_index += 1
+                if normalize_reaction_emoji(candidate) not in used_emojis:
+                    emoji = candidate
+                    normalized_emoji = normalize_reaction_emoji(candidate)
+                    break
+            else:
+                logging.warning(
+                    "custom reaction emoji limit reached user_id=%s short_name=%s tag=%s",
+                    user_id,
+                    short_name,
+                    tag,
+                )
+                break
+        if normalized_emoji in used_emojis:
             logging.warning(
-                "custom reaction emoji limit reached user_id=%s short_name=%s tag=%s",
+                "custom reaction emoji duplicate skipped user_id=%s short_name=%s tag=%s emoji=%s",
                 user_id,
                 short_name,
                 tag,
+                emoji,
             )
-            break
-        options.append((CUSTOM_TAG_REACTION_EMOJIS[custom_index], tag))
+            continue
+        options.append((emoji, tag))
+        used_emojis.add(normalized_emoji)
         seen_tags.add(tag)
-        custom_index += 1
 
     return options
 
 
 def reaction_emoji_map(user_id=None):
-    return {emoji: tag for emoji, tag in reaction_tag_options(user_id=user_id)}
+    mapping = {}
+    for emoji, tag in reaction_tag_options(user_id=user_id):
+        mapping[emoji] = tag
+        mapping[normalize_reaction_emoji(emoji)] = tag
+    return mapping
 
 
 def register_reaction_song_message(message_id, song_id, user_id):
@@ -1281,21 +1376,25 @@ async def import_cmd(ctx):
 
 
 @bot.command(name="addtag", aliases=["tagadd","タグ追加","たぐついか"])
-async def addtag(ctx, full_name=None, short_name=None):
+async def addtag(ctx, full_name=None, short_name=None, emoji=None):
 
     if ctx.channel.id != CHANNEL_ID:
         return
 
     if not full_name or not short_name:
         await ctx.send(
-            "使い方ですわ: !addtag ガチ押し系 go"
+            "使い方だよ: `!addtag ハネリズム hn 🪽`"
         )
         return
 
-    add_custom_tag(full_name, short_name, user_id=ctx.author.id)
+    ok, message = add_custom_tag(full_name, short_name, user_id=ctx.author.id, emoji=emoji or "")
+    if not ok:
+        await ctx.send(f"⚠️ {message}")
+        return
 
+    emoji_line = f"\n{emoji}" if emoji else ""
     await ctx.send(
-        f"✅ タグ追加ですわ\n・{full_name}\n{short_name}"
+        f"✅ タグ追加したよ！\n・{full_name}\n{short_name}{emoji_line}"
     )
 
 
@@ -2604,8 +2703,11 @@ def reaction_emoji_to_tag(emoji, user_id=None, emoji_to_tag=None):
     emoji = str(emoji)
     if emoji_to_tag and emoji in emoji_to_tag:
         return canonical_tag_name(emoji_to_tag[emoji])
+    normalized_emoji = normalize_reaction_emoji(emoji)
+    if emoji_to_tag and normalized_emoji in emoji_to_tag:
+        return canonical_tag_name(emoji_to_tag[normalized_emoji])
     for e, tag in reaction_tag_options(user_id=user_id):
-        if emoji == e:
+        if normalized_emoji == normalize_reaction_emoji(e):
             return tag
     return None
 
@@ -2668,7 +2770,7 @@ def set_song_tag_by_reaction(song_id, emoji, enabled, user_id=None, emoji_to_tag
 async def add_all_tag_reactions(message, user_id=None):
     for emoji, tag in reaction_tag_options(user_id=user_id):
         try:
-            await message.add_reaction(emoji)
+            await message.add_reaction(normalize_reaction_emoji(emoji))
         except Exception:
             logging.exception("add reaction failed message_id=%s user_id=%s emoji=%s tag=%s", message.id, user_id, emoji, tag)
 
