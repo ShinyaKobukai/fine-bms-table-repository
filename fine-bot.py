@@ -76,6 +76,14 @@ def normalize_tag_input(token):
 last_search = {}
 reaction_song_messages = {}
 
+CUSTOM_TAG_REACTION_EMOJIS = [
+    "\U0001f1e6", "\U0001f1e7", "\U0001f1e8", "\U0001f1e9", "\U0001f1ea", "\U0001f1eb",
+    "\U0001f1ec", "\U0001f1ed", "\U0001f1ee", "\U0001f1ef", "\U0001f1f0", "\U0001f1f1",
+    "\U0001f1f2", "\U0001f1f3", "\U0001f1f4", "\U0001f1f5", "\U0001f1f6", "\U0001f1f7",
+    "\U0001f1f8", "\U0001f1f9", "\U0001f1fa", "\U0001f1fb", "\U0001f1fc", "\U0001f1fd",
+    "\U0001f1fe", "\U0001f1ff",
+]
+
 
 def now_text():
     return datetime.now(JST).isoformat(timespec="seconds")
@@ -860,8 +868,8 @@ async def send_single_song_embed(target, row, title="✅ 更新したよ！", co
     if user_id is None:
         user_id = getattr(getattr(target, "author", None), "id", None)
     msg = await target.send(embed=make_single_song_embed(row, title, color, user_id=user_id))
-    reaction_song_messages[msg.id] = row[0]
-    await add_all_tag_reactions(msg)
+    register_reaction_song_message(msg.id, row[0], user_id)
+    await add_all_tag_reactions(msg, user_id=user_id)
 
 
 
@@ -937,33 +945,76 @@ def tag_base_name(tag):
     return tag
 
 
-def tag_emoji(tag):
+def reaction_tag_options(user_id=None):
+    options = []
+    seen_tags = set()
+
+    for emoji, tag in TAG_REACTION_EMOJIS:
+        tag = canonical_tag_name(tag)
+        options.append((emoji, tag))
+        seen_tags.add(tag)
+
+    if user_id is None:
+        return options
+
+    custom_index = 0
+    for short_name, tag in get_all_tags(user_id=user_id).items():
+        tag = canonical_tag_name(tag)
+        if tag in seen_tags:
+            continue
+        if custom_index >= len(CUSTOM_TAG_REACTION_EMOJIS):
+            logging.warning(
+                "custom reaction emoji limit reached user_id=%s short_name=%s tag=%s",
+                user_id,
+                short_name,
+                tag,
+            )
+            break
+        options.append((CUSTOM_TAG_REACTION_EMOJIS[custom_index], tag))
+        seen_tags.add(tag)
+        custom_index += 1
+
+    return options
+
+
+def reaction_emoji_map(user_id=None):
+    return {emoji: tag for emoji, tag in reaction_tag_options(user_id=user_id)}
+
+
+def register_reaction_song_message(message_id, song_id, user_id):
+    reaction_song_messages[message_id] = {
+        "song_id": song_id,
+        "owner_user_id": str(user_id) if user_id is not None else None,
+        "emoji_to_tag": reaction_emoji_map(user_id=user_id),
+    }
+
+
+def tag_emoji(tag, user_id=None):
     base = tag_base_name(tag)
-    for emoji, name in TAG_REACTION_EMOJIS:
+    for emoji, name in reaction_tag_options(user_id=user_id):
         if name == base:
             return emoji
     return "🏷️"
 
 
-def emoji_tag_lines_from_tags(tags):
+def emoji_tag_lines_from_tags(tags, user_id=None):
     tag_list = split_tags(tags)
 
     if not tag_list:
         return "タグなし"
 
     return "\n".join(
-        f"{tag_emoji(tag)} {tag}"
+        f"{tag_emoji(tag, user_id=user_id)} {tag}"
         for tag in sort_tags(tag_list)
     )
 
 
-def reaction_guide_text():
-    return "\n".join([
-        "↔️ 横認識 / 🎵 横認識(8分系) / ↕️ 横認識(縦系)",
-        "🧱 縦連 / 👊 ガチ押し系 / 🔥 乱打 / 💪 地力上げ",
-        "💀 しょうもないラス殺し / 🗑️ ゴミ / ⭐ 良譜面",
-        "📅 日課 / 😭 惜敗",
-    ])
+def reaction_guide_text(user_id=None):
+    parts = [f"{emoji} {tag}" for emoji, tag in reaction_tag_options(user_id=user_id)]
+    lines = []
+    for index in range(0, len(parts), 3):
+        lines.append(" / ".join(parts[index:index + 3]))
+    return compact_text("\n".join(lines), 1000)
 
 
 def make_single_song_detail_embed(row, title="🎵 楽曲情報", color=0x8EC5FF, user_id=None):
@@ -986,7 +1037,7 @@ def make_single_song_detail_embed(row, title="🎵 楽曲情報", color=0x8EC5FF
         name=f"{level} {name}",
         value="\n".join([
             "🏷️ 現在のタグ",
-            emoji_tag_lines_from_tags(get_song_tags_for_display(row, user_id=user_id)),
+            emoji_tag_lines_from_tags(get_song_tags_for_display(row, user_id=user_id), user_id=user_id),
             "",
             f"💬 {memo if memo else '備考なし'}",
             "",
@@ -996,7 +1047,7 @@ def make_single_song_detail_embed(row, title="🎵 楽曲情報", color=0x8EC5FF
 
     embed.add_field(
         name="🎛️ 対応絵文字",
-        value=reaction_guide_text(),
+        value=reaction_guide_text(user_id=user_id),
         inline=False,
     )
 
@@ -1050,8 +1101,8 @@ async def search_cmd(ctx, *args):
             logging.exception("search single-result message edit failed user_id=%s", ctx.author.id)
             msg = await ctx.send(embed=embed)
 
-        reaction_song_messages[msg.id] = rows[0][0]
-        await add_all_tag_reactions(msg)
+        register_reaction_song_message(msg.id, rows[0][0], ctx.author.id)
+        await add_all_tag_reactions(msg, user_id=ctx.author.id)
         return
 
     await send_song_list_embeds(ctx, "\U0001f50e \u691c\u7d22\u7d50\u679c\u3060\u3088\uff01", rows, first_message=progress_message)
@@ -2549,9 +2600,11 @@ async def delsong_cmd(ctx, *, target=None):
 
 # FINE_REACTION_TOGGLE_V1
 
-def reaction_emoji_to_tag(emoji):
+def reaction_emoji_to_tag(emoji, user_id=None, emoji_to_tag=None):
     emoji = str(emoji)
-    for e, tag in TAG_REACTION_EMOJIS:
+    if emoji_to_tag and emoji in emoji_to_tag:
+        return canonical_tag_name(emoji_to_tag[emoji])
+    for e, tag in reaction_tag_options(user_id=user_id):
         if emoji == e:
             return tag
     return None
@@ -2563,12 +2616,12 @@ def make_reaction_tag(tag):
     return tag
 
 
-def set_song_tag_by_reaction(song_id, emoji, enabled, user_id=None):
+def set_song_tag_by_reaction(song_id, emoji, enabled, user_id=None, emoji_to_tag=None):
     started = time.perf_counter()
     result = None
     tag = None
     try:
-        tag = reaction_emoji_to_tag(emoji)
+        tag = reaction_emoji_to_tag(emoji, user_id=user_id, emoji_to_tag=emoji_to_tag)
         if not tag:
             return None
 
@@ -2612,12 +2665,12 @@ def set_song_tag_by_reaction(song_id, emoji, enabled, user_id=None):
         )
 
 
-async def add_all_tag_reactions(message):
-    for emoji, tag in TAG_REACTION_EMOJIS:
+async def add_all_tag_reactions(message, user_id=None):
+    for emoji, tag in reaction_tag_options(user_id=user_id):
         try:
             await message.add_reaction(emoji)
         except Exception:
-            pass
+            logging.exception("add reaction failed message_id=%s user_id=%s emoji=%s tag=%s", message.id, user_id, emoji, tag)
 
 
 async def refresh_reaction_song_message(payload, enabled):
@@ -2627,11 +2680,40 @@ async def refresh_reaction_song_message(payload, enabled):
     if payload.channel_id != CHANNEL_ID:
         return
 
-    song_id = reaction_song_messages.get(payload.message_id)
+    context = reaction_song_messages.get(payload.message_id)
+    if not context:
+        return
+
+    if isinstance(context, dict):
+        song_id = context.get("song_id")
+        owner_user_id = context.get("owner_user_id")
+        emoji_to_tag = context.get("emoji_to_tag") or {}
+    else:
+        song_id = context
+        owner_user_id = None
+        emoji_to_tag = {}
+
     if not song_id:
         return
 
-    fresh = set_song_tag_by_reaction(song_id, str(payload.emoji), enabled, user_id=payload.user_id)
+    if owner_user_id and str(payload.user_id) != str(owner_user_id):
+        logging.info(
+            "reaction ignored non-owner message_id=%s owner_user_id=%s payload_user_id=%s emoji=%s",
+            payload.message_id,
+            owner_user_id,
+            payload.user_id,
+            payload.emoji,
+        )
+        return
+
+    user_id = owner_user_id or str(payload.user_id)
+    fresh = set_song_tag_by_reaction(
+        song_id,
+        str(payload.emoji),
+        enabled,
+        user_id=user_id,
+        emoji_to_tag=emoji_to_tag,
+    )
     if not fresh:
         return
 
@@ -2649,7 +2731,7 @@ async def refresh_reaction_song_message(payload, enabled):
             embed=make_single_song_detail_embed(
                 fresh,
                 "🎵 楽曲情報",
-                user_id=payload.user_id,
+                user_id=user_id,
             )
         )
     except Exception:
@@ -2657,13 +2739,13 @@ async def refresh_reaction_song_message(payload, enabled):
 
     try:
         from sheet_sync import sync_song_to_sheet
-        tag_name = reaction_emoji_to_tag(str(payload.emoji))
+        tag_name = reaction_emoji_to_tag(str(payload.emoji), user_id=user_id, emoji_to_tag=emoji_to_tag)
 
         with open("/tmp/fine_sheet_sync.log", "a", encoding="utf-8") as f:
             f.write(
                 f"[sheet_sync] start enabled={enabled} "
                 f"emoji={payload.emoji} tag={tag_name} song_id={song_id} "
-                f"user={payload.user_id} bot={bot.user.id if bot.user else None}\n"
+                f"user={user_id} bot={bot.user.id if bot.user else None}\n"
             )
 
         ok = sync_song_to_sheet(
@@ -2671,7 +2753,7 @@ async def refresh_reaction_song_message(payload, enabled):
             tag_name=tag_name,
             emoji=str(payload.emoji),
             enabled=enabled,
-            user_id=payload.user_id,
+            user_id=user_id,
         )
 
         with open("/tmp/fine_sheet_sync.log", "a", encoding="utf-8") as f:
