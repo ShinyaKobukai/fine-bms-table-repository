@@ -3,8 +3,8 @@
   "tag": "日課",
   "slug": "dy",
   "fixed": true,
-  "count": 9,
-  "score_count": 7,
+  "count": 10,
+  "score_count": 8,
   "songs": [
     {
       "id": 320,
@@ -155,6 +155,23 @@
       "songdata_title": "追憶の森 -Voices of the Earth- [wide]",
       "songdata_subtitle": "",
       "url": "https://web.archive.org/web/20190322230138/http://www.hyper-laner.com/sabun/all201807_laner.rar",
+      "memo": "",
+      "tag": "日課",
+      "comment": ""
+    },
+    {
+      "id": 859,
+      "source": "st",
+      "level": "st2",
+      "title": "Mugikamagika [Toybox]",
+      "chart_name": "",
+      "display_title": "Mugikamagika [Toybox]",
+      "md5": "d104e734f46a3f18b1f37b38201c0aae",
+      "sha256": "ed6bca27d973abfb835ab643d74d94067d3629bb59e7f831d134d7cf19c1e592",
+      "artist": "otoshi.b",
+      "songdata_title": "Mugikamagika",
+      "songdata_subtitle": "[Toybox]",
+      "url": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=19&event=146",
       "memo": "",
       "tag": "日課",
       "comment": ""
