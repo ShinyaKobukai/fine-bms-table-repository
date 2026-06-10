@@ -3,7 +3,7 @@
   "tag": "縦連",
   "slug": "tt",
   "fixed": true,
-  "count": 3,
+  "count": 4,
   "score_count": 2,
   "songs": [
     {
@@ -53,6 +53,23 @@
       "songdata_title": "Central GRAY [Crazy]",
       "songdata_subtitle": "",
       "url": "http://absolute.pv.land.to/uploader/src/up4378.rar",
+      "memo": "",
+      "tag": "縦連",
+      "comment": ""
+    },
+    {
+      "id": 420,
+      "source": "st",
+      "level": "st0",
+      "title": "ちんこ音頭2012",
+      "chart_name": "",
+      "display_title": "ちんこ音頭2012",
+      "md5": "",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "http://sagena.harisen.jp/",
       "memo": "",
       "tag": "縦連",
       "comment": ""

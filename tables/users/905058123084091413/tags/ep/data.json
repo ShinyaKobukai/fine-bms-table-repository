@@ -3,7 +3,7 @@
   "tag": "地力上げ",
   "slug": "ep",
   "fixed": true,
-  "count": 2,
+  "count": 3,
   "score_count": 2,
   "songs": [
     {
@@ -36,6 +36,23 @@
       "songdata_title": "EUROBEATアイドル橘花音のテーマ",
       "songdata_subtitle": "[Muel]",
       "url": "https://stellabms.xyz/upload/4251",
+      "memo": "",
+      "tag": "地力上げ",
+      "comment": ""
+    },
+    {
+      "id": 420,
+      "source": "st",
+      "level": "st0",
+      "title": "ちんこ音頭2012",
+      "chart_name": "",
+      "display_title": "ちんこ音頭2012",
+      "md5": "",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "http://sagena.harisen.jp/",
       "memo": "",
       "tag": "地力上げ",
       "comment": ""

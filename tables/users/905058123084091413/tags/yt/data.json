@@ -3,7 +3,7 @@
   "tag": "横認識(縦系)",
   "slug": "yt",
   "fixed": true,
-  "count": 2,
+  "count": 3,
   "score_count": 1,
   "songs": [
     {
@@ -36,6 +36,23 @@
       "songdata_title": "Emporfahren (bms edit) [2424]",
       "songdata_subtitle": "",
       "url": "https://venue.bmssearch.net/ssss_2nd/4",
+      "memo": "",
+      "tag": "横認識(縦系)",
+      "comment": ""
+    },
+    {
+      "id": 420,
+      "source": "st",
+      "level": "st0",
+      "title": "ちんこ音頭2012",
+      "chart_name": "",
+      "display_title": "ちんこ音頭2012",
+      "md5": "",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "http://sagena.harisen.jp/",
       "memo": "",
       "tag": "横認識(縦系)",
       "comment": ""
