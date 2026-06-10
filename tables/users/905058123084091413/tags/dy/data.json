@@ -3,8 +3,8 @@
   "tag": "日課",
   "slug": "dy",
   "fixed": true,
-  "count": 6,
-  "score_count": 4,
+  "count": 7,
+  "score_count": 5,
   "songs": [
     {
       "id": 320,
@@ -104,6 +104,23 @@
       "songdata_title": "",
       "songdata_subtitle": "",
       "url": "http://bms.hexlataia.xyz/tables/hexajoy.html",
+      "memo": "",
+      "tag": "日課",
+      "comment": ""
+    },
+    {
+      "id": 19,
+      "source": "st",
+      "level": "st1",
+      "title": "Hazy moon [雷雨]",
+      "chart_name": "",
+      "display_title": "Hazy moon [雷雨]",
+      "md5": "496cbb0d0f6b3b7287fb360944124e85",
+      "sha256": "9ab50bfe2a5bf1c8e586c5605cdf0f4e0618cf0896059e88232dc7563b364c07",
+      "artist": "Chitose / obj:Rian",
+      "songdata_title": "Hazy moon[雷雨]",
+      "songdata_subtitle": "",
+      "url": "https://drive.google.com/open?id=1u1NTkaIfkAalc4F3a-0xiw9bCj1muBg_",
       "memo": "",
       "tag": "日課",
       "comment": ""
