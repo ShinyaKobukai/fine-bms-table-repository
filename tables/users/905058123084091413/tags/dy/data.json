@@ -3,8 +3,8 @@
   "tag": "日課",
   "slug": "dy",
   "fixed": true,
-  "count": 1,
-  "score_count": 1,
+  "count": 2,
+  "score_count": 2,
   "songs": [
     {
       "id": 320,
@@ -19,6 +19,23 @@
       "songdata_title": "EOS -PING-",
       "songdata_subtitle": "",
       "url": "http://www.mediafire.com/?9n94dyt0za3qm5e",
+      "memo": "",
+      "tag": "日課",
+      "comment": ""
+    },
+    {
+      "id": 321,
+      "source": "st",
+      "level": "st0",
+      "title": "EUROBEATアイドル橘花音のテーマ [Muel]",
+      "chart_name": "",
+      "display_title": "EUROBEATアイドル橘花音のテーマ [Muel]",
+      "md5": "2d488edb0fad6b0bce38f0440eb6e755",
+      "sha256": "cf0bc82ec8606dc718712c208f8bb410c0792cf2c1feb481caf4cf5584a24843",
+      "artist": "nmk feat.EUROBEATアイドル橘花音",
+      "songdata_title": "EUROBEATアイドル橘花音のテーマ",
+      "songdata_subtitle": "[Muel]",
+      "url": "https://stellabms.xyz/upload/4251",
       "memo": "",
       "tag": "日課",
       "comment": ""
