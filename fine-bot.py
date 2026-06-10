@@ -1125,6 +1125,26 @@ def reaction_guide_text(user_id=None):
     return compact_text("\n".join(lines), 1000)
 
 
+def quick_tag_input_text(user_id=None):
+    tags = get_all_tags(user_id=user_id)
+    preferred = ["y", "8", "yt", "tt", "go", "r", "ep", "sr", "g", "ni", "dy", "sh"]
+    keys = [key for key in preferred if key in tags]
+    keys += [key for key in tags.keys() if key not in keys]
+
+    lines = []
+    for index in range(0, len(keys), 3):
+        parts = [f"`{key}`（{tags[key]}）" for key in keys[index:index + 3]]
+        lines.append(" / ".join(parts))
+
+    lines.append("")
+    lines.append("`add ep` / `add dy` / `add ni`")
+    custom_keys = [key for key in keys if key not in preferred]
+    if custom_keys:
+        lines.append(" / ".join(f"`add {key}`" for key in custom_keys[:6]))
+    lines.append("`-dy` / `reset` / `/null`")
+    return compact_text("\n".join(lines), 1000)
+
+
 def make_single_song_detail_embed(row, title="🎵 楽曲情報", color=0x8EC5FF, user_id=None):
     embed = discord.Embed(
         title=title,
@@ -1161,15 +1181,7 @@ def make_single_song_detail_embed(row, title="🎵 楽曲情報", color=0x8EC5FF
 
     embed.add_field(
         name="✏️ このまま入力できるよ！",
-        value="\n".join([
-            "`y`（横認識） / `8`（横認識8分系） / `yt`（横認識縦系）",
-            "`tt`（縦連） / `go`（ガチ押し系） / `r`（乱打）",
-            "`ep`（地力上げ） / `sr`（ラス殺し） / `g`（ゴミ）",
-            "`ni`（良譜面） / `dy`（日課） / `sh`（惜敗）",
-            "",
-            "`add ep` / `add dy` / `add ni`",
-            "`-dy` / `reset` / `/null`",
-        ]),
+        value=quick_tag_input_text(user_id=user_id),
         inline=False,
     )
 
@@ -2851,6 +2863,23 @@ async def refresh_reaction_song_message(payload, enabled):
         )
     except Exception:
         pass
+
+    if os.getenv("ENABLE_SHEET_SYNC_ON_REACTION", "").strip() != "1":
+        logging.info(
+            "sheet sync skipped on reaction user_id=%s song_id=%s enabled=%s reason=disabled",
+            user_id,
+            song_id,
+            enabled,
+        )
+        try:
+            with open("/tmp/fine_sheet_sync.log", "a", encoding="utf-8") as f:
+                f.write(
+                    f"[sheet_sync] sheet sync skipped on reaction "
+                    f"enabled={enabled} song_id={song_id} user={user_id}\n"
+                )
+        except Exception:
+            logging.exception("failed to write sheet sync skipped log")
+        return
 
     try:
         from sheet_sync import sync_song_to_sheet
