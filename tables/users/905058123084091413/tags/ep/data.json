@@ -3,8 +3,8 @@
   "tag": "地力上げ",
   "slug": "ep",
   "fixed": true,
-  "count": 8,
-  "score_count": 6,
+  "count": 9,
+  "score_count": 7,
   "songs": [
     {
       "id": 4354,
@@ -104,6 +104,23 @@
       "songdata_title": "",
       "songdata_subtitle": "",
       "url": "http://bms.hexlataia.xyz/tables/hexajoy.html",
+      "memo": "",
+      "tag": "地力上げ",
+      "comment": ""
+    },
+    {
+      "id": 491,
+      "source": "st",
+      "level": "st1",
+      "title": "After The Rain [Drops]",
+      "chart_name": "",
+      "display_title": "After The Rain [Drops]",
+      "md5": "5227a17ac5adf4f1785a181079446b66",
+      "sha256": "f07a149f41f8789f0d0806e1559a6bf053762a27fd634ed19ce7de670b971782",
+      "artist": "ikaruga_nex",
+      "songdata_title": "After The Rain",
+      "songdata_subtitle": "[Drops]",
+      "url": "https://stellabms.xyz/upload/1929",
       "memo": "",
       "tag": "地力上げ",
       "comment": ""
