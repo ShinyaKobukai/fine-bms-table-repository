@@ -3,8 +3,8 @@
   "tag": "横認識(縦系)",
   "slug": "yt",
   "fixed": true,
-  "count": 5,
-  "score_count": 2,
+  "count": 6,
+  "score_count": 3,
   "songs": [
     {
       "id": 3176,
@@ -36,6 +36,23 @@
       "songdata_title": "Emporfahren (bms edit) [2424]",
       "songdata_subtitle": "",
       "url": "https://venue.bmssearch.net/ssss_2nd/4",
+      "memo": "",
+      "tag": "横認識(縦系)",
+      "comment": ""
+    },
+    {
+      "id": 4354,
+      "source": "sl",
+      "level": "sl11",
+      "title": "地獄の業火で焼肉大会！？ [地獄の筋肉でガチ押し大会]",
+      "chart_name": "",
+      "display_title": "地獄の業火で焼肉大会！？ [地獄の筋肉でガチ押し大会]",
+      "md5": "dc958cc99785ee53f09155a078df3a18",
+      "sha256": "abbdf70fd89974edf5a3cd6530d7a9e0826058284464129b342a3777230259ff",
+      "artist": "さかみりと / img:しぐれぷに子",
+      "songdata_title": "地獄の業火で焼肉大会！？",
+      "songdata_subtitle": "[地獄の筋肉でガチ押し大会]",
+      "url": "https://stellabms.xyz/upload/1689",
       "memo": "",
       "tag": "横認識(縦系)",
       "comment": ""

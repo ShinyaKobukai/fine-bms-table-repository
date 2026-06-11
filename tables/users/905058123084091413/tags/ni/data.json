@@ -3,8 +3,8 @@
   "tag": "良譜面",
   "slug": "ni",
   "fixed": true,
-  "count": 2,
-  "score_count": 2,
+  "count": 3,
+  "score_count": 3,
   "songs": [
     {
       "id": 2978,
@@ -19,6 +19,23 @@
       "songdata_title": "Ray of Chain (ShiningStar)",
       "songdata_subtitle": "",
       "url": "https://stellabms.xyz/upload/1489",
+      "memo": "",
+      "tag": "良譜面",
+      "comment": ""
+    },
+    {
+      "id": 4354,
+      "source": "sl",
+      "level": "sl11",
+      "title": "地獄の業火で焼肉大会！？ [地獄の筋肉でガチ押し大会]",
+      "chart_name": "",
+      "display_title": "地獄の業火で焼肉大会！？ [地獄の筋肉でガチ押し大会]",
+      "md5": "dc958cc99785ee53f09155a078df3a18",
+      "sha256": "abbdf70fd89974edf5a3cd6530d7a9e0826058284464129b342a3777230259ff",
+      "artist": "さかみりと / img:しぐれぷに子",
+      "songdata_title": "地獄の業火で焼肉大会！？",
+      "songdata_subtitle": "[地獄の筋肉でガチ押し大会]",
+      "url": "https://stellabms.xyz/upload/1689",
       "memo": "",
       "tag": "良譜面",
       "comment": ""
