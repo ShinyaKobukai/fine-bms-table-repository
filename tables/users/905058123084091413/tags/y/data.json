@@ -3,7 +3,7 @@
   "tag": "横認識",
   "slug": "y",
   "fixed": true,
-  "count": 16,
+  "count": 17,
   "score_count": 13,
   "songs": [
     {
@@ -155,6 +155,23 @@
       "songdata_title": "",
       "songdata_subtitle": "",
       "url": "https://web.archive.org/web/20190917071620/http://sabosabun.tank.jp/",
+      "memo": "",
+      "tag": "横認識",
+      "comment": ""
+    },
+    {
+      "id": 550,
+      "source": "st",
+      "level": "st1",
+      "title": "Electric Emotion -Negative Emotion-",
+      "chart_name": "",
+      "display_title": "Electric Emotion -Negative Emotion-",
+      "md5": "",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "https://parksu.darksabun.club/",
       "memo": "",
       "tag": "横認識",
       "comment": ""

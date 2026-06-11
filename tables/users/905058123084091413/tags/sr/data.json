@@ -3,7 +3,7 @@
   "tag": "ラス殺し",
   "slug": "sr",
   "fixed": true,
-  "count": 2,
+  "count": 3,
   "score_count": 1,
   "songs": [
     {
@@ -19,6 +19,23 @@
       "songdata_title": "",
       "songdata_subtitle": "",
       "url": "https://web.archive.org/web/20190917071620/http://sabosabun.tank.jp/",
+      "memo": "",
+      "tag": "ラス殺し",
+      "comment": ""
+    },
+    {
+      "id": 550,
+      "source": "st",
+      "level": "st1",
+      "title": "Electric Emotion -Negative Emotion-",
+      "chart_name": "",
+      "display_title": "Electric Emotion -Negative Emotion-",
+      "md5": "",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "https://parksu.darksabun.club/",
       "memo": "",
       "tag": "ラス殺し",
       "comment": ""
