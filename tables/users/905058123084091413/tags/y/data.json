@@ -3,7 +3,7 @@
   "tag": "横認識",
   "slug": "y",
   "fixed": true,
-  "count": 15,
+  "count": 16,
   "score_count": 13,
   "songs": [
     {
@@ -138,6 +138,23 @@
       "songdata_title": "",
       "songdata_subtitle": "",
       "url": "http://bms.hexlataia.xyz/tables/hexajoy.html",
+      "memo": "",
+      "tag": "横認識",
+      "comment": ""
+    },
+    {
+      "id": 543,
+      "source": "st",
+      "level": "st1",
+      "title": "dolorosa melodia　 -EX-",
+      "chart_name": "",
+      "display_title": "dolorosa melodia　 -EX-",
+      "md5": "",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "https://web.archive.org/web/20190917071620/http://sabosabun.tank.jp/",
       "memo": "",
       "tag": "横認識",
       "comment": ""

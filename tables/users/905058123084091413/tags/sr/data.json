@@ -3,9 +3,26 @@
   "tag": "ラス殺し",
   "slug": "sr",
   "fixed": true,
-  "count": 1,
+  "count": 2,
   "score_count": 1,
   "songs": [
+    {
+      "id": 543,
+      "source": "st",
+      "level": "st1",
+      "title": "dolorosa melodia　 -EX-",
+      "chart_name": "",
+      "display_title": "dolorosa melodia　 -EX-",
+      "md5": "",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "https://web.archive.org/web/20190917071620/http://sabosabun.tank.jp/",
+      "memo": "",
+      "tag": "ラス殺し",
+      "comment": ""
+    },
     {
       "id": 873,
       "source": "st",
