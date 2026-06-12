@@ -38,6 +38,7 @@ TAG_ALIASES = {
     "ep": "地力上げ",
     "ni": "良譜面",
     "g": "ゴミ",
+    "dy": "日課",
     "sh": "惜敗",
 }
 
@@ -592,7 +593,53 @@ def score_abmd5_candidate(song_row, songdata_row):
     return score, "+".join(reasons) or "text"
 
 
-def infer_abmd5_match(song_row):
+def parse_key_count_token(token):
+    normalized = normalize_text(token).replace("_", "").replace("-", "")
+    if normalized in {"keyany", "anykey", "allkey", "allkeys"}:
+        return None, True
+    match = re.fullmatch(r"(?:key)?(5|7|9|10|14)(?:key|keys|k)?", normalized)
+    if not match:
+        return None, False
+    return int(match.group(1)), True
+
+
+def songdata_key_count(songdata_row):
+    raw_key = normalize_text(songdata_row.get("key_count", "")).strip()
+    if raw_key in {"5", "7", "9", "10", "14"}:
+        return int(raw_key)
+    raw_match = re.fullmatch(r"(?:key)?(5|7|9|10|14)(?:key|keys|k)?", raw_key)
+    if raw_match:
+        return int(raw_match.group(1))
+
+    values = [
+        songdata_row.get("title", ""),
+        songdata_row.get("subtitle", ""),
+    ]
+    text = normalize_text(" ".join(str(value or "") for value in values))
+    for pattern in (
+        r"(?<!\d)(5|7|9|10|14)\s*(?:key|keys|k)(?![a-z0-9])",
+        r"(?<!\d)(5|7|9|10|14)\s*鍵",
+    ):
+        match = re.search(pattern, text)
+        if match:
+            return int(match.group(1))
+    if re.search(r"\bdp\b|double", text):
+        return 14
+    if re.search(r"\bsp\b|single", text):
+        return 7
+    return None
+
+
+def songdata_matches_key_preference(songdata_row, preferred_key_count):
+    if preferred_key_count is None:
+        return True
+    detected = songdata_key_count(songdata_row)
+    if detected is None:
+        return True
+    return detected == preferred_key_count
+
+
+def infer_abmd5_match(song_row, preferred_key_count=7):
     from table_generator import load_songdata_rows
 
     rows = load_songdata_rows()
@@ -600,6 +647,8 @@ def infer_abmd5_match(song_row):
     for songdata_row in rows:
         md5 = songdata_row.get("md5", "")
         if not valid_md5(md5):
+            continue
+        if not songdata_matches_key_preference(songdata_row, preferred_key_count):
             continue
         score, reason = score_abmd5_candidate(song_row, songdata_row)
         if score >= 70:
@@ -619,15 +668,57 @@ def infer_abmd5_match(song_row):
     return top, top_reason, top_score, "", None
 
 
-def auto_abmd5_candidates_for_user(user_id, tag_name=None, limit=50):
+def auto_abmd5_candidates_for_user(user_id, tag_name=None, limit=50, preferred_key_count=7):
     from table_generator import missing_md5_records
 
     missing = missing_md5_records(str(user_id), tag_name=tag_name)
+    con = db()
+    try:
+        ensure_user_tags_table(con)
+        ensure_md5_overrides_table_bot(con)
+        auto_override_rows = con.execute(
+            """
+            SELECT DISTINCT
+                s.id,
+                s.level,
+                s.title,
+                s.chart_name,
+                ut.tag_name,
+                s.url
+            FROM user_tags ut
+            JOIN songs s ON s.id = ut.song_id
+            JOIN md5_overrides mo ON mo.song_id = s.id
+            WHERE ut.user_id=?
+              AND COALESCE(mo.source, '')='auto_abmd5'
+            """,
+            (str(user_id),),
+        ).fetchall()
+    finally:
+        con.close()
+
+    auto_override_items = []
+    for song_id, level, title, chart_name, user_tag, url in auto_override_rows:
+        user_tag = canonical_tag_name(user_tag)
+        if tag_name and not tag_matches(user_tag, tag_name):
+            continue
+        auto_override_items.append(
+            {
+                "song_id": song_id,
+                "level": level or "",
+                "title": title or "",
+                "chart_name": chart_name or "",
+                "tag": user_tag,
+                "url": url or "",
+                "source": "auto_abmd5",
+            }
+        )
+
+    targets = list(missing) + auto_override_items
     seen = set()
     candidates = []
     skipped = []
 
-    for item in missing:
+    for item in targets:
         song_id = item["song_id"]
         if song_id in seen:
             continue
@@ -649,7 +740,10 @@ def auto_abmd5_candidates_for_user(user_id, tag_name=None, limit=50):
             skipped.append(skipped_item)
             continue
 
-        found, reason, score, detail, rejected = infer_abmd5_match(song_row)
+        found, reason, score, detail, rejected = infer_abmd5_match(
+            song_row,
+            preferred_key_count=preferred_key_count,
+        )
         if not found and rejected:
             found = rejected
             reason = f"nearest-{reason}"
@@ -1206,7 +1300,7 @@ async def md5_help_cmd(ctx):
         "md5補正は全ユーザー共通の辞書に入るよ。誤登録したら戻せるよ。",
         [
             ("確認", help_code("!missingmd5", "!missingmd5 日課")),
-            ("自動登録", help_code("!abmd5 auto", "!abmd5 auto 日課")),
+            ("自動登録", help_code("!abmd5 auto", "!abmd5 auto 日課", "!abmd5 auto key10", "!abmd5 auto 日課 key10")),
             ("手動登録", help_code("!abmd5 1 0123456789abcdef0123456789abcdef", "ins md5 0123456789abcdef0123456789abcdef 曲名 [差分名]")),
             ("取り消し", help_code("!abmd5 -1", "!abmd5 -曲名", "!abmd5 --clear-all")),
         ],
@@ -1761,7 +1855,7 @@ async def abmd5_cmd(ctx, *args):
             "```text\n!abmd5 1 0123456789abcdef0123456789abcdef\n```\n"
             "```text\n!abmd5 -1\n```\n"
             "```text\n!abmd5 --clear-all\n```\n"
-            "```text\n!abmd5 auto\n```"
+            "```text\n!abmd5 auto\n!abmd5 auto key10\n```"
         )
         return
 
@@ -1769,17 +1863,29 @@ async def abmd5_cmd(ctx, *args):
     args = list(args)
     if args[0] in {"auto", "guess", "infer"}:
         tag_name = None
+        preferred_key_count = 7
         if len(args) > 1:
-            tag_token = " ".join(args[1:]).strip()
-            tag_name = resolve_tag_fuzzy(tag_token, user_id=ctx.author.id) or resolve_tag(tag_token, user_id=ctx.author.id)
-            if not tag_name:
+            tag_parts = []
+            for token in args[1:]:
+                parsed_key_count, is_key_token = parse_key_count_token(token)
+                if is_key_token:
+                    preferred_key_count = parsed_key_count
+                else:
+                    tag_parts.append(token)
+
+            tag_token = " ".join(tag_parts).strip()
+            if tag_token:
+                tag_name = resolve_tag_fuzzy(tag_token, user_id=ctx.author.id) or resolve_tag(tag_token, user_id=ctx.author.id)
+            if tag_token and not tag_name:
                 await ctx.send(f"⚠️ `{tag_token}` はタグに見つからなかったみたいだよ！")
                 return
+
+        key_label = "key指定なし" if preferred_key_count is None else f"{preferred_key_count}key"
 
         started = time.perf_counter()
         progress = await ctx.send(
             "🔎 md5候補を推定しているよ！\n"
-            "最近接の候補が取れた曲はまとめて登録するよ。少し待ってね！"
+            f"最近接の候補が取れた曲はまとめて登録するよ。対象: {key_label}"
         )
         try:
             await progress.edit(
@@ -1797,7 +1903,11 @@ async def abmd5_cmd(ctx, *args):
             loop = asyncio.get_running_loop()
             candidates, skipped, total = await loop.run_in_executor(
                 None,
-                lambda: auto_abmd5_candidates_for_user(ctx.author.id, tag_name=tag_name),
+                lambda: auto_abmd5_candidates_for_user(
+                    ctx.author.id,
+                    tag_name=tag_name,
+                    preferred_key_count=preferred_key_count,
+                ),
             )
             await progress.edit(
                 content=(
@@ -1815,6 +1925,7 @@ async def abmd5_cmd(ctx, *args):
         lines = [
             "✅ md5候補を一括登録したよ！",
             f"対象 {total}曲 / 登録 {len(candidates)}曲 / 見送り {len(skipped)}曲",
+            f"key: {key_label}",
             f"処理時間: {time.perf_counter() - started:.1f}秒",
             "source: auto_abmd5（履歴あり）",
             "",
@@ -3062,7 +3173,8 @@ def get_all_tags(user_id=None):
                 """,
                 (str(user_id),),
             ):
-                tags[short_name] = canonical_tag_name(full_name)
+                if short_name not in tags:
+                    tags[short_name] = canonical_tag_name(full_name)
     finally:
         con.close()
 

@@ -236,10 +236,19 @@ def songdata_select_sql(cur):
     url_expr = "url" if "url" in cols else "'' AS url"
     url_diff_expr = "url_diff" if "url_diff" in cols else "'' AS url_diff"
     level_expr = "level" if "level" in cols else "'' AS level"
+    key_col = next(
+        (
+            col
+            for col in ("key_count", "keys", "key", "mode", "play_mode", "playmode")
+            if col in cols
+        ),
+        None,
+    )
+    key_expr = f'"{key_col}" AS key_count' if key_col else "'' AS key_count"
     return (
         "SELECT "
         f"md5, {sha_expr}, title, {subtitle_expr}, {artist_expr}, "
-        f"{url_expr}, {url_diff_expr}, {level_expr} "
+        f"{url_expr}, {url_diff_expr}, {level_expr}, {key_expr} "
         "FROM song"
     )
 
@@ -257,7 +266,7 @@ def unique_songdata_rows(rows):
 
 
 def songdata_row_to_dict(row):
-    md5, sha256, title, subtitle, artist, url, url_diff, level = row
+    md5, sha256, title, subtitle, artist, url, url_diff, level, key_count = row
     return {
         "md5": md5 or "",
         "sha256": sha256 or "",
@@ -267,6 +276,7 @@ def songdata_row_to_dict(row):
         "url": url or "",
         "url_diff": url_diff or "",
         "level": level or "",
+        "key_count": key_count or "",
     }
 
 
