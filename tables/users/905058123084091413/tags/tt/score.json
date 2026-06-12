@@ -9,6 +9,15 @@
     "tag": "縦連"
   },
   {
+    "level": "sl3",
+    "title": "Neo Side",
+    "artist": "",
+    "comment": "縦連",
+    "md5": "6db6517799e45781adbd48a9b96afa05",
+    "url_diff": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=332&event=140",
+    "tag": "縦連"
+  },
+  {
     "level": "sl10",
     "title": "Central GRAY [Crazy]",
     "artist": "P.E. / D",
@@ -18,12 +27,39 @@
     "tag": "縦連"
   },
   {
+    "level": "st0",
+    "title": "ちんこ音頭2012",
+    "artist": "",
+    "comment": "縦連",
+    "md5": "a3c4f1060479d87a9a7d33a48ec1b094",
+    "url_diff": "http://sagena.harisen.jp/",
+    "tag": "縦連"
+  },
+  {
+    "level": "st0",
+    "title": "情熱の大阪",
+    "artist": "",
+    "comment": "縦連",
+    "md5": "8a5cfc7467f2b4f060eef2e09b4c86f7",
+    "url_diff": "http://bms.hexlataia.xyz/tables/hexajoy.html",
+    "tag": "縦連"
+  },
+  {
     "level": "st1",
     "title": "After The Rain [Drops]",
     "artist": "ikaruga_nex",
     "comment": "縦連",
     "md5": "5227a17ac5adf4f1785a181079446b66",
     "url_diff": "https://stellabms.xyz/upload/1929",
+    "tag": "縦連"
+  },
+  {
+    "level": "st1",
+    "title": "dolorosa melodia　 -EX-",
+    "artist": "",
+    "comment": "縦連",
+    "md5": "1314b6497ed8ee213cb044e5a9fe0ddd",
+    "url_diff": "https://web.archive.org/web/20190917071620/http://sabosabun.tank.jp/",
     "tag": "縦連"
   },
   {
