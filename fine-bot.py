@@ -197,14 +197,17 @@ def delete_custom_tag(short_name, user_id):
     con = db()
     ensure_user_custom_tags_table(con)
 
-    con.execute(
+    cur = con.execute(
         "DELETE FROM user_custom_tags WHERE user_id=? AND short_name=?",
         (str(user_id), short_name)
     )
 
     con.commit()
     con.close()
-    schedule_auto_table_publish(user_id, reason="custom_tag_deleted")
+    if cur.rowcount > 0:
+        schedule_auto_table_publish(user_id, reason="custom_tag_deleted")
+        return True
+    return False
 
 
 def get_user_custom_tag_rows(user_id):
@@ -375,7 +378,6 @@ def parse_edit_args(args, user_id=None):
         memo = memo[:150]
 
     return join_tags(tags), memo
-
 
 
 
@@ -805,6 +807,7 @@ async def help_cmd(ctx):
         ("md5未取得", "!missingmd5", "自分のタグ付き曲のうち、難易度表に出ないmd5未取得曲を確認するよ。"),
         ("md5未取得 タグ指定", "!missingmd5 日課", "指定タグだけのmd5未取得曲を確認するよ。"),
         ("難易度表生成", "!maketables", "自分専用のタグ別難易度表を生成して、登録URLを返すよ。"),
+        ("難易度表生成 タグ指定", "!maketables 日課", "生成後、指定タグの登録URLだけ返すよ。"),
         ("テーブル一覧", "!tables", "登録済みの取得元テーブルを見るよ。"),
         ("テーブル追加", "!addtable テーブル名", "手動曲追加用のテーブルを作るよ。"),
         ("曲追加", '!addsong テーブル名 lv12 "曲名" "差分名" y 備考', "手動で曲を追加するよ。"),
@@ -1435,7 +1438,10 @@ async def deltag(ctx, short_name=None):
         )
         return
 
-    delete_custom_tag(short_name, user_id=ctx.author.id)
+    deleted = delete_custom_tag(short_name, user_id=ctx.author.id)
+    if not deleted:
+        await ctx.send(f"⚠️ `{short_name}` は追加タグに見つからなかったみたいだよ！")
+        return
 
     await ctx.send(
         f"🗑️ タグ削除ですわ\n{short_name}"
@@ -1659,6 +1665,12 @@ async def edit_cmd(ctx, index: int = None, *args):
     row = rows[index - 1]
     body = " ".join(args).strip()
 
+    if not body:
+        fresh_row = get_song_by_id(row[0]) or row
+        last_search[ctx.author.id] = [fresh_row]
+        await send_single_song_embed(ctx, fresh_row, "🎵 楽曲情報だよ！", user_id=ctx.author.id)
+        return
+
     if normalize_text(body) == "reset":
         fresh_before = get_song_by_id(row[0]) or row
         sync_removed_tags_to_sheet(
@@ -1669,10 +1681,6 @@ async def edit_cmd(ctx, index: int = None, *args):
         reset_song(row, user_id=ctx.author.id)
         fresh_row = get_song_by_id(row[0]) or row
         await send_single_song_embed(ctx, fresh_row, "🗑️ 初期化したよ！", user_id=ctx.author.id)
-        return
-
-    if not body:
-        await ctx.send("タグか備考を入力してくださいませ。例: `!e 1 y r 良い`")
         return
 
     parts = body.split()
@@ -2174,7 +2182,7 @@ def search_by_tag(args, user_id=None):
     resolved_tags = []
 
     for token in tag_tokens:
-        tag = resolve_tag_fuzzy(token, user_id=user_id)
+        tag = resolve_tag_fuzzy(token, user_id=user_id) or resolve_tag(token, user_id=user_id)
         if tag:
             resolved_tags.append(tag)
 
@@ -3034,11 +3042,19 @@ bot.remove_command("maketables")
 
 
 @bot.command(name="maketables", aliases=["make_tables", "tablesgen"])
-async def maketables_cmd_progress(ctx):
+async def maketables_cmd_progress(ctx, *tag_args):
     if ctx.channel.id != CHANNEL_ID:
         return
 
     user_id = str(ctx.author.id)
+    target_tag_name = None
+    if tag_args:
+        tag_token = " ".join(tag_args).strip()
+        target_tag_name = resolve_tag_fuzzy(tag_token, user_id=ctx.author.id) or resolve_tag(tag_token, user_id=ctx.author.id)
+        if not target_tag_name:
+            await ctx.send(f"⚠️ `{tag_token}` はタグに見つからなかったみたいだよ！ `!t` で確認してね。")
+            return
+
     table_base_url = os.getenv("TABLE_BASE_URL", "").strip()
     progress_message = await ctx.send("📋 難易度表生成を開始したよ！")
     logging.info(
@@ -3233,7 +3249,12 @@ async def maketables_cmd_progress(ctx):
     tags = result["tags"]
     non_empty = [tag for tag in tags if tag["count"] > 0]
     table_links = [tag for tag in tags if tag.get("table_url")]
-    lines = [
+    if target_tag_name:
+        table_links = [
+            tag for tag in table_links
+            if tag_matches(tag.get("tag_name", ""), target_tag_name)
+        ]
+    header_lines = [
         "✅ 難易度表を公開できたよ！",
         f"user_id: {user_id}",
         f"生成タグ数: {len(tags)}",
@@ -3242,17 +3263,54 @@ async def maketables_cmd_progress(ctx):
         f"status: {deploy_result.get('message', '')}",
         f"commit: {deploy_result.get('commit', '')}",
         "",
-        "beatoraja登録URL:",
+        f"beatoraja登録URL: {target_tag_name}" if target_tag_name else "beatoraja登録URL:",
     ]
 
-    for tag in table_links[:12]:
-        lines.append(f"{tag['tag_name']} ({tag['count']})")
-        lines.append(f"```text\n{tag['table_url']}\n```")
+    def table_link_lines(link_tags, page=None, total_pages=None):
+        lines = []
+        if page is not None and total_pages is not None:
+            lines.append(f"beatoraja登録URL 続き {page}/{total_pages}:")
+            lines.append("")
+        for tag in link_tags:
+            lines.append(f"{tag['tag_name']} ({tag['count']})")
+            lines.append(f"```text\n{tag['table_url']}\n```")
+        return lines
 
-    if len(table_links) > 12:
-        lines.append(f"...ほか {len(table_links) - 12} タグあるよ！")
+    def build_table_link_chunks(link_tags, first_prefix_len=0, limit=1750):
+        chunks = []
+        current = []
+        current_len = first_prefix_len
+        for tag in link_tags:
+            item_lines = table_link_lines([tag])
+            item_text = "\n".join(item_lines)
+            item_len = len(item_text) + 1
+            if current and current_len + item_len > limit:
+                chunks.append(current)
+                current = []
+                current_len = 0
+            current.append(tag)
+            current_len += item_len
+        if current:
+            chunks.append(current)
+        return chunks
 
-    await update_progress("\n".join(lines), label="complete")
+    chunks = build_table_link_chunks(
+        table_links,
+        first_prefix_len=len("\n".join(header_lines)) + 2,
+    )
+    if not chunks:
+        await update_progress("\n".join(header_lines), label="complete")
+        return
+
+    total_pages = len(chunks)
+    first_lines = header_lines + table_link_lines(chunks[0])
+    if total_pages > 1:
+        first_lines.append("")
+        first_lines.append(f"続きのURLがあと {total_pages - 1} 件あるよ！")
+    await update_progress("\n".join(first_lines)[:1900], label="complete")
+
+    for page, chunk in enumerate(chunks[1:], 2):
+        await ctx.send("\n".join(table_link_lines(chunk, page=page, total_pages=total_pages))[:1900])
 
 
 init_db()
