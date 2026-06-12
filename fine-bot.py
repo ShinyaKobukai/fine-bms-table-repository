@@ -606,16 +606,16 @@ def infer_abmd5_match(song_row):
 
     scored.sort(key=lambda item: item[0], reverse=True)
     if not scored:
-        return None, "no_candidate", 0, ""
+        return None, "no_candidate", 0, "", None
 
     top_score, top_reason, top = scored[0]
     second_score = scored[1][0] if len(scored) > 1 else 0
     if top_score < 82 and top_score - second_score < 15:
-        return None, "ambiguous", top_score, top_reason
+        return None, "ambiguous", top_score, top_reason, top
     if top_score >= 82 and second_score and top_score - second_score < 4:
-        return None, "ambiguous", top_score, top_reason
+        return None, "ambiguous", top_score, top_reason, top
 
-    return top, top_reason, top_score, ""
+    return top, top_reason, top_score, "", None
 
 
 def auto_abmd5_candidates_for_user(user_id, tag_name=None, limit=50):
@@ -632,17 +632,33 @@ def auto_abmd5_candidates_for_user(user_id, tag_name=None, limit=50):
             continue
         seen.add(song_id)
         if len(candidates) >= limit:
-            skipped.append((item, "limit"))
+            skipped_item = dict(item)
+            skipped_item["reason"] = "limit"
+            skipped_item["score"] = 0
+            skipped_item["detail"] = ""
+            skipped.append(skipped_item)
             continue
 
         song_row = get_song_by_id(song_id)
         if not song_row:
-            skipped.append((item, "missing_song"))
+            skipped_item = dict(item)
+            skipped_item["reason"] = "missing_song"
+            skipped_item["score"] = 0
+            skipped_item["detail"] = ""
+            skipped.append(skipped_item)
             continue
 
-        found, reason, score, detail = infer_abmd5_match(song_row)
+        found, reason, score, detail, rejected = infer_abmd5_match(song_row)
         if not found:
-            skipped.append((item, detail or reason))
+            skipped_item = dict(item)
+            skipped_item["reason"] = reason
+            skipped_item["score"] = score
+            skipped_item["detail"] = detail or ""
+            if rejected:
+                skipped_item["songdata_title"] = rejected.get("title", "")
+                skipped_item["songdata_subtitle"] = rejected.get("subtitle", "")
+                skipped_item["md5"] = rejected.get("md5", "")
+            skipped.append(skipped_item)
             continue
 
         candidates.append(
@@ -1694,9 +1710,35 @@ async def abmd5_cmd(ctx, *args):
                 await ctx.send(f"⚠️ `{tag_token}` はタグに見つからなかったみたいだよ！")
                 return
 
-        progress = await ctx.send("🔎 md5候補を推定しているよ！")
+        started = time.perf_counter()
+        progress = await ctx.send(
+            "🔎 md5候補を推定しているよ！\n"
+            "songdata.db と未取得曲を照合中だよ。少し待ってね！"
+        )
         try:
-            candidates, skipped, total = auto_abmd5_candidates_for_user(ctx.author.id, tag_name=tag_name)
+            await progress.edit(
+                content=(
+                    "🔎 md5候補を推定しているよ！\n"
+                    "[1/3] md5未取得曲を確認中..."
+                )
+            )
+            await progress.edit(
+                content=(
+                    "🔎 md5候補を推定しているよ！\n"
+                    "[2/3] songdata.db と照合中..."
+                )
+            )
+            loop = asyncio.get_running_loop()
+            candidates, skipped, total = await loop.run_in_executor(
+                None,
+                lambda: auto_abmd5_candidates_for_user(ctx.author.id, tag_name=tag_name),
+            )
+            await progress.edit(
+                content=(
+                    "🔎 md5候補を推定しているよ！\n"
+                    "[3/3] 結果をまとめているよ..."
+                )
+            )
         except Exception as e:
             logging.exception("abmd5 auto failed user_id=%s tag=%s", ctx.author.id, tag_name or "")
             await progress.edit(content=f"❌ md5推定に失敗したみたいだよ。\n{concise_error(e)}")
@@ -1707,9 +1749,12 @@ async def abmd5_cmd(ctx, *args):
             f"対象: {total}曲",
             f"候補: {len(candidates)}曲",
             f"見送り: {len(skipped)}曲",
+            f"処理時間: {time.perf_counter() - started:.1f}秒",
             "※まだ登録していないよ。確認して `!abmd5 曲ID md5` で入れてね。",
             "",
         ]
+        if candidates:
+            lines.append("採用候補:")
         for item in candidates[:10]:
             lines.append(f"{item['song_id']}: {item['level']} {compact_text(item['title'], 45)}")
             matched_name = item["songdata_title"]
@@ -1723,9 +1768,23 @@ async def abmd5_cmd(ctx, *args):
             lines.append(f"...ほか {len(candidates) - 10} 曲候補があるよ！")
         if skipped:
             lines.append("")
-            lines.append("見送り例:")
-            for item, reason in skipped[:5]:
-                lines.append(f"{item['song_id']}: {compact_text(item['title'], 35)} ({reason})")
+            lines.append("見送り例（登録していないよ）:")
+            for item in skipped[:5]:
+                lines.append(f"{item['song_id']}: {compact_text(item['title'], 35)}")
+                reason_text = item.get("reason", "")
+                detail_text = item.get("detail", "")
+                score_text = item.get("score", 0)
+                if detail_text:
+                    lines.append(f"見送り理由: {reason_text} ({detail_text}) score={score_text}")
+                else:
+                    lines.append(f"見送り理由: {reason_text} score={score_text}")
+                matched_name = item.get("songdata_title", "")
+                if item.get("songdata_subtitle"):
+                    matched_name = f"{matched_name} {item['songdata_subtitle']}"
+                if matched_name:
+                    lines.append(f"最接近: {compact_text(matched_name, 45)}")
+                    if item.get("md5"):
+                        lines.append(f"md5: {item['md5']}")
 
         await progress.edit(content="\n".join(lines)[:1900])
         return
