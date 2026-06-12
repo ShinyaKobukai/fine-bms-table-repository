@@ -1095,85 +1095,137 @@ def compact_text(text, limit=40):
 
 
 
+def help_code(*lines):
+    return "```text\n" + "\n".join(lines) + "\n```"
+
+
+async def send_help_embed(ctx, title, description, sections, footer=None):
+    if ctx.channel.id != CHANNEL_ID:
+        return
+
+    embed = discord.Embed(title=title, description=description, color=EMBED_BLUE)
+    for name, body in sections:
+        embed.add_field(name=name, value=body, inline=False)
+    if footer:
+        embed.set_footer(text=footer)
+    await ctx.send(embed=embed)
+
+
 @bot.command(name="help", aliases=["h", "ヘルプ", "へるぷ"])
 async def help_cmd(ctx):
     if ctx.channel.id != CHANNEL_ID:
         return
 
-    def command_block(command, description):
-        return f"```text\n{command}\n```\n{description}"
-
-    fields = [
-        ("検索", "!s レシュ", "曲名・差分名・レベル・タグ・備考から検索するよ。1件だけならリアクション編集もできるよ。"),
-        ("タグ検索", "!ts 日課", "指定タグが付いた曲を検索するよ。例: `!ts sl12 日課`"),
-        ("タグ一覧", "!t", "自分が使える固定タグ・追加タグを表示するよ。"),
-        ("タグ数", "!tagcount", "自分のタグ件数を表示するよ。固定タグは0件でも出るよ。"),
-        ("タグ別レベル", "!tl 日課", "指定タグの曲をレベル別に見るよ。"),
-        ("タグ追加", "!addtag ハネリズム hn 🪽", "自分用のタグを追加するよ。3つ目はリアクション絵文字だよ。"),
-        ("タグ削除", "!deltag hn", "自分用の追加タグを削除するよ。"),
-        ("編集", "!e 1 y ep", "`!s` の検索結果番号を指定してタグや備考を編集するよ。"),
-        ("件数", "!count レシュ", "検索条件に合う曲数を数えるよ。"),
-        ("md5未取得", "!missingmd5", "自分のタグ付き曲のうち、難易度表に出ないmd5未取得曲を確認するよ。"),
-        ("md5未取得 タグ指定", "!missingmd5 日課", "指定タグだけのmd5未取得曲を確認するよ。"),
-        ("md5補正登録", "!abmd5 1 0123456789abcdef0123456789abcdef", "`!s` 後の番号、song_id、曲名でmd5補正を登録するよ。"),
-        ("md5補正削除", "!abmd5 -1", "登録したmd5補正を削除するよ。例: `!abmd5 -曲名`"),
-        ("md5補正 全削除", "!abmd5 --clear-all", "abmd5で登録したmd5補正を一度空にするよ。履歴は残るよ。"),
-        ("md5直接登録", "ins md5 0123456789abcdef0123456789abcdef 曲名 [差分名]", "`!s` で1曲に絞った表示名と完全一致した時だけmd5登録するよ。"),
-        ("md5最近接登録", "!abmd5 auto", "未取得曲の最近接md5候補を一括登録するよ。候補が取れない曲は見送るよ。"),
-        ("難易度表生成", "!maketables", "自分専用のタグ別難易度表を生成して、登録URLを返すよ。"),
-        ("難易度表生成 タグ指定", "!maketables 日課", "生成後、指定タグの登録URLだけ返すよ。"),
-        ("テーブル一覧", "!tables", "登録済みの取得元テーブルを見るよ。"),
-        ("テーブル追加", "!addtable テーブル名", "手動曲追加用のテーブルを作るよ。"),
-        ("曲追加", '!addsong テーブル名 lv12 "曲名" "差分名" y 備考', "手動で曲を追加するよ。"),
-        ("タグ順", "!tagorder dy 1", "固定タグや短縮名の表示順を変更するよ。"),
-        ("テーブル削除", "!deltable テーブル名", "手動追加用テーブルを削除するよ。"),
-        ("曲削除", "!delsong 1", "`!s` の検索結果番号を指定して曲を削除するよ。"),
-        ("取り込み", "!import", "登録テーブルから曲を取り込むよ。"),
-    ]
-
-    embed = discord.Embed(
-        title="📖 Fine Bot ヘルプだよ！",
-        description="コピペしやすいように、1コマンドずつ分けてあるよ。",
-        color=EMBED_BLUE,
+    await send_help_embed(
+        ctx,
+        "📖 Fine Bot ヘルプだよ！",
+        "よく使う入口だけまとめたよ。詳しい操作は分野別ヘルプを見てね！",
+        [
+            (
+                "まず使うもの",
+                help_code(
+                    "!s 曲名",
+                    "!e 1 y ep",
+                    "!maketables",
+                    "!taghelp",
+                    "!tablehelp",
+                    "!md5help",
+                )
+                + "検索して、タグを付けて、難易度表を作る流れだよ。",
+            ),
+            (
+                "分野別ヘルプ",
+                help_code(
+                    "!searchhelp  検索と編集",
+                    "!taghelp     タグ操作",
+                    "!tablehelp   難易度表",
+                    "!md5help     md5補正",
+                    "!managehelp  取り込み/手動追加",
+                ),
+            ),
+        ],
+        footer="迷ったら !s 曲名 → リアクション、または !e 1 y ep で編集してね。",
     )
 
-    for name, command, description in fields:
-        embed.add_field(name=name, value=command_block(command, description), inline=False)
 
-    embed.add_field(
-        name="1件検索後の直接入力",
-        value=(
-            "```text\ny ep dy\n```\n"
-            "```text\nadd ni\n```\n"
-            "```text\n-dy\n```\n"
-            "```text\nreset\n```\n"
-            "```text\n/null\n```\n"
-            "`!s` の結果が1件だけなら、そのままタグ編集できるよ。"
-        ),
-        inline=False,
+@bot.command(name="searchhelp")
+async def search_help_cmd(ctx):
+    await send_help_embed(
+        ctx,
+        "🔍 検索と編集ヘルプだよ！",
+        "曲を探して、その結果からタグや備考を編集できるよ。",
+        [
+            ("検索", help_code("!s レシュ", "!s sl12 レシュ", "!count レシュ")),
+            ("検索結果から編集", help_code("!e 1", "!e 1 y ep", "!e 1 -dy", "!e 1 reset", "!e 1 /null")),
+            ("1件だけ出た時の直接編集", help_code("y ep dy", "add ni", "-dy", "reset", "/null")),
+        ],
     )
 
-    embed.add_field(
-        name="主な短縮タグ",
-        value=(
-            "```text\ny 横認識\n```\n"
-            "```text\n8 横認識(8分系)\n```\n"
-            "```text\nyt 横認識(縦系)\n```\n"
-            "```text\ntt 縦連\n```\n"
-            "```text\ngo ガチ押し系\n```\n"
-            "```text\nr 乱打\n```\n"
-            "```text\nep 地力上げ\n```\n"
-            "```text\nsr ラス殺し\n```\n"
-            "```text\ng ゴミ\n```\n"
-            "```text\nni 良譜面\n```\n"
-            "```text\ndy 日課\n```\n"
-            "```text\nsh 惜敗\n```"
-        ),
-        inline=False,
+
+@bot.command(name="taghelp")
+async def tag_help_cmd(ctx):
+    await send_help_embed(
+        ctx,
+        "🏷️ タグヘルプだよ！",
+        "タグはユーザーごとに分かれているよ。他の人のタグとは混ざらないよ。",
+        [
+            ("見る", help_code("!t", "!tagcount", "!tl 日課", "!ts 日課", "!ts sl12 日課")),
+            ("追加タグ", help_code("!addtag ハネリズム hn 🪽", "!deltag hn", "!tagorder hn 1")),
+            (
+                "主な短縮タグ",
+                help_code(
+                    "y 横認識 / 8 横認識(8分系) / yt 横認識(縦系)",
+                    "tt 縦連 / go ガチ押し系 / r 乱打",
+                    "ep 地力上げ / ni 良譜面 / sr ラス殺し",
+                    "g ゴミ / dy 日課 / sh 惜敗",
+                ),
+            ),
+        ],
     )
 
-    embed.set_footer(text="迷ったら !s で検索してから編集してね。")
-    await ctx.send(embed=embed)
+
+@bot.command(name="tablehelp")
+async def table_help_cmd(ctx):
+    await send_help_embed(
+        ctx,
+        "📋 難易度表ヘルプだよ！",
+        "beatoraja/oraja に登録するURLを作るよ。URLはユーザー専用だよ。",
+        [
+            ("生成", help_code("!maketables", "!maketables 日課", "!maketables hn")),
+            ("見る", help_code("!missingmd5", "!missingmd5 日課")),
+            ("メモ", "md5が取れない曲は `score.json` に出ないよ。まず `!missingmd5` で確認してね。"),
+        ],
+    )
+
+
+@bot.command(name="md5help")
+async def md5_help_cmd(ctx):
+    await send_help_embed(
+        ctx,
+        "🧩 md5ヘルプだよ！",
+        "md5補正は全ユーザー共通の辞書に入るよ。誤登録したら戻せるよ。",
+        [
+            ("確認", help_code("!missingmd5", "!missingmd5 日課")),
+            ("自動登録", help_code("!abmd5 auto", "!abmd5 auto 日課")),
+            ("手動登録", help_code("!abmd5 1 0123456789abcdef0123456789abcdef", "ins md5 0123456789abcdef0123456789abcdef 曲名 [差分名]")),
+            ("取り消し", help_code("!abmd5 -1", "!abmd5 -曲名", "!abmd5 --clear-all")),
+        ],
+        footer="autoは最近接候補を登録するよ。根拠が怪しければ取り消してね。",
+    )
+
+
+@bot.command(name="managehelp")
+async def manage_help_cmd(ctx):
+    await send_help_embed(
+        ctx,
+        "🛠️ 管理系ヘルプだよ！",
+        "普段はあまり使わないけど、手動追加や取り込み用のコマンドだよ。",
+        [
+            ("取得元テーブル", help_code("!tables", "!addtable テーブル名", "!deltable テーブル名")),
+            ("曲の手動追加", help_code('!addsong テーブル名 lv12 "曲名" "差分名" y 備考', "!delsong 1")),
+            ("取り込み", help_code("!import")),
+        ],
+    )
 
 
 
@@ -1762,38 +1814,36 @@ async def abmd5_cmd(ctx, *args):
 
         lines = [
             "✅ md5候補を一括登録したよ！",
-            f"対象: {total}曲",
-            f"登録: {len(candidates)}曲",
-            f"見送り: {len(skipped)}曲",
+            f"対象 {total}曲 / 登録 {len(candidates)}曲 / 見送り {len(skipped)}曲",
             f"処理時間: {time.perf_counter() - started:.1f}秒",
-            "※最近接候補が取れた曲は `md5_overrides` に登録済みだよ。",
+            "source: auto_abmd5（履歴あり）",
             "",
         ]
         if candidates:
             lines.append("登録した曲:")
         for item in candidates[:10]:
-            lines.append(f"{item['song_id']}: {item['level']} {compact_text(item['title'], 45)}")
             matched_name = item["songdata_title"]
             if item["songdata_subtitle"]:
                 matched_name = f"{matched_name} {item['songdata_subtitle']}"
-            lines.append(f"根拠: score={item['score']} reason={item['reason']}")
-            lines.append(f"照合先: {compact_text(matched_name, 55)}")
-            lines.append(f"md5: {item['md5']}")
-            lines.append("source: auto_abmd5")
+            lines.append(
+                f"{item['song_id']}: {item['level']} {compact_text(item['title'], 28)} "
+                f"→ {compact_text(matched_name, 28)} "
+                f"(score={item['score']}, {item['reason']})"
+            )
         if len(candidates) > 10:
             lines.append(f"...ほか {len(candidates) - 10} 曲も登録したよ！")
         if skipped:
             lines.append("")
-            lines.append("見送り例（最近接候補なし/処理対象外）:")
+            lines.append("見送り例:")
             for item in skipped[:5]:
                 lines.append(f"{item['song_id']}: {compact_text(item['title'], 35)}")
                 reason_text = item.get("reason", "")
                 detail_text = item.get("detail", "")
                 score_text = item.get("score", 0)
                 if detail_text:
-                    lines.append(f"見送り理由: {reason_text} ({detail_text}) score={score_text}")
+                    lines.append(f"理由: {reason_text} ({detail_text}) score={score_text}")
                 else:
-                    lines.append(f"見送り理由: {reason_text} score={score_text}")
+                    lines.append(f"理由: {reason_text} score={score_text}")
                 matched_name = item.get("songdata_title", "")
                 if item.get("songdata_subtitle"):
                     matched_name = f"{matched_name} {item['songdata_subtitle']}"
