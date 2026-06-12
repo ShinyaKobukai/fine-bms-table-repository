@@ -3,8 +3,8 @@
   "tag": "横認識",
   "slug": "y",
   "fixed": true,
-  "count": 20,
-  "score_count": 20,
+  "count": 21,
+  "score_count": 21,
   "songs": [
     {
       "id": 2468,
@@ -291,6 +291,23 @@
       "songdata_title": "Mugikamagika",
       "songdata_subtitle": "[Toybox]",
       "url": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=19&event=146",
+      "memo": "",
+      "tag": "横認識",
+      "comment": ""
+    },
+    {
+      "id": 861,
+      "source": "st",
+      "level": "st2",
+      "title": "Neo Side [Run Away]",
+      "chart_name": "",
+      "display_title": "Neo Side [Run Away]",
+      "md5": "ebf75354a4bd0f8bfb8d1702a4a67bb6",
+      "sha256": "ebbc80f7feda47aad921b32c034d38131648f416dc2b7b801554d664e4dd126c",
+      "artist": "Harunao, Kanna obj:E",
+      "songdata_title": "Neo Side [Run Away]",
+      "songdata_subtitle": "",
+      "url": "https://stellabms.xyz/upload/4435",
       "memo": "",
       "tag": "横認識",
       "comment": ""
