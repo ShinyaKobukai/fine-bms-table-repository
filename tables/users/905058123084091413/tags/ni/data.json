@@ -3,8 +3,8 @@
   "tag": "良譜面",
   "slug": "ni",
   "fixed": true,
-  "count": 3,
-  "score_count": 3,
+  "count": 4,
+  "score_count": 4,
   "songs": [
     {
       "id": 2978,
@@ -53,6 +53,23 @@
       "songdata_title": "EOS -PING-",
       "songdata_subtitle": "",
       "url": "http://www.mediafire.com/?9n94dyt0za3qm5e",
+      "memo": "",
+      "tag": "良譜面",
+      "comment": ""
+    },
+    {
+      "id": 16,
+      "source": "st",
+      "level": "st0",
+      "title": "情熱の大阪",
+      "chart_name": "",
+      "display_title": "情熱の大阪",
+      "md5": "8a5cfc7467f2b4f060eef2e09b4c86f7",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "http://bms.hexlataia.xyz/tables/hexajoy.html",
       "memo": "",
       "tag": "良譜面",
       "comment": ""
