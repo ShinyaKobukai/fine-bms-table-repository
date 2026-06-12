@@ -967,6 +967,7 @@ async def help_cmd(ctx):
         ("md5補正登録", "!abmd5 1 0123456789abcdef0123456789abcdef", "`!s` 後の番号、song_id、曲名でmd5補正を登録するよ。"),
         ("md5補正削除", "!abmd5 -1", "登録したmd5補正を削除するよ。例: `!abmd5 -曲名`"),
         ("md5補正 全削除", "!abmd5 --clear-all", "abmd5で登録したmd5補正を一度空にするよ。履歴は残るよ。"),
+        ("md5直接登録", "ins md5 0123456789abcdef0123456789abcdef 曲名 [差分名]", "`!s` で1曲に絞った表示名と完全一致した時だけmd5登録するよ。"),
         ("難易度表生成", "!maketables", "自分専用のタグ別難易度表を生成して、登録URLを返すよ。"),
         ("難易度表生成 タグ指定", "!maketables 日課", "生成後、指定タグの登録URLだけ返すよ。"),
         ("テーブル一覧", "!tables", "登録済みの取得元テーブルを見るよ。"),
@@ -2004,6 +2005,46 @@ async def edit_after_search(message):
         last_search[message.author.id] = [fresh_row]
 
     await send_single_song_embed(message.channel, row, "✅ 更新したよ！", user_id=message.author.id)
+
+
+@bot.listen("on_message")
+async def insert_md5_after_search(message):
+    if message.author.bot:
+        return
+    if message.channel.id != CHANNEL_ID:
+        return
+
+    text = unicodedata.normalize("NFKC", message.content).strip()
+    if not text.lower().startswith("ins md5 "):
+        return
+
+    rows = last_search.get(message.author.id, [])
+    if len(rows) != 1:
+        await message.channel.send("`ins md5` は `!s` で1曲だけに絞ってから使ってね。")
+        return
+
+    md5_match = re.search(r"\b[0-9a-fA-F]{32}\b", text)
+    if not md5_match:
+        await message.channel.send("32文字のmd5が見つからなかったよ。")
+        return
+
+    md5 = md5_match.group(0).lower()
+    name_text = (text[:md5_match.start()] + text[md5_match.end():]).strip()
+    name_text = re.sub(r"^ins\s+md5\s+", "", name_text, flags=re.I).strip()
+    row = rows[0]
+    display_name = song_display_name(row)
+    if name_text != display_name:
+        await message.channel.send(
+            "曲名が直前の検索結果と完全一致しなかったよ。\n"
+            f"```text\n入力: {name_text}\n期待: {display_name}\n```"
+        )
+        return
+
+    set_md5_override(row, md5, message.author.id)
+    await message.channel.send(
+        "✅ md5を登録したよ！\n"
+        f"```text\n{row[0]}: {row[2]} {display_name}\nmd5: {md5}\n```"
+    )
 
 
 @bot.listen("on_message")
