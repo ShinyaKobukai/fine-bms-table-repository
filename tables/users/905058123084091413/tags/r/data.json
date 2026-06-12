@@ -3,8 +3,8 @@
   "tag": "乱打",
   "slug": "r",
   "fixed": true,
-  "count": 6,
-  "score_count": 6,
+  "count": 7,
+  "score_count": 7,
   "songs": [
     {
       "id": 4514,
@@ -53,6 +53,23 @@
       "songdata_title": "永劫綺譚の純潔葬花 -Yellow Lily-",
       "songdata_subtitle": "",
       "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02264.zip",
+      "memo": "",
+      "tag": "乱打",
+      "comment": ""
+    },
+    {
+      "id": 37,
+      "source": "st",
+      "level": "st2",
+      "title": "adabana [HEARTFUL]",
+      "chart_name": "",
+      "display_title": "adabana [HEARTFUL]",
+      "md5": "c3c99394db35ed28295a589bafebbf5e",
+      "sha256": "a1b440fc381438d3df018e4195920c2053f7c52855830ad1648ea55940920d91",
+      "artist": "Kyuzo Sameura",
+      "songdata_title": "adabana",
+      "songdata_subtitle": "[HEARTFUL]",
+      "url": "https://stellabms.xyz/upload/3827",
       "memo": "",
       "tag": "乱打",
       "comment": ""

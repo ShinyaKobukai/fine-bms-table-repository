@@ -3,8 +3,8 @@
   "tag": "日課",
   "slug": "dy",
   "fixed": true,
-  "count": 17,
-  "score_count": 17,
+  "count": 18,
+  "score_count": 18,
   "songs": [
     {
       "id": 4511,
@@ -223,6 +223,23 @@
       "songdata_title": "追憶の森 -Voices of the Earth- [wide]",
       "songdata_subtitle": "",
       "url": "https://web.archive.org/web/20190322230138/http://www.hyper-laner.com/sabun/all201807_laner.rar",
+      "memo": "",
+      "tag": "日課",
+      "comment": ""
+    },
+    {
+      "id": 37,
+      "source": "st",
+      "level": "st2",
+      "title": "adabana [HEARTFUL]",
+      "chart_name": "",
+      "display_title": "adabana [HEARTFUL]",
+      "md5": "c3c99394db35ed28295a589bafebbf5e",
+      "sha256": "a1b440fc381438d3df018e4195920c2053f7c52855830ad1648ea55940920d91",
+      "artist": "Kyuzo Sameura",
+      "songdata_title": "adabana",
+      "songdata_subtitle": "[HEARTFUL]",
+      "url": "https://stellabms.xyz/upload/3827",
       "memo": "",
       "tag": "日課",
       "comment": ""

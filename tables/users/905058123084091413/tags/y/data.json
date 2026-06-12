@@ -3,8 +3,8 @@
   "tag": "横認識",
   "slug": "y",
   "fixed": true,
-  "count": 21,
-  "score_count": 21,
+  "count": 22,
+  "score_count": 22,
   "songs": [
     {
       "id": 2468,
@@ -274,6 +274,23 @@
       "songdata_title": "追憶の森 -Voices of the Earth- [wide]",
       "songdata_subtitle": "",
       "url": "https://web.archive.org/web/20190322230138/http://www.hyper-laner.com/sabun/all201807_laner.rar",
+      "memo": "",
+      "tag": "横認識",
+      "comment": ""
+    },
+    {
+      "id": 37,
+      "source": "st",
+      "level": "st2",
+      "title": "adabana [HEARTFUL]",
+      "chart_name": "",
+      "display_title": "adabana [HEARTFUL]",
+      "md5": "c3c99394db35ed28295a589bafebbf5e",
+      "sha256": "a1b440fc381438d3df018e4195920c2053f7c52855830ad1648ea55940920d91",
+      "artist": "Kyuzo Sameura",
+      "songdata_title": "adabana",
+      "songdata_subtitle": "[HEARTFUL]",
+      "url": "https://stellabms.xyz/upload/3827",
       "memo": "",
       "tag": "横認識",
       "comment": ""
