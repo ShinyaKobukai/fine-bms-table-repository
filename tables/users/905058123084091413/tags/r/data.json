@@ -3,9 +3,26 @@
   "tag": "乱打",
   "slug": "r",
   "fixed": true,
-  "count": 5,
-  "score_count": 5,
+  "count": 6,
+  "score_count": 6,
   "songs": [
+    {
+      "id": 4514,
+      "source": "sl",
+      "level": "sl12",
+      "title": "図書室のエルザ [FOX]",
+      "chart_name": "",
+      "display_title": "図書室のエルザ [FOX]",
+      "md5": "c1834c716dee9f9210326e5bb888e380",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "http://kirakitsune.web.fc2.com/sabun.html",
+      "memo": "",
+      "tag": "乱打",
+      "comment": ""
+    },
     {
       "id": 14,
       "source": "st",

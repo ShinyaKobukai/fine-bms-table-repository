@@ -3,8 +3,8 @@
   "tag": "横認識",
   "slug": "y",
   "fixed": true,
-  "count": 18,
-  "score_count": 18,
+  "count": 19,
+  "score_count": 19,
   "songs": [
     {
       "id": 2468,
@@ -70,6 +70,23 @@
       "songdata_title": "レシュノルティア",
       "songdata_subtitle": "[あなたの横に]",
       "url": "https://stellabms.xyz/upload/4286",
+      "memo": "",
+      "tag": "横認識",
+      "comment": ""
+    },
+    {
+      "id": 4514,
+      "source": "sl",
+      "level": "sl12",
+      "title": "図書室のエルザ [FOX]",
+      "chart_name": "",
+      "display_title": "図書室のエルザ [FOX]",
+      "md5": "c1834c716dee9f9210326e5bb888e380",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "http://kirakitsune.web.fc2.com/sabun.html",
       "memo": "",
       "tag": "横認識",
       "comment": ""
