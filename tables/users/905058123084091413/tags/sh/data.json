@@ -3,8 +3,8 @@
   "tag": "惜敗",
   "slug": "sh",
   "fixed": true,
-  "count": 4,
-  "score_count": 4,
+  "count": 5,
+  "score_count": 5,
   "songs": [
     {
       "id": 543,
@@ -38,6 +38,23 @@
       "url": "https://parksu.darksabun.club/",
       "memo": "",
       "tag": "惜敗[2026-06-11]",
+      "comment": ""
+    },
+    {
+      "id": 555,
+      "source": "st",
+      "level": "st1",
+      "title": "Espresso Shots (ぴょんぴょん)",
+      "chart_name": "",
+      "display_title": "Espresso Shots (ぴょんぴょん)",
+      "md5": "518c27df28b90cc4043961b295f3a477",
+      "sha256": "da3ef1dd6e7f52e1521c3d08b549d16666f340894afc1acc764f2bd551fda879",
+      "artist": "Chino / obj;NoName",
+      "songdata_title": "Espresso Shots",
+      "songdata_subtitle": "(ぴょんぴょん)",
+      "url": "http://kanki2.net/bme.html",
+      "memo": "",
+      "tag": "惜敗[2026-06-12]",
       "comment": ""
     },
     {
