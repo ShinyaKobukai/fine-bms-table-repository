@@ -3,8 +3,8 @@
   "tag": "横認識(縦系)",
   "slug": "yt",
   "fixed": true,
-  "count": 7,
-  "score_count": 7,
+  "count": 8,
+  "score_count": 8,
   "songs": [
     {
       "id": 3176,
@@ -53,6 +53,23 @@
       "songdata_title": "地獄の業火で焼肉大会！？",
       "songdata_subtitle": "[地獄の筋肉でガチ押し大会]",
       "url": "https://stellabms.xyz/upload/1689",
+      "memo": "",
+      "tag": "横認識(縦系)",
+      "comment": ""
+    },
+    {
+      "id": 279,
+      "source": "sl",
+      "level": "sl12",
+      "title": "溶けたアイス、キミの声 [MELTY]",
+      "chart_name": "",
+      "display_title": "溶けたアイス、キミの声 [MELTY]",
+      "md5": "04bd8f404bc86c7254f44a2e4d6a0814",
+      "sha256": "1d62ac02a51a2546f00f9707f75a2cc387b9b137a1df7c70a77a39af3d47bbaa",
+      "artist": "kei_iwata feat.Noa",
+      "songdata_title": "溶けたアイス、キミの声",
+      "songdata_subtitle": "[MELTY]",
+      "url": "http://manbow.nothing.sh/event/event.cgi?action=More_def&num=403&event=133",
       "memo": "",
       "tag": "横認識(縦系)",
       "comment": ""

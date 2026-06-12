@@ -3,8 +3,8 @@
   "tag": "地力上げ",
   "slug": "ep",
   "fixed": true,
-  "count": 10,
-  "score_count": 10,
+  "count": 11,
+  "score_count": 11,
   "songs": [
     {
       "id": 4354,
@@ -36,6 +36,23 @@
       "songdata_title": "レシュノルティア",
       "songdata_subtitle": "[あなたの横に]",
       "url": "https://stellabms.xyz/upload/4286",
+      "memo": "",
+      "tag": "地力上げ",
+      "comment": ""
+    },
+    {
+      "id": 279,
+      "source": "sl",
+      "level": "sl12",
+      "title": "溶けたアイス、キミの声 [MELTY]",
+      "chart_name": "",
+      "display_title": "溶けたアイス、キミの声 [MELTY]",
+      "md5": "04bd8f404bc86c7254f44a2e4d6a0814",
+      "sha256": "1d62ac02a51a2546f00f9707f75a2cc387b9b137a1df7c70a77a39af3d47bbaa",
+      "artist": "kei_iwata feat.Noa",
+      "songdata_title": "溶けたアイス、キミの声",
+      "songdata_subtitle": "[MELTY]",
+      "url": "http://manbow.nothing.sh/event/event.cgi?action=More_def&num=403&event=133",
       "memo": "",
       "tag": "地力上げ",
       "comment": ""
