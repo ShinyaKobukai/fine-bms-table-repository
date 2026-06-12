@@ -18,7 +18,19 @@ from dotenv import load_dotenv
 load_dotenv("fine.env")
 
 TOKEN = os.getenv("DISCORD_TOKEN")
-CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
+
+
+def optional_int_env(*names):
+    for name in names:
+        value = os.getenv(name)
+        if value is None or str(value).strip() == "":
+            continue
+        return int(str(value).strip())
+    return None
+
+
+CHANNEL_ID = optional_int_env("CHANNEL_ID", "ALLOWED_CHANNEL_ID", "BOT_CHANNEL_ID", "SEARCH_CHANNEL_ID")
+GUILD_ID = optional_int_env("GUILD_ID", "ALLOWED_GUILD_ID")
 
 DB = "stella_songs.db"
 JST = ZoneInfo("Asia/Tokyo")
@@ -1077,6 +1089,81 @@ auto_table_publish_tasks = {}
 auto_table_publish_lock = asyncio.Lock()
 
 
+def guild_allowed(guild_id):
+    if GUILD_ID is None:
+        return True
+    if guild_id is None:
+        return False
+    return int(guild_id) == GUILD_ID
+
+
+def channel_allowed(channel_id):
+    if CHANNEL_ID is None:
+        return True
+    if channel_id is None:
+        return False
+    return int(channel_id) == CHANNEL_ID
+
+
+def context_allowed(ctx):
+    guild_id = getattr(getattr(ctx, "guild", None), "id", None)
+    channel_id = getattr(getattr(ctx, "channel", None), "id", None)
+    return guild_allowed(guild_id) and channel_allowed(channel_id)
+
+
+def message_allowed(message):
+    guild_id = getattr(getattr(message, "guild", None), "id", None)
+    channel_id = getattr(getattr(message, "channel", None), "id", None)
+    return guild_allowed(guild_id) and channel_allowed(channel_id)
+
+
+def payload_allowed(payload):
+    guild_id = getattr(payload, "guild_id", None)
+    channel_id = getattr(payload, "channel_id", None)
+    return guild_allowed(guild_id) and channel_allowed(channel_id)
+
+
+@bot.before_invoke
+async def log_command_start(ctx):
+    ctx._fine_command_started = time.perf_counter()
+    logging.info(
+        "command start command=%s guild=%s channel=%s user_id=%s",
+        getattr(ctx.command, "qualified_name", ""),
+        getattr(getattr(ctx, "guild", None), "id", None),
+        getattr(getattr(ctx, "channel", None), "id", None),
+        getattr(getattr(ctx, "author", None), "id", None),
+    )
+
+
+@bot.after_invoke
+async def log_command_end(ctx):
+    started = getattr(ctx, "_fine_command_started", None)
+    seconds = time.perf_counter() - started if started else 0.0
+    logging.info(
+        "command end command=%s seconds=%.3fs guild=%s channel=%s user_id=%s",
+        getattr(ctx.command, "qualified_name", ""),
+        seconds,
+        getattr(getattr(ctx, "guild", None), "id", None),
+        getattr(getattr(ctx, "channel", None), "id", None),
+        getattr(getattr(ctx, "author", None), "id", None),
+    )
+
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        return
+
+    logging.error(
+        "command failed name=%s guild=%s channel=%s user_id=%s",
+        getattr(getattr(ctx, "command", None), "qualified_name", ""),
+        getattr(getattr(ctx, "guild", None), "id", None),
+        getattr(getattr(ctx, "channel", None), "id", None),
+        getattr(getattr(ctx, "author", None), "id", None),
+        exc_info=(type(error), error, error.__traceback__),
+    )
+
+
 def auto_table_publish_enabled():
     return os.getenv("AUTO_TABLE_PUBLISH_ON_TAG_CHANGE", "1").strip().lower() not in {
         "0",
@@ -1169,6 +1256,14 @@ async def on_message(message):
     content = content.replace("、", " ")
     content = content.replace(",", " ")
     message.content = content
+    if content.startswith(("!", "！")):
+        logging.info(
+            "message guild=%s channel=%s author=%s content=%s",
+            getattr(getattr(message, "guild", None), "id", None),
+            getattr(getattr(message, "channel", None), "id", None),
+            getattr(getattr(message, "author", None), "id", None),
+            content.split()[0] if content.split() else "",
+        )
 
     await bot.process_commands(message)
 
@@ -1194,7 +1289,7 @@ def help_code(*lines):
 
 
 async def send_help_embed(ctx, title, description, sections, footer=None):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     embed = discord.Embed(title=title, description=description, color=EMBED_BLUE)
@@ -1207,7 +1302,7 @@ async def send_help_embed(ctx, title, description, sections, footer=None):
 
 @bot.command(name="help", aliases=["h", "ヘルプ", "へるぷ"])
 async def help_cmd(ctx):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     await send_help_embed(
@@ -1655,7 +1750,7 @@ def make_single_song_detail_embed(row, title="🎵 楽曲情報", color=0x8EC5FF
 
 @bot.command(name="s", aliases=["search", "\u691c\u7d22", "\u3055", "\u3057"])
 async def search_cmd(ctx, *args):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     if not args:
@@ -1694,7 +1789,7 @@ async def search_cmd(ctx, *args):
 
 @bot.command(name="ts", aliases=["タグ検索", "たぐけんさく"])
 async def tag_search_cmd(ctx, *args):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     if not args:
@@ -1725,7 +1820,7 @@ async def tag_search_cmd(ctx, *args):
 
 @bot.command(name="t", aliases=["tag", "tags", "タグ", "た"])
 async def tag_cmd(ctx):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     embed = discord.Embed(
@@ -1766,7 +1861,7 @@ async def tag_cmd(ctx):
 
 @bot.command(name="missingmd5", aliases=["md5missing", "md5\u672a\u53d6\u5f97"])
 async def missing_md5_cmd(ctx, *args):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     started = time.perf_counter()
@@ -1846,7 +1941,7 @@ async def missing_md5_cmd(ctx, *args):
 
 @bot.command(name="abmd5", aliases=["md5override"])
 async def abmd5_cmd(ctx, *args):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     if not args:
@@ -2011,7 +2106,7 @@ async def abmd5_cmd(ctx, *args):
 
 @bot.command(name="import", aliases=["取り込み", "更新"])
 async def import_cmd(ctx):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     async with ctx.typing():
@@ -2031,7 +2126,7 @@ async def import_cmd(ctx):
 @bot.command(name="addtag", aliases=["tagadd","タグ追加","たぐついか"])
 async def addtag(ctx, full_name=None, short_name=None, emoji=None):
 
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     if not full_name or not short_name:
@@ -2054,7 +2149,7 @@ async def addtag(ctx, full_name=None, short_name=None, emoji=None):
 @bot.command(name="deltag", aliases=["tagdel","タグ削除","たぐさくじょ"])
 async def deltag(ctx, short_name=None):
 
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     if not short_name:
@@ -2139,7 +2234,7 @@ def normalize_tag_for_count(tag):
 
 @bot.command(name="tl", aliases=["taglevel", "タグレベル"])
 async def tag_level_cmd(ctx, *args):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     if not args:
@@ -2233,7 +2328,7 @@ async def tag_level_cmd(ctx, *args):
 
 @bot.command(name="tagcount", aliases=["タグ数", "タグ統計"])
 async def tagcount_cmd(ctx):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     from collections import Counter
@@ -2259,7 +2354,7 @@ async def tagcount_cmd(ctx):
 
 @bot.command(name="count", aliases=["数", "件数", "か"])
 async def count_cmd(ctx):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     con = db()
@@ -2274,7 +2369,7 @@ async def count_cmd(ctx):
 
 @bot.command(name="e", aliases=["え", "edit", "編集"])
 async def edit_cmd(ctx, index: int = None, *args):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     if index is None:
@@ -2344,7 +2439,7 @@ async def on_message_edit(before, after):
 async def edit_after_search(message):
     if message.author.bot:
         return
-    if message.channel.id != CHANNEL_ID:
+    if not message_allowed(message):
         return
 
     text = unicodedata.normalize("NFKC", message.content).strip()
@@ -2415,7 +2510,7 @@ async def edit_after_search(message):
 async def insert_md5_after_search(message):
     if message.author.bot:
         return
-    if message.channel.id != CHANNEL_ID:
+    if not message_allowed(message):
         return
 
     text = unicodedata.normalize("NFKC", message.content).strip()
@@ -2455,7 +2550,7 @@ async def insert_md5_after_search(message):
 async def quick_edit_single_search(message):
     if message.author.bot:
         return
-    if message.channel.id != CHANNEL_ID:
+    if not message_allowed(message):
         return
 
     text = unicodedata.normalize("NFKC", message.content).strip()
@@ -2564,7 +2659,7 @@ async def check_update_loop():
     if not (now.day == 1 and now.hour == 0 and now.month in [1, 3, 5, 7, 9, 11]):
         return
 
-    channel = bot.get_channel(CHANNEL_ID)
+    channel = bot.get_channel(CHANNEL_ID) if CHANNEL_ID is not None else None
     if not channel:
         return
 
@@ -2915,7 +3010,7 @@ def format_song(row, index, user_id=None):
 
 @bot.command(name="tables", aliases=["tablelist", "テーブル一覧", "てーぶる"])
 async def tables_cmd(ctx):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     rows = get_tables()
@@ -2944,7 +3039,7 @@ async def tables_cmd(ctx):
 
 @bot.command(name="addtable", aliases=["tableadd", "テーブル追加", "てーぶるついか"])
 async def tableadd_cmd(ctx, *, name=None):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     if not name:
@@ -2973,7 +3068,7 @@ async def tableadd_cmd(ctx, *, name=None):
 
 @bot.command(name="addsong", aliases=["songadd", "曲追加", "曲登録"])
 async def addsong_cmd(ctx, *, body=None):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     if body:
@@ -3262,7 +3357,7 @@ def set_tag_order(short_name, new_priority):
 
 @bot.command(name="tagorder", aliases=["タグ順", "tagprio"])
 async def tagorder_cmd(ctx, short_name=None, priority: int = None):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     ensure_tag_order_table()
@@ -3349,7 +3444,7 @@ def delete_song_by_id(song_id):
 
 @bot.command(name="deltable", aliases=["テーブル削除"])
 async def deltable_cmd(ctx, *, name=None):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     if not name:
@@ -3366,7 +3461,7 @@ async def deltable_cmd(ctx, *, name=None):
 
 @bot.command(name="delsong", aliases=["曲削除"])
 async def delsong_cmd(ctx, *, target=None):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     if not target:
@@ -3478,7 +3573,7 @@ async def refresh_reaction_song_message(payload, enabled):
     if payload.user_id == bot.user.id:
         return
 
-    if payload.channel_id != CHANNEL_ID:
+    if not payload_allowed(payload):
         return
 
     context = reaction_song_messages.get(payload.message_id)
@@ -3616,7 +3711,7 @@ async def on_raw_reaction_remove(payload):
 
 @bot.command(name="maketables", aliases=["make_tables", "tablesgen"])
 async def maketables_cmd(ctx):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     user_id = str(ctx.author.id)
@@ -3656,7 +3751,7 @@ bot.remove_command("maketables")
 
 @bot.command(name="maketables", aliases=["make_tables", "tablesgen"])
 async def maketables_cmd_pages(ctx):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     user_id = str(ctx.author.id)
@@ -3709,7 +3804,7 @@ bot.remove_command("maketables")
 
 @bot.command(name="maketables", aliases=["make_tables", "tablesgen"])
 async def maketables_cmd_progress(ctx, *tag_args):
-    if ctx.channel.id != CHANNEL_ID:
+    if not context_allowed(ctx):
         return
 
     user_id = str(ctx.author.id)
