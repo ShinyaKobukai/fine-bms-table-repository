@@ -482,7 +482,7 @@ def resolve_song_for_abmd5(ctx, target):
     return None, f"`{target}` は候補が複数あるみたいだよ。song_idか `!s` 後の番号で指定してね。\n```text\n{examples}\n```"
 
 
-def set_md5_override(row, md5, user_id, source="manual_abmd5", action="set"):
+def set_md5_override(row, md5, user_id, source="manual_abmd5", action="set", schedule_publish=True):
     con = db()
     ensure_md5_overrides_table_bot(con)
     now = now_text()
@@ -499,7 +499,8 @@ def set_md5_override(row, md5, user_id, source="manual_abmd5", action="set"):
     )
     con.commit()
     con.close()
-    schedule_auto_table_publish(user_id, reason="md5_override_updated")
+    if schedule_publish:
+        schedule_auto_table_publish(user_id, reason="md5_override_updated")
 
 
 def delete_md5_override(song_id, user_id):
@@ -649,6 +650,11 @@ def auto_abmd5_candidates_for_user(user_id, tag_name=None, limit=50):
             continue
 
         found, reason, score, detail, rejected = infer_abmd5_match(song_row)
+        if not found and rejected:
+            found = rejected
+            reason = f"nearest-{reason}"
+            if detail:
+                reason = f"{reason}+{detail}"
         if not found:
             skipped_item = dict(item)
             skipped_item["reason"] = reason
@@ -661,6 +667,14 @@ def auto_abmd5_candidates_for_user(user_id, tag_name=None, limit=50):
             skipped.append(skipped_item)
             continue
 
+        set_md5_override(
+            song_row,
+            found["md5"],
+            user_id,
+            source="auto_abmd5",
+            action="auto_set",
+            schedule_publish=False,
+        )
         candidates.append(
             {
                 "song_id": song_id,
@@ -1105,7 +1119,7 @@ async def help_cmd(ctx):
         ("md5補正削除", "!abmd5 -1", "登録したmd5補正を削除するよ。例: `!abmd5 -曲名`"),
         ("md5補正 全削除", "!abmd5 --clear-all", "abmd5で登録したmd5補正を一度空にするよ。履歴は残るよ。"),
         ("md5直接登録", "ins md5 0123456789abcdef0123456789abcdef 曲名 [差分名]", "`!s` で1曲に絞った表示名と完全一致した時だけmd5登録するよ。"),
-        ("md5候補表示", "!abmd5 auto", "未取得曲のmd5候補を表示するよ。自動登録はしないよ。"),
+        ("md5最近接登録", "!abmd5 auto", "未取得曲の最近接md5候補を一括登録するよ。候補が取れない曲は見送るよ。"),
         ("難易度表生成", "!maketables", "自分専用のタグ別難易度表を生成して、登録URLを返すよ。"),
         ("難易度表生成 タグ指定", "!maketables 日課", "生成後、指定タグの登録URLだけ返すよ。"),
         ("テーブル一覧", "!tables", "登録済みの取得元テーブルを見るよ。"),
@@ -1713,7 +1727,7 @@ async def abmd5_cmd(ctx, *args):
         started = time.perf_counter()
         progress = await ctx.send(
             "🔎 md5候補を推定しているよ！\n"
-            "songdata.db と未取得曲を照合中だよ。少し待ってね！"
+            "最近接の候補が取れた曲はまとめて登録するよ。少し待ってね！"
         )
         try:
             await progress.edit(
@@ -1735,26 +1749,28 @@ async def abmd5_cmd(ctx, *args):
             )
             await progress.edit(
                 content=(
-                    "🔎 md5候補を推定しているよ！\n"
-                    "[3/3] 結果をまとめているよ..."
+                    "🔎 md5候補を登録しているよ！\n"
+                    "[3/3] md5_overridesへ反映中..."
                 )
             )
+            if candidates:
+                schedule_auto_table_publish(ctx.author.id, reason="auto_abmd5_updated")
         except Exception as e:
             logging.exception("abmd5 auto failed user_id=%s tag=%s", ctx.author.id, tag_name or "")
             await progress.edit(content=f"❌ md5推定に失敗したみたいだよ。\n{concise_error(e)}")
             return
 
         lines = [
-            "🔎 md5候補を見つけたよ！",
+            "✅ md5候補を一括登録したよ！",
             f"対象: {total}曲",
-            f"候補: {len(candidates)}曲",
+            f"登録: {len(candidates)}曲",
             f"見送り: {len(skipped)}曲",
             f"処理時間: {time.perf_counter() - started:.1f}秒",
-            "※まだ登録していないよ。確認して `!abmd5 曲ID md5` で入れてね。",
+            "※最近接候補が取れた曲は `md5_overrides` に登録済みだよ。",
             "",
         ]
         if candidates:
-            lines.append("採用候補:")
+            lines.append("登録した曲:")
         for item in candidates[:10]:
             lines.append(f"{item['song_id']}: {item['level']} {compact_text(item['title'], 45)}")
             matched_name = item["songdata_title"]
@@ -1763,12 +1779,12 @@ async def abmd5_cmd(ctx, *args):
             lines.append(f"根拠: score={item['score']} reason={item['reason']}")
             lines.append(f"照合先: {compact_text(matched_name, 55)}")
             lines.append(f"md5: {item['md5']}")
-            lines.append(f"登録: !abmd5 {item['song_id']} {item['md5']}")
+            lines.append("source: auto_abmd5")
         if len(candidates) > 10:
-            lines.append(f"...ほか {len(candidates) - 10} 曲候補があるよ！")
+            lines.append(f"...ほか {len(candidates) - 10} 曲も登録したよ！")
         if skipped:
             lines.append("")
-            lines.append("見送り例（登録していないよ）:")
+            lines.append("見送り例（最近接候補なし/処理対象外）:")
             for item in skipped[:5]:
                 lines.append(f"{item['song_id']}: {compact_text(item['title'], 35)}")
                 reason_text = item.get("reason", "")
