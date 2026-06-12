@@ -1,0 +1,27 @@
+{
+  "user_id": "523433215738773505",
+  "tag": "良譜面",
+  "slug": "ni",
+  "fixed": true,
+  "count": 1,
+  "score_count": 1,
+  "songs": [
+    {
+      "id": 2311,
+      "source": "st",
+      "level": "st11",
+      "title": "Defeat awaken battle ship (SP DESTROYER)",
+      "chart_name": "",
+      "display_title": "Defeat awaken battle ship (SP DESTROYER)",
+      "md5": "2c61b055ab4a80c60786f705d168de45",
+      "sha256": "416d15f2f44af00593c98005c469bb2a3a6b5072563a817732acff689a2148f8",
+      "artist": "有賀 澪",
+      "songdata_title": "Defeat awaken battle ship (SP DESTROYER)",
+      "songdata_subtitle": "",
+      "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01483.zip",
+      "memo": "",
+      "tag": "良譜面",
+      "comment": ""
+    }
+  ]
+}
