@@ -1,5 +1,14 @@
 [
   {
+    "level": "sl3",
+    "title": "Neo Side",
+    "artist": "",
+    "comment": "地力上げ",
+    "md5": "6db6517799e45781adbd48a9b96afa05",
+    "url_diff": "https://manbow.nothing.sh/event/event.cgi?action=More_def&num=332&event=140",
+    "tag": "地力上げ"
+  },
+  {
     "level": "sl9",
     "title": "Flashdance [#]",
     "artist": "music:litmus* / bms: :Poin7less",
@@ -15,6 +24,15 @@
     "comment": "地力上げ",
     "md5": "0bbcf824051b19c6da354c615692d740",
     "url_diff": "https://stellabms.xyz/upload/4286",
+    "tag": "地力上げ"
+  },
+  {
+    "level": "sl12",
+    "title": "図書室のエルザ [FOX]",
+    "artist": "",
+    "comment": "地力上げ",
+    "md5": "c1834c716dee9f9210326e5bb888e380",
+    "url_diff": "http://kirakitsune.web.fc2.com/sabun.html",
     "tag": "地力上げ"
   },
   {
@@ -55,11 +73,29 @@
   },
   {
     "level": "st0",
+    "title": "ちんこ音頭2012",
+    "artist": "",
+    "comment": "地力上げ",
+    "md5": "a3c4f1060479d87a9a7d33a48ec1b094",
+    "url_diff": "http://sagena.harisen.jp/",
+    "tag": "地力上げ"
+  },
+  {
+    "level": "st0",
     "title": "バーチャルセラピー [超物量セラピー]",
     "artist": "ふぃるまーち！（CV：ちょこ＆藍月なくる＆山田じぇみ子）",
     "comment": "地力上げ",
     "md5": "b2e0a5d984b39b9a17451000ead86071",
     "url_diff": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0",
+    "tag": "地力上げ"
+  },
+  {
+    "level": "st0",
+    "title": "情熱の大阪",
+    "artist": "",
+    "comment": "地力上げ",
+    "md5": "8a5cfc7467f2b4f060eef2e09b4c86f7",
+    "url_diff": "http://bms.hexlataia.xyz/tables/hexajoy.html",
     "tag": "地力上げ"
   },
   {
@@ -114,6 +150,15 @@
     "comment": "地力上げ",
     "md5": "e3840c4a4eb84f84e663409bb857a09c",
     "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01457.zip",
+    "tag": "地力上げ"
+  },
+  {
+    "level": "st2",
+    "title": "薄雲 [六角形的]",
+    "artist": "",
+    "comment": "地力上げ",
+    "md5": "dab23f9ac043c210b9192fb9e5e13f1b",
+    "url_diff": "http://bms.hexlataia.xyz/tables/hexajoy.html",
     "tag": "地力上げ"
   }
 ]

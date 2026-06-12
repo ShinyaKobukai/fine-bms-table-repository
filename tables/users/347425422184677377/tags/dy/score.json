@@ -37,6 +37,15 @@
   },
   {
     "level": "sl12",
+    "title": "図書室のエルザ [FOX]",
+    "artist": "",
+    "comment": "日課",
+    "md5": "c1834c716dee9f9210326e5bb888e380",
+    "url_diff": "http://kirakitsune.web.fc2.com/sabun.html",
+    "tag": "日課"
+  },
+  {
+    "level": "sl12",
     "title": "溶けたアイス、キミの声 [MELTY]",
     "artist": "kei_iwata feat.Noa",
     "comment": "日課",
@@ -73,11 +82,29 @@
   },
   {
     "level": "st0",
+    "title": "ちんこ音頭2012",
+    "artist": "",
+    "comment": "日課",
+    "md5": "a3c4f1060479d87a9a7d33a48ec1b094",
+    "url_diff": "http://sagena.harisen.jp/",
+    "tag": "日課"
+  },
+  {
+    "level": "st0",
     "title": "バーチャルセラピー [超物量セラピー]",
     "artist": "ふぃるまーち！（CV：ちょこ＆藍月なくる＆山田じぇみ子）",
     "comment": "日課",
     "md5": "b2e0a5d984b39b9a17451000ead86071",
     "url_diff": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0",
+    "tag": "日課"
+  },
+  {
+    "level": "st0",
+    "title": "情熱の大阪",
+    "artist": "",
+    "comment": "日課",
+    "md5": "8a5cfc7467f2b4f060eef2e09b4c86f7",
+    "url_diff": "http://bms.hexlataia.xyz/tables/hexajoy.html",
     "tag": "日課"
   },
   {
@@ -118,6 +145,15 @@
   },
   {
     "level": "st2",
+    "title": "JKillMe [Muyather]",
+    "artist": "",
+    "comment": "日課",
+    "md5": "3056b4ebfa7b929e1b35619d33d7555f",
+    "url_diff": "https://muy4.github.io/muyacharts/index.html",
+    "tag": "日課"
+  },
+  {
+    "level": "st2",
     "title": "Neo Side [Run Away]",
     "artist": "Harunao, Kanna obj:E",
     "comment": "日課",
@@ -141,6 +177,15 @@
     "comment": "日課",
     "md5": "e3840c4a4eb84f84e663409bb857a09c",
     "url_diff": "https://bms.hexlataia.xyz/mirror/gnqg-upload/01457.zip",
+    "tag": "日課"
+  },
+  {
+    "level": "st2",
+    "title": "薄雲 [六角形的]",
+    "artist": "",
+    "comment": "日課",
+    "md5": "dab23f9ac043c210b9192fb9e5e13f1b",
+    "url_diff": "http://bms.hexlataia.xyz/tables/hexajoy.html",
     "tag": "日課"
   }
 ]

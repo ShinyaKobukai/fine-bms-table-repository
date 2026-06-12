@@ -4,7 +4,7 @@
   "slug": "ni",
   "fixed": true,
   "count": 7,
-  "score_count": 6,
+  "score_count": 7,
   "songs": [
     {
       "id": 3176,
@@ -13,7 +13,7 @@
       "title": "Neo Side",
       "chart_name": "",
       "display_title": "Neo Side",
-      "md5": "",
+      "md5": "6db6517799e45781adbd48a9b96afa05",
       "sha256": "",
       "artist": "",
       "songdata_title": "",
