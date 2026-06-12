@@ -395,6 +395,45 @@ def ensure_md5_overrides_table_bot(con):
         updated_at TEXT
     )
     """)
+    con.execute("""
+    CREATE TABLE IF NOT EXISTS md5_override_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        song_id INTEGER NOT NULL,
+        url_diff TEXT,
+        title TEXT,
+        chart_name TEXT,
+        level TEXT,
+        old_md5 TEXT DEFAULT '',
+        new_md5 TEXT DEFAULT '',
+        action TEXT NOT NULL,
+        source TEXT DEFAULT 'abmd5',
+        created_by_user_id TEXT,
+        created_at TEXT
+    )
+    """)
+
+
+def record_md5_override_history(con, row, old_md5, new_md5, action, user_id, source="abmd5"):
+    con.execute(
+        """
+        INSERT INTO md5_override_history
+            (song_id, url_diff, title, chart_name, level, old_md5, new_md5, action, source, created_by_user_id, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            row[0],
+            row[5] or "",
+            row[3] or "",
+            row[4] or "",
+            row[2] or "",
+            old_md5 or "",
+            new_md5 or "",
+            action,
+            source,
+            str(user_id),
+            now_text(),
+        ),
+    )
 
 
 def valid_md5(value):
@@ -443,17 +482,20 @@ def resolve_song_for_abmd5(ctx, target):
     return None, f"`{target}` は候補が複数あるみたいだよ。song_idか `!s` 後の番号で指定してね。\n```text\n{examples}\n```"
 
 
-def set_md5_override(row, md5, user_id):
+def set_md5_override(row, md5, user_id, source="manual_abmd5", action="set"):
     con = db()
     ensure_md5_overrides_table_bot(con)
     now = now_text()
+    old = con.execute("SELECT md5 FROM md5_overrides WHERE song_id=?", (row[0],)).fetchone()
+    old_md5 = old[0] if old else ""
+    record_md5_override_history(con, row, old_md5, md5.lower(), action, user_id, source=source)
     con.execute(
         """
         INSERT OR REPLACE INTO md5_overrides
             (song_id, url_diff, title, chart_name, level, md5, source, created_by_user_id, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, 'manual_abmd5', ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (row[0], row[5] or "", row[3] or "", row[4] or "", row[2] or "", md5.lower(), str(user_id), now, now),
+        (row[0], row[5] or "", row[3] or "", row[4] or "", row[2] or "", md5.lower(), source, str(user_id), now, now),
     )
     con.commit()
     con.close()
@@ -463,6 +505,10 @@ def set_md5_override(row, md5, user_id):
 def delete_md5_override(song_id, user_id):
     con = db()
     ensure_md5_overrides_table_bot(con)
+    row = get_song_by_id(song_id)
+    old = con.execute("SELECT md5 FROM md5_overrides WHERE song_id=?", (song_id,)).fetchone()
+    if row and old:
+        record_md5_override_history(con, row, old[0] or "", "", "delete", user_id)
     cur = con.execute("DELETE FROM md5_overrides WHERE song_id=?", (song_id,))
     con.commit()
     con.close()
@@ -470,6 +516,28 @@ def delete_md5_override(song_id, user_id):
         schedule_auto_table_publish(user_id, reason="md5_override_deleted")
         return True
     return False
+
+
+def clear_all_md5_overrides(user_id):
+    con = db()
+    ensure_md5_overrides_table_bot(con)
+    rows = con.execute(
+        """
+        SELECT s.id, s.source, s.level, s.title, s.chart_name, s.url, s.tags, s.memo, mo.md5
+        FROM md5_overrides mo
+        JOIN songs s ON s.id = mo.song_id
+        WHERE COALESCE(mo.source, '') IN ('manual_abmd5', 'auto_abmd5', 'abmd5')
+        """
+    ).fetchall()
+    for row in rows:
+        song_row = row[:8]
+        record_md5_override_history(con, song_row, row[8] or "", "", "clear_all", user_id)
+    cur = con.execute("DELETE FROM md5_overrides WHERE COALESCE(source, '') IN ('manual_abmd5', 'auto_abmd5', 'abmd5')")
+    con.commit()
+    con.close()
+    if cur.rowcount > 0:
+        schedule_auto_table_publish(user_id, reason="md5_override_clear_all")
+    return cur.rowcount
 
 
 def discover_and_import():
@@ -898,6 +966,7 @@ async def help_cmd(ctx):
         ("md5未取得 タグ指定", "!missingmd5 日課", "指定タグだけのmd5未取得曲を確認するよ。"),
         ("md5補正登録", "!abmd5 1 0123456789abcdef0123456789abcdef", "`!s` 後の番号、song_id、曲名でmd5補正を登録するよ。"),
         ("md5補正削除", "!abmd5 -1", "登録したmd5補正を削除するよ。例: `!abmd5 -曲名`"),
+        ("md5補正 全削除", "!abmd5 --clear-all", "abmd5で登録したmd5補正を一度空にするよ。履歴は残るよ。"),
         ("難易度表生成", "!maketables", "自分専用のタグ別難易度表を生成して、登録URLを返すよ。"),
         ("難易度表生成 タグ指定", "!maketables 日課", "生成後、指定タグの登録URLだけ返すよ。"),
         ("テーブル一覧", "!tables", "登録済みの取得元テーブルを見るよ。"),
@@ -1485,12 +1554,18 @@ async def abmd5_cmd(ctx, *args):
         await ctx.send(
             "使い方だよ！\n"
             "```text\n!abmd5 1 0123456789abcdef0123456789abcdef\n```\n"
-            "```text\n!abmd5 -1\n```"
+            "```text\n!abmd5 -1\n```\n"
+            "```text\n!abmd5 --clear-all\n```"
         )
         return
 
     delete_mode = False
     args = list(args)
+    if args[0] in {"--clear-all", "clear-all", "all-clear"}:
+        count = clear_all_md5_overrides(ctx.author.id)
+        await ctx.send(f"✅ md5補正を全削除したよ！\n```text\n削除数: {count}\n```")
+        return
+
     if args[0].startswith("-"):
         delete_mode = True
         if args[0] == "-":
