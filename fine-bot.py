@@ -380,6 +380,96 @@ def parse_edit_args(args, user_id=None):
     return join_tags(tags), memo
 
 
+def ensure_md5_overrides_table_bot(con):
+    con.execute("""
+    CREATE TABLE IF NOT EXISTS md5_overrides (
+        song_id INTEGER PRIMARY KEY,
+        url_diff TEXT,
+        title TEXT,
+        chart_name TEXT,
+        level TEXT,
+        md5 TEXT NOT NULL,
+        source TEXT DEFAULT 'manual',
+        created_by_user_id TEXT,
+        created_at TEXT,
+        updated_at TEXT
+    )
+    """)
+
+
+def valid_md5(value):
+    return bool(re.fullmatch(r"[0-9a-fA-F]{32}", str(value or "").strip()))
+
+
+def resolve_song_for_abmd5(ctx, target):
+    target = str(target or "").strip()
+    if not target:
+        return None, "曲指定が空みたいだよ！"
+
+    rows = last_search.get(ctx.author.id, [])
+    if target.isdigit():
+        number = int(target)
+        if 1 <= number <= len(rows):
+            return rows[number - 1], ""
+        row = get_song_by_id(number)
+        if row:
+            return row, ""
+
+    normalized_target = normalize_text(target)
+    exact_matches = []
+    partial_matches = []
+    con = db()
+    try:
+        for row in con.execute("SELECT id, source, level, title, chart_name, url, tags, memo FROM songs"):
+            display_name = song_display_name(row)
+            haystacks = [
+                normalize_text(row[3] or ""),
+                normalize_text(row[4] or ""),
+                normalize_text(display_name),
+            ]
+            if normalized_target in haystacks:
+                exact_matches.append(row)
+            elif any(normalized_target in hay for hay in haystacks):
+                partial_matches.append(row)
+    finally:
+        con.close()
+
+    matches = exact_matches or partial_matches
+    if len(matches) == 1:
+        return matches[0], ""
+    if not matches:
+        return None, f"`{target}` に合う曲が見つからなかったよ！ `!s` 後に番号指定もできるよ。"
+    examples = "\n".join(f"{row[0]}: {row[2]} {song_display_name(row)}" for row in matches[:5])
+    return None, f"`{target}` は候補が複数あるみたいだよ。song_idか `!s` 後の番号で指定してね。\n```text\n{examples}\n```"
+
+
+def set_md5_override(row, md5, user_id):
+    con = db()
+    ensure_md5_overrides_table_bot(con)
+    now = now_text()
+    con.execute(
+        """
+        INSERT OR REPLACE INTO md5_overrides
+            (song_id, url_diff, title, chart_name, level, md5, source, created_by_user_id, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, 'manual_abmd5', ?, ?, ?)
+        """,
+        (row[0], row[5] or "", row[3] or "", row[4] or "", row[2] or "", md5.lower(), str(user_id), now, now),
+    )
+    con.commit()
+    con.close()
+    schedule_auto_table_publish(user_id, reason="md5_override_updated")
+
+
+def delete_md5_override(song_id, user_id):
+    con = db()
+    ensure_md5_overrides_table_bot(con)
+    cur = con.execute("DELETE FROM md5_overrides WHERE song_id=?", (song_id,))
+    con.commit()
+    con.close()
+    if cur.rowcount > 0:
+        schedule_auto_table_publish(user_id, reason="md5_override_deleted")
+        return True
+    return False
 
 
 def discover_and_import():
@@ -806,6 +896,8 @@ async def help_cmd(ctx):
         ("件数", "!count レシュ", "検索条件に合う曲数を数えるよ。"),
         ("md5未取得", "!missingmd5", "自分のタグ付き曲のうち、難易度表に出ないmd5未取得曲を確認するよ。"),
         ("md5未取得 タグ指定", "!missingmd5 日課", "指定タグだけのmd5未取得曲を確認するよ。"),
+        ("md5補正登録", "!abmd5 1 0123456789abcdef0123456789abcdef", "`!s` 後の番号、song_id、曲名でmd5補正を登録するよ。"),
+        ("md5補正削除", "!abmd5 -1", "登録したmd5補正を削除するよ。例: `!abmd5 -曲名`"),
         ("難易度表生成", "!maketables", "自分専用のタグ別難易度表を生成して、登録URLを返すよ。"),
         ("難易度表生成 タグ指定", "!maketables 日課", "生成後、指定タグの登録URLだけ返すよ。"),
         ("テーブル一覧", "!tables", "登録済みの取得元テーブルを見るよ。"),
@@ -1382,6 +1474,59 @@ async def missing_md5_cmd(ctx, *args):
         lines.append(f"...\u307b\u304b {len(songs) - 15} \u66f2\u3042\u308b\u3088\uff01")
 
     await edit_missing_md5_message("\n".join(lines))
+
+
+@bot.command(name="abmd5", aliases=["md5override"])
+async def abmd5_cmd(ctx, *args):
+    if ctx.channel.id != CHANNEL_ID:
+        return
+
+    if not args:
+        await ctx.send(
+            "使い方だよ！\n"
+            "```text\n!abmd5 1 0123456789abcdef0123456789abcdef\n```\n"
+            "```text\n!abmd5 -1\n```"
+        )
+        return
+
+    delete_mode = False
+    args = list(args)
+    if args[0].startswith("-"):
+        delete_mode = True
+        if args[0] == "-":
+            target = " ".join(args[1:]).strip()
+        else:
+            target = args[0][1:]
+            if len(args) > 1:
+                target = " ".join([target] + args[1:]).strip()
+    else:
+        if len(args) < 2:
+            await ctx.send("md5を入れてね。例: `!abmd5 1 0123456789abcdef0123456789abcdef`")
+            return
+        md5 = args[-1].strip().lower()
+        target = " ".join(args[:-1]).strip()
+        if not valid_md5(md5):
+            await ctx.send("md5は32文字の16進数で入れてね。")
+            return
+
+    row, error = resolve_song_for_abmd5(ctx, target)
+    if not row:
+        await ctx.send(error[:1900])
+        return
+
+    if delete_mode:
+        deleted = delete_md5_override(row[0], ctx.author.id)
+        if deleted:
+            await ctx.send(f"✅ md5補正を削除したよ！\n```text\n{row[0]}: {row[2]} {song_display_name(row)}\n```")
+        else:
+            await ctx.send(f"⚠️ この曲のmd5補正はまだ登録されていなかったみたいだよ。\n```text\n{row[0]}: {row[2]} {song_display_name(row)}\n```")
+        return
+
+    set_md5_override(row, md5, ctx.author.id)
+    await ctx.send(
+        "✅ md5補正を登録したよ！\n"
+        f"```text\n{row[0]}: {row[2]} {song_display_name(row)}\nmd5: {md5}\n```"
+    )
 
 
 @bot.command(name="import", aliases=["取り込み", "更新"])
