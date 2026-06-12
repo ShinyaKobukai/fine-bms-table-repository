@@ -540,6 +540,127 @@ def clear_all_md5_overrides(user_id):
     return cur.rowcount
 
 
+def score_abmd5_candidate(song_row, songdata_row):
+    from table_generator import fine_display_candidates, normalize_lookup_text
+
+    fine_title = song_row[3] or ""
+    fine_chart = song_row[4] or ""
+    fine_url = song_row[5] or ""
+    fine_level = normalize_text(song_row[2] or "")
+    fine_candidates = fine_display_candidates(fine_title, fine_chart)
+    normalized_fine = {normalize_lookup_text(candidate) for candidate in fine_candidates}
+    normalized_fine_title = normalize_lookup_text(fine_title)
+    normalized_fine_chart = normalize_lookup_text(fine_chart)
+
+    score = 0
+    reasons = []
+
+    if fine_url and fine_url in {songdata_row.get("url", ""), songdata_row.get("url_diff", "")}:
+        score += 120
+        reasons.append("url")
+
+    db_candidates = set(songdata_row.get("_display_candidates", ()))
+    db_normalized = set(songdata_row.get("_normalized_candidates", ()))
+    if db_candidates.intersection(fine_candidates):
+        score += 95
+        reasons.append("display")
+    elif db_normalized.intersection(normalized_fine):
+        score += 82
+        reasons.append("normalized")
+
+    normalized_db_title = normalize_lookup_text(songdata_row.get("title", ""))
+    normalized_db_subtitle = normalize_lookup_text(songdata_row.get("subtitle", ""))
+    if normalized_fine_title and normalized_fine_title == normalized_db_title:
+        score += 22
+        reasons.append("title")
+    elif normalized_fine_title and (
+        normalized_fine_title in normalized_db_title or normalized_db_title in normalized_fine_title
+    ):
+        score += 12
+        reasons.append("title-like")
+
+    if normalized_fine_chart and normalized_db_subtitle and normalized_fine_chart == normalized_db_subtitle:
+        score += 14
+        reasons.append("chart")
+
+    db_level = normalize_text(songdata_row.get("level", ""))
+    if fine_level and db_level and fine_level == db_level:
+        score += 4
+        reasons.append("level")
+
+    return score, "+".join(reasons) or "text"
+
+
+def infer_abmd5_match(song_row):
+    from table_generator import load_songdata_rows
+
+    rows = load_songdata_rows()
+    scored = []
+    for songdata_row in rows:
+        md5 = songdata_row.get("md5", "")
+        if not valid_md5(md5):
+            continue
+        score, reason = score_abmd5_candidate(song_row, songdata_row)
+        if score >= 70:
+            scored.append((score, reason, songdata_row))
+
+    scored.sort(key=lambda item: item[0], reverse=True)
+    if not scored:
+        return None, "no_candidate", 0, ""
+
+    top_score, top_reason, top = scored[0]
+    second_score = scored[1][0] if len(scored) > 1 else 0
+    if top_score < 82 and top_score - second_score < 15:
+        return None, "ambiguous", top_score, top_reason
+    if top_score >= 82 and second_score and top_score - second_score < 4:
+        return None, "ambiguous", top_score, top_reason
+
+    return top, top_reason, top_score, ""
+
+
+def auto_abmd5_candidates_for_user(user_id, tag_name=None, limit=50):
+    from table_generator import missing_md5_records
+
+    missing = missing_md5_records(str(user_id), tag_name=tag_name)
+    seen = set()
+    candidates = []
+    skipped = []
+
+    for item in missing:
+        song_id = item["song_id"]
+        if song_id in seen:
+            continue
+        seen.add(song_id)
+        if len(candidates) >= limit:
+            skipped.append((item, "limit"))
+            continue
+
+        song_row = get_song_by_id(song_id)
+        if not song_row:
+            skipped.append((item, "missing_song"))
+            continue
+
+        found, reason, score, detail = infer_abmd5_match(song_row)
+        if not found:
+            skipped.append((item, detail or reason))
+            continue
+
+        candidates.append(
+            {
+                "song_id": song_id,
+                "level": song_row[2] or "",
+                "title": song_display_name(song_row),
+                "md5": found["md5"],
+                "score": score,
+                "reason": reason,
+                "songdata_title": found.get("title", ""),
+                "songdata_subtitle": found.get("subtitle", ""),
+            }
+        )
+
+    return candidates, skipped, len(seen)
+
+
 def discover_and_import():
     imported = []
     errors = []
@@ -968,6 +1089,7 @@ async def help_cmd(ctx):
         ("md5補正削除", "!abmd5 -1", "登録したmd5補正を削除するよ。例: `!abmd5 -曲名`"),
         ("md5補正 全削除", "!abmd5 --clear-all", "abmd5で登録したmd5補正を一度空にするよ。履歴は残るよ。"),
         ("md5直接登録", "ins md5 0123456789abcdef0123456789abcdef 曲名 [差分名]", "`!s` で1曲に絞った表示名と完全一致した時だけmd5登録するよ。"),
+        ("md5候補表示", "!abmd5 auto", "未取得曲のmd5候補を表示するよ。自動登録はしないよ。"),
         ("難易度表生成", "!maketables", "自分専用のタグ別難易度表を生成して、登録URLを返すよ。"),
         ("難易度表生成 タグ指定", "!maketables 日課", "生成後、指定タグの登録URLだけ返すよ。"),
         ("テーブル一覧", "!tables", "登録済みの取得元テーブルを見るよ。"),
@@ -1556,12 +1678,58 @@ async def abmd5_cmd(ctx, *args):
             "使い方だよ！\n"
             "```text\n!abmd5 1 0123456789abcdef0123456789abcdef\n```\n"
             "```text\n!abmd5 -1\n```\n"
-            "```text\n!abmd5 --clear-all\n```"
+            "```text\n!abmd5 --clear-all\n```\n"
+            "```text\n!abmd5 auto\n```"
         )
         return
 
     delete_mode = False
     args = list(args)
+    if args[0] in {"auto", "guess", "infer"}:
+        tag_name = None
+        if len(args) > 1:
+            tag_token = " ".join(args[1:]).strip()
+            tag_name = resolve_tag_fuzzy(tag_token, user_id=ctx.author.id) or resolve_tag(tag_token, user_id=ctx.author.id)
+            if not tag_name:
+                await ctx.send(f"⚠️ `{tag_token}` はタグに見つからなかったみたいだよ！")
+                return
+
+        progress = await ctx.send("🔎 md5候補を推定しているよ！")
+        try:
+            candidates, skipped, total = auto_abmd5_candidates_for_user(ctx.author.id, tag_name=tag_name)
+        except Exception as e:
+            logging.exception("abmd5 auto failed user_id=%s tag=%s", ctx.author.id, tag_name or "")
+            await progress.edit(content=f"❌ md5推定に失敗したみたいだよ。\n{concise_error(e)}")
+            return
+
+        lines = [
+            "🔎 md5候補を見つけたよ！",
+            f"対象: {total}曲",
+            f"候補: {len(candidates)}曲",
+            f"見送り: {len(skipped)}曲",
+            "※まだ登録していないよ。確認して `!abmd5 曲ID md5` で入れてね。",
+            "",
+        ]
+        for item in candidates[:10]:
+            lines.append(f"{item['song_id']}: {item['level']} {compact_text(item['title'], 45)}")
+            matched_name = item["songdata_title"]
+            if item["songdata_subtitle"]:
+                matched_name = f"{matched_name} {item['songdata_subtitle']}"
+            lines.append(f"根拠: score={item['score']} reason={item['reason']}")
+            lines.append(f"照合先: {compact_text(matched_name, 55)}")
+            lines.append(f"md5: {item['md5']}")
+            lines.append(f"登録: !abmd5 {item['song_id']} {item['md5']}")
+        if len(candidates) > 10:
+            lines.append(f"...ほか {len(candidates) - 10} 曲候補があるよ！")
+        if skipped:
+            lines.append("")
+            lines.append("見送り例:")
+            for item, reason in skipped[:5]:
+                lines.append(f"{item['song_id']}: {compact_text(item['title'], 35)} ({reason})")
+
+        await progress.edit(content="\n".join(lines)[:1900])
+        return
+
     if args[0] in {"--clear-all", "clear-all", "all-clear"}:
         count = clear_all_md5_overrides(ctx.author.id)
         await ctx.send(f"✅ md5補正を全削除したよ！\n```text\n削除数: {count}\n```")
