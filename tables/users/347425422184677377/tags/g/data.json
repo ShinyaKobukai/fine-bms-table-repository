@@ -3,7 +3,25 @@
   "tag": "ゴミ",
   "slug": "g",
   "fixed": true,
-  "count": 0,
-  "score_count": 0,
-  "songs": []
+  "count": 1,
+  "score_count": 1,
+  "songs": [
+    {
+      "id": 537,
+      "source": "st",
+      "level": "st1",
+      "title": "Death Opera -Eclipse-",
+      "chart_name": "",
+      "display_title": "Death Opera -Eclipse-",
+      "md5": "b35a6c8517799d3ff783275d7720a6a1",
+      "sha256": "563c87352a365f2e2407b2cd76e5d3040a77d5fa022a9b56e4cd1d0d3a3e446f",
+      "artist": "Irish Kappa / selene.",
+      "songdata_title": "Death Opera -Eclipse-",
+      "songdata_subtitle": "",
+      "url": "https://bmscharteditorsgroup.wixsite.com/initialatoz",
+      "memo": "",
+      "tag": "ゴミ",
+      "comment": ""
+    }
+  ]
 }
