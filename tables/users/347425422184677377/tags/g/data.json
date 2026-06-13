@@ -3,8 +3,8 @@
   "tag": "ゴミ",
   "slug": "g",
   "fixed": true,
-  "count": 3,
-  "score_count": 2,
+  "count": 4,
+  "score_count": 3,
   "songs": [
     {
       "id": 537,
@@ -53,6 +53,23 @@
       "songdata_title": "",
       "songdata_subtitle": "",
       "url": "https://stellabms.xyz/upload/1168",
+      "memo": "",
+      "tag": "ゴミ",
+      "comment": ""
+    },
+    {
+      "id": 639,
+      "source": "st",
+      "level": "st1",
+      "title": "Ruins Ray -Genocide-",
+      "chart_name": "",
+      "display_title": "Ruins Ray -Genocide-",
+      "md5": "2e4ebb1e68f945799f1107e669d21fe5",
+      "sha256": "6c8e28dad13ecd563d9ee7e44572c379207b70165b6567e8e2cd31eb0dc189d4",
+      "artist": "kurena / selene.",
+      "songdata_title": "Ruins Ray -Genocide-",
+      "songdata_subtitle": "",
+      "url": "https://stellabms.xyz/upload/626",
       "memo": "",
       "tag": "ゴミ",
       "comment": ""
