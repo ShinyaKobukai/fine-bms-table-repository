@@ -3,7 +3,7 @@
   "tag": "ゴミ",
   "slug": "g",
   "fixed": true,
-  "count": 1,
+  "count": 2,
   "score_count": 1,
   "songs": [
     {
@@ -19,6 +19,23 @@
       "songdata_title": "Death Opera -Eclipse-",
       "songdata_subtitle": "",
       "url": "https://bmscharteditorsgroup.wixsite.com/initialatoz",
+      "memo": "",
+      "tag": "ゴミ",
+      "comment": ""
+    },
+    {
+      "id": 602,
+      "source": "st",
+      "level": "st1",
+      "title": "MachinaRegina -Eclipse-",
+      "chart_name": "",
+      "display_title": "MachinaRegina -Eclipse-",
+      "md5": "",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "https://stellabms.xyz/upload/1168",
       "memo": "",
       "tag": "ゴミ",
       "comment": ""
