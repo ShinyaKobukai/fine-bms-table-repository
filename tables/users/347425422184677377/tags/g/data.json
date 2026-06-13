@@ -3,8 +3,8 @@
   "tag": "ゴミ",
   "slug": "g",
   "fixed": true,
-  "count": 2,
-  "score_count": 1,
+  "count": 3,
+  "score_count": 2,
   "songs": [
     {
       "id": 537,
@@ -19,6 +19,23 @@
       "songdata_title": "Death Opera -Eclipse-",
       "songdata_subtitle": "",
       "url": "https://bmscharteditorsgroup.wixsite.com/initialatoz",
+      "memo": "",
+      "tag": "ゴミ",
+      "comment": ""
+    },
+    {
+      "id": 540,
+      "source": "st",
+      "level": "st1",
+      "title": "Disco Balls -Genocide-",
+      "chart_name": "",
+      "display_title": "Disco Balls -Genocide-",
+      "md5": "cc49d9845cc9af02177308b20290e148",
+      "sha256": "b7a5eec20cd092bad05758846fb0ce3d1c5807c93abb5acc83ad1555556bd624",
+      "artist": "roop × Mentalstock / selene.",
+      "songdata_title": "Disco Balls",
+      "songdata_subtitle": "-Genocide-",
+      "url": "https://bms.hexlataia.xyz/mirror/gnqg-upload/02540.zip",
       "memo": "",
       "tag": "ゴミ",
       "comment": ""
