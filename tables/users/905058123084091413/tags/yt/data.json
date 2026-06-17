@@ -3,8 +3,8 @@
   "tag": "横認識(縦系)",
   "slug": "yt",
   "fixed": true,
-  "count": 11,
-  "score_count": 11,
+  "count": 12,
+  "score_count": 12,
   "songs": [
     {
       "id": 3176,
@@ -172,6 +172,23 @@
       "songdata_title": "EX-AID",
       "songdata_subtitle": "[フレッシュピーチ]",
       "url": "https://stellabms.xyz/upload/4013",
+      "memo": "",
+      "tag": "横認識(縦系)",
+      "comment": ""
+    },
+    {
+      "id": 872,
+      "source": "st",
+      "level": "st2",
+      "title": "pp-hunk [Phxxkin]",
+      "chart_name": "",
+      "display_title": "pp-hunk [Phxxkin]",
+      "md5": "79c1ad2bd63bd1c2595e5ee3db2e25fd",
+      "sha256": "0571601565491416c579feac58142c3c648bb883219a975a7a67f2c067083465",
+      "artist": "Coco / obj:alt",
+      "songdata_title": "pp-hunk [Phxxkin]",
+      "songdata_subtitle": "",
+      "url": "https://drive.google.com/file/d/1PRtvsdVVVzuKujL1Y4zehNofQZxCdjir/view?usp=sharing",
       "memo": "",
       "tag": "横認識(縦系)",
       "comment": ""

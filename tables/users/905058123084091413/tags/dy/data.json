@@ -3,8 +3,8 @@
   "tag": "日課",
   "slug": "dy",
   "fixed": true,
-  "count": 18,
-  "score_count": 18,
+  "count": 19,
+  "score_count": 19,
   "songs": [
     {
       "id": 4511,
@@ -274,6 +274,23 @@
       "songdata_title": "Neo Side [Run Away]",
       "songdata_subtitle": "",
       "url": "https://stellabms.xyz/upload/4435",
+      "memo": "",
+      "tag": "日課",
+      "comment": ""
+    },
+    {
+      "id": 872,
+      "source": "st",
+      "level": "st2",
+      "title": "pp-hunk [Phxxkin]",
+      "chart_name": "",
+      "display_title": "pp-hunk [Phxxkin]",
+      "md5": "79c1ad2bd63bd1c2595e5ee3db2e25fd",
+      "sha256": "0571601565491416c579feac58142c3c648bb883219a975a7a67f2c067083465",
+      "artist": "Coco / obj:alt",
+      "songdata_title": "pp-hunk [Phxxkin]",
+      "songdata_subtitle": "",
+      "url": "https://drive.google.com/file/d/1PRtvsdVVVzuKujL1Y4zehNofQZxCdjir/view?usp=sharing",
       "memo": "",
       "tag": "日課",
       "comment": ""
