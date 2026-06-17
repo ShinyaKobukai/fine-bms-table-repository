@@ -3,8 +3,8 @@
   "tag": "横認識",
   "slug": "y",
   "fixed": true,
-  "count": 22,
-  "score_count": 22,
+  "count": 23,
+  "score_count": 23,
   "songs": [
     {
       "id": 2468,
@@ -376,6 +376,23 @@
       "songdata_title": "Revolution",
       "songdata_subtitle": "[Finitura Fettuccia]",
       "url": "https://stellabms.xyz/upload/3286",
+      "memo": "",
+      "tag": "横認識",
+      "comment": ""
+    },
+    {
+      "id": 55,
+      "source": "st",
+      "level": "st2",
+      "title": "薄雲 [六角形的]",
+      "chart_name": "",
+      "display_title": "薄雲 [六角形的]",
+      "md5": "dab23f9ac043c210b9192fb9e5e13f1b",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "http://bms.hexlataia.xyz/tables/hexajoy.html",
       "memo": "",
       "tag": "横認識",
       "comment": ""
