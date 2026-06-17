@@ -3,8 +3,8 @@
   "tag": "惜敗",
   "slug": "sh",
   "fixed": true,
-  "count": 5,
-  "score_count": 5,
+  "count": 6,
+  "score_count": 6,
   "songs": [
     {
       "id": 543,
@@ -55,6 +55,23 @@
       "url": "http://kanki2.net/bme.html",
       "memo": "",
       "tag": "惜敗[2026-06-12]",
+      "comment": ""
+    },
+    {
+      "id": 801,
+      "source": "st",
+      "level": "st2",
+      "title": "EX-AID [フレッシュピーチ]",
+      "chart_name": "",
+      "display_title": "EX-AID [フレッシュピーチ]",
+      "md5": "fde28b4e435150f81347df6e346ce5f7",
+      "sha256": "66c7975e687e41ffce81864b0df2720bca5ac26b14222460cee18ea14a38114a",
+      "artist": "ちよもも魔法使い & DJ Momo",
+      "songdata_title": "EX-AID",
+      "songdata_subtitle": "[フレッシュピーチ]",
+      "url": "https://stellabms.xyz/upload/4013",
+      "memo": "",
+      "tag": "惜敗[2026-06-17]",
       "comment": ""
     },
     {
