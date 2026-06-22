@@ -3,8 +3,8 @@
   "tag": "日課",
   "slug": "dy",
   "fixed": true,
-  "count": 21,
-  "score_count": 21,
+  "count": 22,
+  "score_count": 22,
   "songs": [
     {
       "id": 265,
@@ -223,6 +223,23 @@
       "songdata_title": "Hazy moon[雷雨]",
       "songdata_subtitle": "",
       "url": "https://drive.google.com/open?id=1u1NTkaIfkAalc4F3a-0xiw9bCj1muBg_",
+      "memo": "",
+      "tag": "日課",
+      "comment": ""
+    },
+    {
+      "id": 662,
+      "source": "st",
+      "level": "st1",
+      "title": "tinnitus [Nyannurs]",
+      "chart_name": "",
+      "display_title": "tinnitus [Nyannurs]",
+      "md5": "392f0d62335823a2f9709d272e07bc0d",
+      "sha256": "1c6db5cff1d205c60e1bd539f34d3743460633377c65349e12703d82cf48e171",
+      "artist": "SP-# / obj. Tristan97",
+      "songdata_title": "tinnitus [Nyannurs]",
+      "songdata_subtitle": "",
+      "url": "https://drive.google.com/file/d/1JmkmTVy-9Li7HKsNq4ye6-q3X0Tzqx2F/view?usp=sharing",
       "memo": "",
       "tag": "日課",
       "comment": ""

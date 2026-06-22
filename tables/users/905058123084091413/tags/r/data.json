@@ -3,8 +3,8 @@
   "tag": "乱打",
   "slug": "r",
   "fixed": true,
-  "count": 8,
-  "score_count": 8,
+  "count": 9,
+  "score_count": 9,
   "songs": [
     {
       "id": 4514,
@@ -36,6 +36,23 @@
       "songdata_title": "バーチャルセラピー",
       "songdata_subtitle": "[超物量セラピー]",
       "url": "https://www.dropbox.com/s/gabn6vryv9s76ms/_fillmarch_spnanami01.bms?dl=0",
+      "memo": "",
+      "tag": "乱打",
+      "comment": ""
+    },
+    {
+      "id": 662,
+      "source": "st",
+      "level": "st1",
+      "title": "tinnitus [Nyannurs]",
+      "chart_name": "",
+      "display_title": "tinnitus [Nyannurs]",
+      "md5": "392f0d62335823a2f9709d272e07bc0d",
+      "sha256": "1c6db5cff1d205c60e1bd539f34d3743460633377c65349e12703d82cf48e171",
+      "artist": "SP-# / obj. Tristan97",
+      "songdata_title": "tinnitus [Nyannurs]",
+      "songdata_subtitle": "",
+      "url": "https://drive.google.com/file/d/1JmkmTVy-9Li7HKsNq4ye6-q3X0Tzqx2F/view?usp=sharing",
       "memo": "",
       "tag": "乱打",
       "comment": ""
