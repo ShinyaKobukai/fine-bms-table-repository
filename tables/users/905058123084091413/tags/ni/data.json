@@ -3,8 +3,8 @@
   "tag": "良譜面",
   "slug": "ni",
   "fixed": true,
-  "count": 5,
-  "score_count": 5,
+  "count": 6,
+  "score_count": 6,
   "songs": [
     {
       "id": 2978,
@@ -19,6 +19,23 @@
       "songdata_title": "Ray of Chain (ShiningStar)",
       "songdata_subtitle": "",
       "url": "https://stellabms.xyz/upload/1489",
+      "memo": "",
+      "tag": "良譜面",
+      "comment": ""
+    },
+    {
+      "id": 3879,
+      "source": "sl",
+      "level": "sl8",
+      "title": "Edge of bravery [Excel Breaker]",
+      "chart_name": "",
+      "display_title": "Edge of bravery [Excel Breaker]",
+      "md5": "03011390e41cd48e9e543f3a5e41442a",
+      "sha256": "4e35794bc0f0bfacb4f05ec2b673138910671599a3456cfe215a07394caad012",
+      "artist": "みーに feat. 初音ミク",
+      "songdata_title": "Edge of bravery[Excel Breaker]",
+      "songdata_subtitle": "",
+      "url": "https://darksabun.club/bceg/event/bofxv/",
       "memo": "",
       "tag": "良譜面",
       "comment": ""
