@@ -3,8 +3,8 @@
   "tag": "横認識(縦系)",
   "slug": "yt",
   "fixed": true,
-  "count": 12,
-  "score_count": 12,
+  "count": 13,
+  "score_count": 13,
   "songs": [
     {
       "id": 3176,
@@ -155,6 +155,23 @@
       "songdata_title": "After The Rain",
       "songdata_subtitle": "[Drops]",
       "url": "https://stellabms.xyz/upload/1929",
+      "memo": "",
+      "tag": "横認識(縦系)",
+      "comment": ""
+    },
+    {
+      "id": 553,
+      "source": "st",
+      "level": "st1",
+      "title": "ENERGY SYNERGY MATRIX -REVOLUTIONS-",
+      "chart_name": "",
+      "display_title": "ENERGY SYNERGY MATRIX -REVOLUTIONS-",
+      "md5": "f3d8537398e4eec3a366f56fb844d34b",
+      "sha256": "2f74007ca415708a12394aacb713feaca2191373129e66692b95bf37e295518a",
+      "artist": "Tanchiky / selene.",
+      "songdata_title": "ENERGY SYNERGY MATRIX -REVOLUTIONS-",
+      "songdata_subtitle": "",
+      "url": "http://gnqg.rosx.net/upload/",
       "memo": "",
       "tag": "横認識(縦系)",
       "comment": ""

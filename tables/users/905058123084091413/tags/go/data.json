@@ -3,8 +3,8 @@
   "tag": "ガチ押し系",
   "slug": "go",
   "fixed": true,
-  "count": 4,
-  "score_count": 4,
+  "count": 5,
+  "score_count": 5,
   "songs": [
     {
       "id": 3879,
@@ -53,6 +53,23 @@
       "songdata_title": "soyosoyo",
       "songdata_subtitle": "zawazawa",
       "url": "https://stellabms.xyz/upload/4525",
+      "memo": "",
+      "tag": "ガチ押し系",
+      "comment": ""
+    },
+    {
+      "id": 553,
+      "source": "st",
+      "level": "st1",
+      "title": "ENERGY SYNERGY MATRIX -REVOLUTIONS-",
+      "chart_name": "",
+      "display_title": "ENERGY SYNERGY MATRIX -REVOLUTIONS-",
+      "md5": "f3d8537398e4eec3a366f56fb844d34b",
+      "sha256": "2f74007ca415708a12394aacb713feaca2191373129e66692b95bf37e295518a",
+      "artist": "Tanchiky / selene.",
+      "songdata_title": "ENERGY SYNERGY MATRIX -REVOLUTIONS-",
+      "songdata_subtitle": "",
+      "url": "http://gnqg.rosx.net/upload/",
       "memo": "",
       "tag": "ガチ押し系",
       "comment": ""
