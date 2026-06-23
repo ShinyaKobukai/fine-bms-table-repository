@@ -3,8 +3,8 @@
   "tag": "縦連",
   "slug": "tt",
   "fixed": true,
-  "count": 11,
-  "score_count": 11,
+  "count": 12,
+  "score_count": 12,
   "songs": [
     {
       "id": 2468,
@@ -155,6 +155,23 @@
       "songdata_title": "Hazy moon[雷雨]",
       "songdata_subtitle": "",
       "url": "https://drive.google.com/open?id=1u1NTkaIfkAalc4F3a-0xiw9bCj1muBg_",
+      "memo": "",
+      "tag": "縦連",
+      "comment": ""
+    },
+    {
+      "id": 764,
+      "source": "st",
+      "level": "st2",
+      "title": "Bittersweet Magic [Kvama]",
+      "chart_name": "",
+      "display_title": "Bittersweet Magic [Kvama]",
+      "md5": "d6c098a558d8330935b9dc3b29701aea",
+      "sha256": "fb965c8b723c01fde257ce85674f0fbc683ceada0461e95e4224c0a44987ffb0",
+      "artist": "Kuwagata",
+      "songdata_title": "Bittersweet Magic",
+      "songdata_subtitle": "[Kvama]",
+      "url": "https://stellabms.xyz/upload/4462",
       "memo": "",
       "tag": "縦連",
       "comment": ""

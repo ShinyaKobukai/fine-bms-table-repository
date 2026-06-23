@@ -3,8 +3,8 @@
   "tag": "横認識(縦系)",
   "slug": "yt",
   "fixed": true,
-  "count": 13,
-  "score_count": 13,
+  "count": 14,
+  "score_count": 14,
   "songs": [
     {
       "id": 3176,
@@ -172,6 +172,23 @@
       "songdata_title": "ENERGY SYNERGY MATRIX -REVOLUTIONS-",
       "songdata_subtitle": "",
       "url": "http://gnqg.rosx.net/upload/",
+      "memo": "",
+      "tag": "横認識(縦系)",
+      "comment": ""
+    },
+    {
+      "id": 764,
+      "source": "st",
+      "level": "st2",
+      "title": "Bittersweet Magic [Kvama]",
+      "chart_name": "",
+      "display_title": "Bittersweet Magic [Kvama]",
+      "md5": "d6c098a558d8330935b9dc3b29701aea",
+      "sha256": "fb965c8b723c01fde257ce85674f0fbc683ceada0461e95e4224c0a44987ffb0",
+      "artist": "Kuwagata",
+      "songdata_title": "Bittersweet Magic",
+      "songdata_subtitle": "[Kvama]",
+      "url": "https://stellabms.xyz/upload/4462",
       "memo": "",
       "tag": "横認識(縦系)",
       "comment": ""
