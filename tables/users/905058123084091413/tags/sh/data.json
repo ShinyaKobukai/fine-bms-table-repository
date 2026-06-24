@@ -3,7 +3,7 @@
   "tag": "惜敗",
   "slug": "sh",
   "fixed": true,
-  "count": 6,
+  "count": 7,
   "score_count": 6,
   "songs": [
     {
@@ -55,6 +55,23 @@
       "url": "http://kanki2.net/bme.html",
       "memo": "",
       "tag": "惜敗[2026-06-12]",
+      "comment": ""
+    },
+    {
+      "id": 781,
+      "source": "st",
+      "level": "st2",
+      "title": "Cinderella Story -Starlight stage-",
+      "chart_name": "",
+      "display_title": "Cinderella Story -Starlight stage-",
+      "md5": "",
+      "sha256": "",
+      "artist": "",
+      "songdata_title": "",
+      "songdata_subtitle": "",
+      "url": "http://absolute.pv.land.to/uploader/upload.html?1443868371",
+      "memo": "",
+      "tag": "惜敗[2026-06-24]",
       "comment": ""
     },
     {
