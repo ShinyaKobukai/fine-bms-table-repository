@@ -3,8 +3,8 @@
   "tag": "乱打",
   "slug": "r",
   "fixed": true,
-  "count": 9,
-  "score_count": 9,
+  "count": 10,
+  "score_count": 10,
   "songs": [
     {
       "id": 4514,
@@ -138,6 +138,23 @@
       "songdata_title": "Revolution",
       "songdata_subtitle": "[Finitura Fettuccia]",
       "url": "https://stellabms.xyz/upload/3286",
+      "memo": "",
+      "tag": "乱打",
+      "comment": ""
+    },
+    {
+      "id": 920,
+      "source": "st",
+      "level": "st2",
+      "title": "TwoPhace [Double Dealer]",
+      "chart_name": "",
+      "display_title": "TwoPhace [Double Dealer]",
+      "md5": "aa8075a675ecaaeb33902932bcd69406",
+      "sha256": "1d40ac3eace3b50af2e8ea9ed39b429a5a47265993ee8a5220e622aa4893293c",
+      "artist": "litmus* + Sound Souler / obj.7zs",
+      "songdata_title": "TwoPhace [Double Dealer]",
+      "songdata_subtitle": "",
+      "url": "http://gnqg.rosx.net/upload/upload.cgi",
       "memo": "",
       "tag": "乱打",
       "comment": ""
