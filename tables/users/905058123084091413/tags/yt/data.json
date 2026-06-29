@@ -3,8 +3,8 @@
   "tag": "横認識(縦系)",
   "slug": "yt",
   "fixed": true,
-  "count": 15,
-  "score_count": 14,
+  "count": 16,
+  "score_count": 15,
   "songs": [
     {
       "id": 3176,
@@ -36,6 +36,23 @@
       "songdata_title": "Emporfahren (bms edit) [2424]",
       "songdata_subtitle": "",
       "url": "https://venue.bmssearch.net/ssss_2nd/4",
+      "memo": "",
+      "tag": "横認識(縦系)",
+      "comment": ""
+    },
+    {
+      "id": 3873,
+      "source": "sl",
+      "level": "sl8",
+      "title": "Cong＊Chu＊Jelly [strawberry flavor]",
+      "chart_name": "",
+      "display_title": "Cong＊Chu＊Jelly [strawberry flavor]",
+      "md5": "b4b061a9c39188bf738d381a2e6aab34",
+      "sha256": "5870b009032e28034b99ccc0ef69918345abdc539e99cd5b1152176d900dcb6a",
+      "artist": "otoshi.b × みゅい × はしたかさん × BAECON",
+      "songdata_title": "Cong＊Chu＊Jelly",
+      "songdata_subtitle": "[strawberry flavor]",
+      "url": "https://venue.bmssearch.net/bmsshuin3/54",
       "memo": "",
       "tag": "横認識(縦系)",
       "comment": ""
